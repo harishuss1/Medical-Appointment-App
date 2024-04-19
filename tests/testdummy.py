@@ -1,14 +1,14 @@
 import unittest
-from MedicalApp import createapp
+from MedicalApp import create_app
 
 
 class MedicalTestCases(unittest.TestCase):
     def setUp(self):
-        app = createapp()
+        app = create_app(test_config={})
         app.config.update({"TESTING": True})
-        self.ctx = app.appcontext()
+        self.ctx = app.app_context()
         self.ctx.push()
-        self.client = app.testclient()
+        self.client = app.test_client()
 
     def tearDown(self):
         self.ctx.pop()
