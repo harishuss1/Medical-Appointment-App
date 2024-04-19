@@ -1,4 +1,4 @@
-from .user import User, MedicalPatient
+from ..user import User, MedicalPatient
 from oracledb import IntegrityError
 
 

@@ -1,6 +1,6 @@
 import os
 from flask import Flask, render_template
-from .dbmanager import close_db, init_db_command
+from .db.dbmanager import close_db, init_db_command
 
 
 def create_app(test_config=False):
