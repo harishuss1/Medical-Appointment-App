@@ -1,0 +1,39 @@
+image: python:latest
+
+# Change pip's cache directory to be inside the project directory since we can
+# only cache local items.
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  FLASK_SECRET: "jack"
+
+# https://pip.pypa.io/en/stable/topics/caching/
+cache:
+  paths:
+    - .cache/pip
+
+before_script:
+  - python --version ; pip --version  # For debugging
+  - python -m venv .venv
+  - source ./.venv/bin/activate
+  - pip install -r requirements.txt
+
+lint:
+  stage: test
+  script:
+    - chmod u+x linter.sh
+    - ./linter.sh > lintreport.txt
+  artifacts:
+    paths:
+      - lintreport.txt
+
+test:
+  stage: test
+  script:
+    - python -m xmlrunner -o results discover
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - results/*.xml
+
+
