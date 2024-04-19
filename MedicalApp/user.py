@@ -21,8 +21,9 @@ class User:
         self.avatar_path = avatar_path
 
 
-class MedicalPatients:
-    def __init__(self, dob, blood_type, height, weight, id=None):
+class MedicalPatient(User):
+    def __init__(self,  weight, email, password, first_name, last_name, dob, blood_type, height, avatar_path=None, id=None):
+        super().__init__(email, password, first_name, last_name, avatar_path, id)
         if id != None and not isinstance(id, int):
             raise ValueError("Illegal type for id")
         if not isinstance(dob, str):
