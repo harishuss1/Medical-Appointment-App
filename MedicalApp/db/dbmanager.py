@@ -38,4 +38,3 @@ def init_db():
 def init_db_command():
     click.echo('Setting up database')
     init_db()
-    # setup the database
