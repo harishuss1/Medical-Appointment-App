@@ -1,18 +1,27 @@
-from flask import Flask
-from .dbmanager import close_db, init_db_command
 import os
+from flask import Flask, render_template
+from .db.dbmanager import close_db, init_db_command
 
 
 def create_app(test_config=False):
     app = Flask(__name__, instance_relative_config=True)
-    app.secret_key = os.environ['FLASK_SECRET']
-    app.config['TESTING'] = test_config
+    if test_config is None:
+        app.config.from_pyfile('config.py', silent=True)
+    else:
+        app.config.from_mapping(test_config)
+
+    app.config.from_mapping(
+        SECRET_KEY=os.environ['FLASK_SECRET']
+    )
+    app.config['TESTING'] = False
+
     init_app(app)
     return app
 
 
 def init_app(app):
-    app.teardown_appcontext(close_db)
-    app.cli.add_command(init_db_command)
+    #REGISTER BLUEPRINTS HERE
 
-    return app
+    app.teardown_appcontext(close_db)
+
+    app.cli.add_command(init_db_command)
