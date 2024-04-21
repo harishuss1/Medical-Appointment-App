@@ -25,21 +25,41 @@ class Database:
                             except Exception as e:
                                 print(e)
                         statement_parts = []
+        
+    def delete_user(self, user_email):
+        try:
+            with self.__connection.cursor() as cursor:
+                cursor.execute(
+                    "DELETE FROM medical_users WHERE email = :email",
+                    {'email': user_email}
+                )
+                self.__connection.commit()
+        except Exception as e:
+            print("Error deleting user:", e)
+            raise
+        
+    def block_user(self, email):
+        try:
+            with self.__connection.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE medical_users SET account_status = 'blocked' WHERE email = :email",
+                    {'email': email}
+                )
+                self.__connection.commit()
+        except Exception as e:
+            print("Error blocking user:", e)
+            raise
+        
+    def change_user_type(self, user_email, new_user_type):
+        try:
+            with self.__connection.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE medical_users SET user_type = :user_type WHERE email = :email",
+                    {'user_type': new_user_type, 'email': user_email}
+                )
+                self.__connection.commit()
+        except Exception as e:
+            print("Error changing user type:", e)
+            raise
     
-    def create_user(self, email, plaintext_password, first_name, last_name, user_type):
-        # Hash the password securely
-        hashed_password = generate_password_hash(plaintext_password, method='pbkdf2:sha256', salt_length=16)
-
-        with self.__connection.cursor() as cursor:
-            insert_query = """
-                INSERT INTO medical_users (email, password, first_name, last_name, user_type)
-                VALUES (:email, :password, :first_name, :last_name, :user_type)
-            """
-            cursor.execute(insert_query, {
-                'email': email,
-                'password': hashed_password,
-                'first_name': first_name,
-                'last_name': last_name,
-                'user_type': user_type
-            })
     
