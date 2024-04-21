@@ -11,29 +11,6 @@ admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 def admin_dashboard():
     return render_template('admin_dashboard.html')
 
-
-@admin_bp.route('/add_user', methods=['GET', 'POST'])
-@login_required
-def add_user():
-    if request.method == 'POST':
-        email = request.form['email']
-        password = generate_password_hash(request.form['password'])
-        first_name = request.form['first_name']
-        last_name = request.form['last_name']
-        user_type = request.form['user_type']
-        
-        db = get_db()
-        new_user = User(email, password, first_name, last_name, user_type)
-        try:
-            db.create_user(new_user)
-            flash("User created successfully", 'success')
-            return redirect(url_for('admin.admin_dashboard'))
-        except Exception as e:
-            flash(f"Error creating user: {e}", 'error')
-    
-
-    return render_template('add_user.html')
-
 @login_required
 def add_user():
     if request.method == 'POST':
