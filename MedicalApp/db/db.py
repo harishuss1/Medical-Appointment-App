@@ -38,6 +38,17 @@ class Database:
                            'last_name': user.last_name,
                            'user_type': user.access_level})
 
+    def get_user_by_email(self, email):
+        user = None
+        with self.__get_cursor() as cursor:
+            cursor.execute(
+                'select id, email, password, first_name, last_name,avatar_path,user_typefrom medical_users where email=:email', email=email)
+            row = cursor.fetchone()
+            if row:
+                user = User(row[0], row[1], row[2],
+                            row[3], row[4], row[5], row[6])
+        return user
+
     def __get_cursor(self):
         for i in range(3):
             try:

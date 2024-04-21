@@ -18,6 +18,8 @@ def signup():
         redirect(url_for('auth.login'))
     return render_template('signup.html', form=form)
 
+# Change the templates once they are completed
+
 
 @bp.route('login', methods=['GET', 'POST'])
 def login():
@@ -30,5 +32,3 @@ def login():
         else:
             flash('Incorrect info')
     return render_template('login.html', form=form)
-
-
