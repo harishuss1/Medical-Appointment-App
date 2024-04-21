@@ -1,0 +1,11 @@
+{% extends "home.html" %}
+{% block content %}
+    <h1>{% block title %}Doctor Dashboard{% endblock title %}</h1>
+    <main>
+        <section>
+            <h3><a href="{{ url_for('doctor.confirmed_appointments') }}">See all confirmed appointments</a></h3>
+            <h3><a href="{{ url_for('doctor.requested_appointments') }}">See appointment requests</a></h3>
+            <h3><a href="{{ url_for('doctor.notes') }}">See patient notes</a></h3>
+        </section>
+    </main>
+{% endblock content %}

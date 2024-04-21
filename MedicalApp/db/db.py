@@ -1,6 +1,7 @@
 import oracledb
 import os
 from flask import g
+from ..appointments import Appointments
 
 
 class Database:
@@ -24,3 +25,14 @@ class Database:
                             except Exception as e:
                                 print(e)
                         statement_parts = []
+    
+    # status 0 = pending, status 1 = confirmed, status -1 = cancel
+    def get__appointments_by_status(self, status):
+        appointments = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                "SELECT id, patient_id, doctor_id, appointment_time ,status, location, description FROM medical_appointments WHERE status = :status",
+                status=status)
+            for row in results:
+                appointments.append(Appointments(row[0], row[1], row[2], row[3], row[4], row[5], row[6]))
+        return appointments
