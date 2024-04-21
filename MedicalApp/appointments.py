@@ -16,7 +16,7 @@ class Appointments:
             raise ValueError('Illegal type for appointment_time')
         self.appointment_time = appointment_time
 
-        if not isinstance(status, int):
+        if not isinstance(status, int or status > 1 or status < -1):
             raise ValueError('Illegal type for status')
         self.status = status
 

@@ -1,6 +1,7 @@
 import oracledb
 import os
 from flask import g
+from MedicalApp.appointments import Appointments   
 
 
 class Database:
@@ -24,3 +25,28 @@ class Database:
                             except Exception as e:
                                 print(e)
                         statement_parts = []
+
+    def add_appointment(self, appointment):
+        with self.__get_cursor() as cursor:
+            if not isinstance(appointment, Appointments):
+                raise TypeError("expected Appointment object")
+            with self.__get_cursor() as cursor:
+                cursor.execute('insert into medical_appointments (id, patient_id, doctor_id, appointment_time, status, location, description) values (:id, :patient_id, :doctor_id, :appointment_time, :status, :location, :description)',
+                                id=appointment.id,
+                                patient_id=appointment.patient_id,
+                                doctor_id=appointment.doctor_id,
+                                appointment_time=appointment.appointment_time,
+                                status=appointment.status,
+                                location=appointment.location,
+                                description=appointment.description)
+        
+        def get_appointment_id(self, id):
+            appointment = None
+            with self.__get_cursor() as cursor:
+                cursor.execute(
+                    'select id, patient_id, doctor_id, appointment_time, status, location, description from medical_appointments where name=:name', id=id)
+                row = cursor.fetchone()
+                if row:
+                    appointment = Appointments(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+            return appointment                           
+
