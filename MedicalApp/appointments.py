@@ -1,4 +1,27 @@
+import json
+from flask_wtf import FlaskForm
+from wtforms import IntegerField, StringField
+from wtforms.validators import DataRequired
+
+
 class Appointments:
+    def from_json(data):
+        if not isinstance(data, dict):
+            raise TypeError()
+        return Appointments(data['id'], data['patient_id'],data['doctor_id'], data['appointment_time'], 
+                        data['status'], data['location'], data['description'])
+
+    def to_json(self):
+        return ({
+            'id': self.id,
+            'patient_id': self.patient_id,
+            'doctor_id': self.doctor_id,
+            'appointment_time': self.appointment_time,
+            'status': self.status,
+            'location': self.location,
+            'description': self.description
+        })
+
     def __init__(self, id, patient_id, doctor_id, appointment_time, status, location, description):
         if not isinstance(id, int) or id < 0:
             raise ValueError('Illegal type for patient id')
@@ -30,3 +53,12 @@ class Appointments:
 
     def __str__(self):
         return f'{self.id} {self.patient_id} {self.doctor_id} {self.appointment_time} {self.status} {self.location} {self.description}'
+    
+    class AppointmentForm(FlaskForm):
+        id = IntegerField("ID:", validators=[DataRequired()])
+        patient_id = IntegerField("Patient ID:", validators=[DataRequired()])
+        doctor_id= IntegerField("Doctor ID:", validators=[DataRequired()])
+        appointment_time = StringField("Appointment Time:", validators=[DataRequired()])
+        status = StringField("Status:", validators=[DataRequired()])
+        location = StringField("Location:", validators=[DataRequired()])
+        description = StringField("Description:", validators=[DataRequired()])

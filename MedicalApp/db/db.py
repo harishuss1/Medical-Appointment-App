@@ -40,13 +40,23 @@ class Database:
                                 location=appointment.location,
                                 description=appointment.description)
         
-        def get_appointment_id(self, id):
-            appointment = None
-            with self.__get_cursor() as cursor:
-                cursor.execute(
-                    'select id, patient_id, doctor_id, appointment_time, status, location, description from medical_appointments where name=:name', id=id)
-                row = cursor.fetchone()
-                if row:
-                    appointment = Appointments(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
-            return appointment                           
+    def get_appointment_id(self, id):
+        appointment = None
+        with self.__get_cursor() as cursor:
+            cursor.execute(
+                'select id, patient_id, doctor_id, appointment_time, status, location, description from medical_appointments where name=:name', id=id)
+            row = cursor.fetchone()
+            if row:
+                appointment = Appointments(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+        return appointment                        
+
+    def get_appointments(self):
+        appointments = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                'select id, patient_id, doctor_id, appointment_time, status, location, description from medical_appointments')
+            for row in results:
+                appointment = Appointments(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+                appointments.append(appointment)
+        return appointments 
 
