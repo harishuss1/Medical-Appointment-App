@@ -1,7 +1,5 @@
 class Notes:
 
-    # For now i kept date as String, Might want to change to date??
-
     def __init__(self, id, patient_id, note_taker_id, note_date, note):
         if not isinstance(id, int):
             raise ValueError("ID must be an Integer")
