@@ -31,12 +31,12 @@ class Database:
         if not isinstance(user, User):
             raise TypeError("expected User object")
         with self.__get_cursor() as cursor:
-            cursor.execute('insert into medical_users (email, password, first_name,last_name,avatar_path,user_type)  values (:email, :password, :first_name, :last_name, :access_level)',{
-                           'email':user.email,
-                           'password':user.password,
-                           'first_name':user.first_name,
-                           'last_name':user.last_name,
-                           'user_type':user.access_level})
+            cursor.execute('insert into medical_users (email, password, first_name,last_name,avatar_path,user_type)  values (:email, :password, :first_name, :last_name, :access_level)', {
+                           'email': user.email,
+                           'password': user.password,
+                           'first_name': user.first_name,
+                           'last_name': user.last_name,
+                           'user_type': user.access_level})
 
     def __get_cursor(self):
         for i in range(3):
