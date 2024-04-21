@@ -26,7 +26,7 @@ class Appointments:
 
         if not isinstance(description, str):
             raise ValueError('Illegal type for description')
-        self.location = description
+        self.description = description
 
     def __str__(self):
         return f'{self.id} {self.patient_id} {self.doctor_id} {self.appointment_time} {self.status} {self.location} {self.description}'
