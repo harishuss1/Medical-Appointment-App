@@ -6,14 +6,12 @@ from .user import User
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
-# Admin Dashboard Route
 @admin_bp.route('/')
 @login_required
 def admin_dashboard():
     return render_template('admin_dashboard.html')
 
 
-# Add New User Route
 @admin_bp.route('/add_user', methods=['GET', 'POST'])
 @login_required
 def add_user():
@@ -74,8 +72,20 @@ def delete_user():
     
     return render_template('delete_user.html')
 
+@login_required
+def block_user():
+    if request.method == 'POST':
+        email = request.form['email']
+        db = get_db()
+        try:
+            db.block_user(email)
+            flash("User blocked successfully", 'success')
+            return redirect(url_for('admin.admin_dashboard'))
+        except Exception as e:
+            flash(f"Error blocking user: {e}", 'error')
+    
+    return render_template('block_user.html')
 
-# Change User Role Route
 @admin_bp.route('/change_user_role', methods=['GET', 'POST'])
 @login_required
 def change_user_role():
