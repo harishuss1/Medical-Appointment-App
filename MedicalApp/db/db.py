@@ -2,6 +2,7 @@ import oracledb
 import os
 from flask import g
 from ..appointments import Appointments
+from ..user import MedicalPatient
 
 
 class Database:
@@ -25,14 +26,79 @@ class Database:
                             except Exception as e:
                                 print(e)
                         statement_parts = []
-    
+
     # status 0 = pending, status 1 = confirmed, status -1 = cancel
     def get__appointments_by_status(self, status):
         appointments = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
-                "SELECT id, patient_id, doctor_id, appointment_time ,status, location, description FROM medical_appointments WHERE status = :status",
+                "SELECT id, patient_id, doctor_id, appointment_time, status, location, description FROM medical_appointments WHERE status = :status",
                 status=status)
             for row in results:
-                appointments.append(Appointments(row[0], row[1], row[2], row[3], row[4], row[5], row[6]))
+                appointments.append(Appointments(int(row[0]), int(row[1]), int(
+                    row[2]), str(row[3]), int(row[4]), row[5], row[6]))
         return appointments
+
+    def get__appointment_by_id(self, id):
+        appointment = None
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                "SELECT id, patient_id, doctor_id, appointment_time, status, location, description FROM medical_appointments WHERE id = :id",
+                id=id)
+            row = results.fetchone()
+            if row:
+                appointment = Appointments(int(row[0]), int(row[1]), int(
+                    row[2]), str(row[3]), int(row[4]), row[5], row[6])
+        return appointment
+
+    def get_user_by_id(self, id):
+        patient = None
+        with self.__get_cursor() as cursor:
+            results = cursor.execute("SELECT email, password, first_name, last_name, access_level, avatar_path, id FROM medical_users WHERE id = :id",
+                                     id=id)
+            row = results.fetchone()
+            if row:
+                patient = MedicalPatient(
+                    row[0], row[1], row[2], row[3], row[4], avatar_path=row[5], id=int(row[6]))
+        return (patient)
+
+    def update_appointment_status(self, id, status):
+        with self.__get_cursor() as cursor:
+            cursor.execute("UPDATE medical_appointments SET status = :status WHERE id = :id",
+                           status=status, id=id)
+            
+    def __get_cursor(self):
+        for i in range(3):
+            try:
+                return self.__connection.cursor()
+            except Exception as e:
+                # Might need to reconnect
+                self.__reconnect()
+
+    def __reconnect(self):
+        try:
+            self.close()
+        except oracledb.Error as f:
+            pass
+        self.__connection = self.__connect()
+
+    def __connect(self):
+        return oracledb.connect(user=os.environ['DBUSER'], password=os.environ['DBPWD'],
+                                host="198.168.52.211", port=1521, service_name="pdbora19c.dawsoncollege.qc.ca")
+
+    def close(self):
+        '''Closes the connection'''
+        if self.__connection is not None:
+            self.__connection.close()
+            self.__connection = None
+
+
+if __name__ == '__main__':
+    print('Provide file to initialize database')
+    file_path = input()
+    if os.path.exists(file_path):
+        db = Database()
+        db.run_file(file_path)
+        db.close()
+    else:
+        print('Invalid Path')
