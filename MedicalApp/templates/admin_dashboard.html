@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Admin Dashboard
+{% endblock title %}
+
+{% block content %}
+<h1>Welcome to the Admin Dashboard</h1>
+
+<div class="admin-sections">
+    <section class="user-management">
+        <h2>User Management</h2>
+        <ul>
+            <li><a href="{{ url_for('admin.add_user') }}">Add New User</a></li>
+            <li><a href="{{ url_for('admin.delete_user') }}">Delete User</a></li>
+            <li><a href="{{ url_for('admin.change_user_role') }}">Change User Role</a></li>
+        </ul>
+    </section>
+</div>
+{% endblock content %}
