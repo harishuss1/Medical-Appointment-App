@@ -21,6 +21,8 @@ def create_app(test_config=None):
 
 def init_app(app):
     #REGISTER BLUEPRINTS HERE
+    from .admin_view import bp as admin_bp
+    app.register_blueprint(admin_bp)
 
     app.teardown_appcontext(close_db)
 
