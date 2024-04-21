@@ -1,6 +1,7 @@
 import oracledb
 import os
 from flask import g
+from werkzeug.security import generate_password_hash
 
 
 class Database:
@@ -24,3 +25,21 @@ class Database:
                             except Exception as e:
                                 print(e)
                         statement_parts = []
+    
+    def create_user(self, email, plaintext_password, first_name, last_name, user_type):
+        # Hash the password securely
+        hashed_password = generate_password_hash(plaintext_password, method='pbkdf2:sha256', salt_length=16)
+
+        with self.__connection.cursor() as cursor:
+            insert_query = """
+                INSERT INTO medical_users (email, password, first_name, last_name, user_type)
+                VALUES (:email, :password, :first_name, :last_name, :user_type)
+            """
+            cursor.execute(insert_query, {
+                'email': email,
+                'password': hashed_password,
+                'first_name': first_name,
+                'last_name': last_name,
+                'user_type': user_type
+            })
+    
