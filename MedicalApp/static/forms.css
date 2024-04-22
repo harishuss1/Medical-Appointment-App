@@ -1,0 +1,31 @@
+/* forms.css */
+/* This is a temporary css since my teamate will polish this up. */
+.form-group {
+    margin-bottom: 10px;
+}
+
+.error-message {
+    color: red;
+}
+
+input[type="text"], input[type="password"], input[type="email"] {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0 22px 0;
+    display: inline-block;
+    border: none;
+    background: #f1f1f1;
+}
+
+input[type="submit"] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    border: none;
+    cursor: pointer;
+    opacity: 0.9;
+}
+
+input[type="submit"]:hover {
+    opacity:1;
+}

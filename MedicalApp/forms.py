@@ -1,6 +1,25 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField, EmailField, PasswordField
-from wtforms.validators import DataRequired, NumberRange
+from wtforms import StringField, IntegerField, EmailField, PasswordField, SubmitField
+from wtforms.validators import DataRequired, Email, Length, EqualTo
+
+
+class SignupForm(FlaskForm):
+    first_name = StringField('First Name', validators=[DataRequired()])
+    last_name = StringField('Last Name', validators=[DataRequired()])
+    email = EmailField('Email', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[
+        DataRequired(),
+        Length(min=8, message='Password must be at least 8 characters long'),
+        EqualTo('confirm_password', message='Passwords must match')
+    ])
+    confirm_password = PasswordField(
+        'Confirm Password', validators=[DataRequired()])
+    submit = SubmitField('Register')
+
+
+class LoginForm(FlaskForm):
+    email = EmailField('email')
+    password = PasswordField('password')
 
 
 class AppointmentForm(FlaskForm):
