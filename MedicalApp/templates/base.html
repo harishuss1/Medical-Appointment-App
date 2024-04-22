@@ -1,21 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    {% block header %}{% endblock %}
-</head>
-<body>
-    <header>
-        <h1>Welcome to Our Site</h1>
-    </header>
-
-    {% block content %}{% endblock %}
-
-    <footer>
-        <p>Copyright © 2024</p>
-    </footer>
-</body>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+        <link rel="stylesheet"
+              href="{{ url_for('static', filename='css/styles.css') }}">
+        {% block header %}
+        {% endblock header %}
+    </head>
+    <body>
+        <header>
+            <h1>Welcome to Our Site</h1>
+        </header>
+        {% block content %}
+        {% endblock content %}
+        <footer>
+            <p>Copyright © 2024</p>
+        </footer>
+    </body>
 </html>
