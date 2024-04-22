@@ -20,7 +20,7 @@ def create_app(test_config=None):
 
 
 def init_app(app):
-    #REGISTER BLUEPRINTS HERE
+    # REGISTER BLUEPRINTS HERE
 
     app.teardown_appcontext(close_db)
 
