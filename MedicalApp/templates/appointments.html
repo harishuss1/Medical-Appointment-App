@@ -2,16 +2,19 @@
 {% block content %}
 <ul>
     {% for appointment in appointments %}
-    <li><a href="{{ url_for('addressbook.get_address', name=address.name) }}">{{ address }}</a></li>
+    <li><a href="{{ url_for('appointments.get_appointment', id=appointment.u) }}">{{ address }}</a></li>
     {% endfor %}
 </ul>
 
 <form method="post">
     {{ form.csrf_token }}
-    {{ form.name.label }} {{ form.name() }}
-    {{ form.street.label }} {{ form.street() }}
-    {{ form.city.label }} {{ form.city() }}
-    {{ form.province.label }} {{ form.province() }}
+    {{ form.id.label }} {{ form.id() }}
+    {{ form.patient_id.label }} {{ form.patient_id() }}
+    {{ form.doctor_id.label }} {{ form.doctor_id() }}
+    {{ form.appointment_time.label }} {{ form.appointment_time() }}
+    {{ form.status.label }} {{ form.status() }}
+    {{ form.location.label }} {{ form.location() }}
+    {{ form.description.label }} {{ form.description() }}
     <input type="submit" />
 </form>
 {% endblock body %}
