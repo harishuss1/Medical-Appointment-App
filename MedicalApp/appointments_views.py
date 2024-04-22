@@ -43,4 +43,12 @@ def get_appointments():
     return render_template('appointments.html', appointments=appointments, form=form)
 
 
+@bp.route('/<int:id>/')
+def get_appointment(id):
+    db = dbmanager.get_db()
+    appointment = db.get_address(id)
+    if appointment is None:
+        flash("Appointment cannot be found", 'error')
+        return redirect(url_for('appointments.get_appointments'))
+    return render_template('specific_appointment.html', appointment=appointment)
 
