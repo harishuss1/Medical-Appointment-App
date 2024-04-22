@@ -1,7 +1,7 @@
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from MedicalApp.appointments import Appointments
 from MedicalApp.forms import AppointmentForm
-from MedicalApp import db, dbmanager
+from MedicalApp.db import db, dbmanager
 
 bp = Blueprint('appointments', __name__, url_prefix='/appointments/')
 

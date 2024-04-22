@@ -1,6 +1,6 @@
 import os
 from flask import Flask, render_template
-from .db.dbmanager import close_db, init_db_command
+from MedicalApp.db.dbmanager import close_db, init_db_command
 
 
 def create_app(test_config=None):
