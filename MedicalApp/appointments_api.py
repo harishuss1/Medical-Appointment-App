@@ -6,7 +6,7 @@ bp = Blueprint('appointments_api', __name__, url_prefix='/api/appointments/')
 
 
 @bp.route('', methods=['GET', 'POST'])
-def get_addresses():
+def get_appointments():
     if request.method == 'POST':
         data = request.json
         appointment = Appointments.from_json(data)
@@ -23,6 +23,6 @@ def get_addresses():
         else:
             abort(400)
 
-    appointments = get_db().get_addresses()
+    appointments = get_db().get_appointments()
     json_appointments = [x.__dict__ for x in appointments]
     return jsonify(json_appointments)

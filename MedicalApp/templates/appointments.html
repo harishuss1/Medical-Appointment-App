@@ -2,7 +2,7 @@
 {% block content %}
 <ul>
     {% for appointment in appointments %}
-    <li><a href="{{ url_for('appointments.get_appointment', id=appointment.u) }}">{{ address }}</a></li>
+    <li><a href="{{ url_for('appointmenst.get_appointment', id=appointment.id) }}">{{ address }}</a></li>
     {% endfor %}
 </ul>
 

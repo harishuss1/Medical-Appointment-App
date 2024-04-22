@@ -22,18 +22,22 @@ def get_appointments():
         status = form.status.data
         location = form.location.data
         description = form.description.data
-        new_appointment = Appointments(id, patient_id, doctor_id, appointment_id, status, location, description)
+        new_appointment = Appointments(
+            id, patient_id, doctor_id, appointment_id, status, location, description)
 
         # checks if theres any existing appointment in the appointments list and it will check if it matches with
         # the new appointment, if match then it flashed that it already exist and
         # will not take the new appointment
-        if any(appointment.id == new_appointment.id and
-               appointment.patient_id == new_appointment.patient_id_id and
-               appointment.doctor_id == new_appointment.doctor_id
-               for appointment in appointments):
+        if any(
+                appointment.id == new_appointment.id and
+                appointment.patient_id == new_appointment.patient_id and
+                appointment.doctor_id == new_appointment.doctor_id
+                for appointment in appointments
+            ):
             flash("Appointment already exists", "error")
         else:
-            new_appointment = Appointments(id, patient_id, doctor_id, appointment_id, status, location, description)
+            new_appointment = Appointments(
+                id, patient_id, doctor_id, appointment_id, status, location, description)
             db.add_appointment(new_appointment)
             flash("Appointement added to the List of Appointments")
 
@@ -46,9 +50,8 @@ def get_appointments():
 @bp.route('/<int:id>/')
 def get_appointment(id):
     db = dbmanager.get_db()
-    appointment = db.get_address(id)
+    appointment = db.get_appointment_id(id)
     if appointment is None:
         flash("Appointment cannot be found", 'error')
         return redirect(url_for('appointments.get_appointments'))
     return render_template('specific_appointment.html', appointment=appointment)
-

@@ -8,11 +8,11 @@ class Appointments:
     def from_json(data):
         if not isinstance(data, dict):
             raise TypeError()
-        return Appointments(data['id'], data['patient_id'],data['doctor_id'], data['appointment_time'], 
-                        data['status'], data['location'], data['description'])
+        return Appointments(data['id'], data['patient_id'], data['doctor_id'], data['appointment_time'],
+                            data['status'], data['location'], data['description'])
 
     def to_json(self):
-        return ({
+        return {
             'id': self.id,
             'patient_id': self.patient_id,
             'doctor_id': self.doctor_id,
@@ -20,19 +20,20 @@ class Appointments:
             'status': self.status,
             'location': self.location,
             'description': self.description
-        })
+        }
 
     def __init__(self, id, patient_id, doctor_id, appointment_time, status, location, description):
         if not isinstance(id, int) or id < 0:
             raise ValueError('Illegal type for patient id')
         self.id = id
-        
+
         if not isinstance(patient_id, int) or patient_id < 0:
             raise ValueError('Illegal type for patient id')
         self.patient_id = patient_id
 
         if not isinstance(doctor_id, int) or doctor_id < 0:
-            raise ValueError('Id must be positive or Illegal type for doctor id')
+            raise ValueError(
+                'Id must be positive or Illegal type for doctor id')
         self.doctor_id = doctor_id
 
         if not isinstance(appointment_time, str):
@@ -53,12 +54,3 @@ class Appointments:
 
     def __str__(self):
         return f'{self.id} {self.patient_id} {self.doctor_id} {self.appointment_time} {self.status} {self.location} {self.description}'
-    
-    class AppointmentForm(FlaskForm):
-        id = IntegerField("ID:", validators=[DataRequired()])
-        patient_id = IntegerField("Patient ID:", validators=[DataRequired()])
-        doctor_id= IntegerField("Doctor ID:", validators=[DataRequired()])
-        appointment_time = StringField("Appointment Time:", validators=[DataRequired()])
-        status = StringField("Status:", validators=[DataRequired()])
-        location = StringField("Location:", validators=[DataRequired()])
-        description = StringField("Description:", validators=[DataRequired()])
