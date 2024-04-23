@@ -111,18 +111,11 @@ class Database:
                                 host="198.168.52.211", port=1521, service_name="pdbora19c.dawsoncollege.qc.ca")
 
 
-<< << << < HEAD
-
-
 def close(self):
     '''Closes the connection'''
     if self.__connection is not None:
         self.__connection.close()
         self.__connection = None
-
-
-== == == =
->>>>>> > 97cc10ce2a48be63593e57de0984cf7f77d4ca3c
 
 if __name__ == '__main__':
     print('Provide file to initialize database')
