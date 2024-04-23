@@ -27,8 +27,8 @@ def init_app(app):
     login_manager.init_app(app)
 
     @login_manager.user_loader
-    def load_user(user_email):
-        user = get_db().get_user_by_email(user_email)
+    def load_user(user_id):
+        user = get_db().get_user_by_email(user_id)
         return user
 
 

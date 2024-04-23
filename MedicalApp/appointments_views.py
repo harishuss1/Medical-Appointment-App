@@ -7,6 +7,7 @@ bp = Blueprint('appointments', __name__, url_prefix='/appointments/')
 
 
 @bp.route('', methods=['GET', 'POST'])
+# @login_required
 def get_appointments():
     db = dbmanager.get_db()
     appointments = db.get_appointments()
@@ -48,6 +49,7 @@ def get_appointments():
 
 
 @bp.route('/<int:id>/')
+# @login_required
 def get_appointment(id):
     db = dbmanager.get_db()
     appointment = db.get_appointment_id(id)
