@@ -20,3 +20,14 @@ class SignupForm(FlaskForm):
 class LoginForm(FlaskForm):
     email = EmailField('email')
     password = PasswordField('password')
+
+
+class AppointmentForm(FlaskForm):
+    id = IntegerField("ID:", validators=[DataRequired()])
+    patient_id = IntegerField("Patient ID:", validators=[DataRequired()])
+    doctor_id = IntegerField("Doctor ID:", validators=[DataRequired()])
+    appointment_time = StringField(
+        "Appointment Time:", validators=[DataRequired()])
+    status = StringField("Status:", validators=[DataRequired()])
+    location = StringField("Location:", validators=[DataRequired()])
+    description = StringField("Description:", validators=[DataRequired()])

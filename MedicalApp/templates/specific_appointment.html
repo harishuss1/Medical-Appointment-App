@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Appointments{% endblock body %}
+
+{% block content %}
+<h2>Appointments</h2>
+<ul>
+    <li>ID: {{ appointment.id }}</li>
+    <li>Patient ID: {{ appointment.patient_id }}</li>
+    <li>Doctor ID: {{ appointment.doctor_id }}</li>
+    <li>Province: {{ appointment.appointment_time }}</li> 
+    <li>Status: {{ appointment.status }}</li>   
+    <li>Location: {{ appointment.location }}</li>  
+    <li>Description: {{ appointment.description }}</li>  
+</ul>
+{% endblock body %}
