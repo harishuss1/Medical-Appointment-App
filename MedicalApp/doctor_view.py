@@ -65,6 +65,6 @@ def update_appointment(id):
 
 
 @bp.route('/notes/')
-@login_required
+# @login_required
 def notes():
     return render_template('doctor_notes.html')
