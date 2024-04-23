@@ -56,7 +56,7 @@ class Database:
     def get_user_by_id(self, id):
         patient = None
         with self.__get_cursor() as cursor:
-            results = cursor.execute("SELECT email, password, first_name, last_name, access_level, avatar_path, id FROM medical_users WHERE id = :id",
+            results = cursor.execute("SELECT email, password, first_name, last_name, user_type, avatar_path, id FROM medical_users WHERE id = :id",
                                      id=id)
             row = results.fetchone()
             if row:
@@ -73,7 +73,7 @@ class Database:
         patients = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
-                "SELECT weight, email, password, first_name, last_name, access_level, dob, blood_type, height, avatar_path, users.id FROM medical_users users INNER JOIN medical_patients p ON(users.id == p.patient_id) INNER JOIN medical_appointments appts ON(users.id == appts.pateint_id) WHERE doctor_id = :id",
+                "SELECT weight, email, password, first_name, last_name, user_type, dob, blood_type, height, avatar_path, users.id FROM medical_users users INNER JOIN medical_patients p ON(users.id = p.id) INNER JOIN medical_appointments appts ON(users.id = appts.patient_id) WHERE doctor_id = :id",
                 id=doctor_id)
             for row in results:
                 patients.append(MedicalPatient(
@@ -83,7 +83,7 @@ class Database:
     def get_patients_by_id(self, patient_id):
         patient = None
         with self.__get_cursor() as cursor:
-            results = cursor.execute("SELECT weight, email, password, first_name, last_name, access_level, dob, blood_type, height, avatar_path, id FROM medical_users u INNER JOIN medical_patients p USING(id) WHERE id = :id",
+            results = cursor.execute("SELECT weight, email, password, first_name, last_name, user_type, dob, blood_type, height, avatar_path, id FROM medical_users u INNER JOIN medical_patients p USING(id) WHERE id = :id",
                                      id=patient_id)
             row = results.fetchone()
             if row:
