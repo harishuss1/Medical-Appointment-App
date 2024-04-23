@@ -28,7 +28,6 @@ class Database:
                             except Exception as e:
                                 print(e)
                         statement_parts = []
-<<<<<<< HEAD
         
     def delete_user(self, user_email):
         try:
@@ -67,7 +66,6 @@ class Database:
             raise
     
     
-=======
 
     def create_user(self, user):
         if not isinstance(user, User):
@@ -158,4 +156,3 @@ if __name__ == '__main__':
     else:
         print('Invalid Path')
 
->>>>>>> f31efbcfa380019d4a5dfeecde93210f3ce87611
