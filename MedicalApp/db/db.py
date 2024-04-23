@@ -3,7 +3,7 @@ import os
 from flask import g
 from ..appointments import Appointments
 from ..user import MedicalPatient
-
+from ..note import Note
 from MedicalApp.user import User
 
 
@@ -60,7 +60,7 @@ class Database:
                                      id=id)
             row = results.fetchone()
             if row:
-                patient = MedicalPatient(
+                patient = User(
                     row[0], row[1], row[2], row[3], row[4], avatar_path=row[5], id=int(row[6]))
         return (patient)
 
@@ -68,6 +68,39 @@ class Database:
         with self.__get_cursor() as cursor:
             cursor.execute("UPDATE medical_appointments SET status = :status WHERE id = :id",
                            status=status, id=id)
+            
+    def get_patients_by_doctor(self, doctor_id):
+        patients = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                "SELECT weight, email, password, first_name, last_name, access_level, dob, blood_type, height, avatar_path, users.id FROM medical_users users INNER JOIN medical_patients p ON(users.id == p.patient_id) INNER JOIN medical_appointments appts ON(users.id == appts.pateint_id) WHERE doctor_id = :id",
+                id=doctor_id)
+            for row in results:
+                patients.append(MedicalPatient(
+                    float(row[0]), row[1], row[2], row[3], row[4], str(row[7]), str(row[8]), float(row[9]), avatar_path=row[5], id=int(row[6]) ))
+        return patients
+    
+    def get_patients_by_id(self, patient_id):
+        patient = None
+        with self.__get_cursor() as cursor:
+            results = cursor.execute("SELECT weight, email, password, first_name, last_name, access_level, dob, blood_type, height, avatar_path, id FROM medical_users u INNER JOIN medical_patients p USING(id) WHERE id = :id",
+                                     id=patient_id)
+            row = results.fetchone()
+            if row:
+                patient = MedicalPatient(
+                    float(row[0]), row[1], row[2], row[3], row[4], str(row[7]), str(row[8]), float(row[9]), avatar_path=row[5], id=int(row[6]) )
+        return (patient)
+    
+    def get_notes_by_patient_id(self, patient_id, doctor_id):
+        notes = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                "SELECT id, patient_id, note_taker_id, note_date, note FROM medical_notes WHERE note_taker_id = :doctor_id AND patient_id = :patient_id",
+                doctor_id=doctor_id, patient_id=patient_id)
+            for row in results:
+                notes.append(Note(
+                    int(row[0]), int(row[1]), int(row[2]), str(row[3]), str(row[4])))
+        return notes
 
     def create_user(self, user):
         if not isinstance(user, User):
