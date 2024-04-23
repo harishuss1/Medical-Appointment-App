@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Document</title>
         <link rel="stylesheet"
-              href="{{ url_for('static', filename='css/styles.css') }}">
+              href="{{ url_for('static', filename='styles.css') }}">
         {% block header %}
         {% endblock header %}
     </head>
@@ -15,11 +15,18 @@
         </header>
         {% block content %}
         {% endblock content %}
+        <nav>
+            <ol type="i">
+                <li><a href="{{ url_for('home.index') }}">Home</a></li>
+                <li><a href="{{ url_for('appointments.get_appointments') }}">Appointments</a></li>
+            </ol>
+        </nav>
         <section>
             {% for message in get_flashed_messages() %}
                 <p class="flash">{{ message }}</p>
             {% endfor %}
         </section>
+
         <footer>
             <p>Copyright © 2024</p>
         </footer>
