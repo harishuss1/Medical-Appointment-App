@@ -30,7 +30,7 @@ class Database:
                         statement_parts = []
 
     # status 0 = pending, status 1 = confirmed, status -1 = cancel
-    def get__appointments_by_status(self, status):
+    def get_appointments_by_status(self, status):
         appointments = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
@@ -38,10 +38,10 @@ class Database:
                 status=status)
             for row in results:
                 appointments.append(Appointments(int(row[0]), int(row[1]), int(
-                    row[2]), str(row[3]), int(row[4]), row[5], row[6]))
+                    row[2]), str(row[3]), int(row[4]), row[5], str(row[6])))
         return appointments
 
-    def get__appointment_by_id(self, id):
+    def get_appointment_by_id(self, id):
         appointment = None
         with self.__get_cursor() as cursor:
             results = cursor.execute(

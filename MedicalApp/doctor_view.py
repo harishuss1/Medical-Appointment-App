@@ -5,7 +5,6 @@ from .db.dbmanager import get_db
 from oracledb import InternalError, DatabaseError
 from flask_login import login_user, logout_user, login_required
 from .forms import AppointmentResponseForm
-
 bp = Blueprint('doctor', __name__, url_prefix="/doctor/")
 
 
@@ -19,11 +18,11 @@ def dashboard():
 # @login_required
 def confirmed_appointments():
     try:
-        appointments = get_db().get__appointments_by_status(1)
+        appointments = get_db().get_appointments_by_status(1)
         if appointments is None or len(appointments) == 0:
             flash("No confirmed appointments")
             return redirect(url_for('doctor.dashboard'))
-        return render_template('doctor_appointments.html', appointments=appointments)
+        return render_template('doctor_appointments.html', appointments=appointments, get_db=get_db, get_user_by_id=get_user_by_id)
     except DatabaseError as e:
         flash("Something went wrong with the database")
         return redirect(url_for('doctor.dashboard'))
