@@ -69,10 +69,4 @@ create table medical_note_attachments(
     CONSTRAINT note_fk FOREIGN KEY (note_id) REFERENCES medical_notes(id)
 );
 
-create table medical_access_level(
-    user_type varchar2(20) PRIMARY KEY,
-    CONSTRAINT check_user_type
-    CHECK (user_type IN('PATIENT', 'STAFF', 'ADMIN_USER', 'ADMIN'))
-);
-
 commit;

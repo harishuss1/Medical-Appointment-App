@@ -7,5 +7,6 @@ drop table medical_note_attachments cascade constraints;
 drop table medical_notes cascade constraints;
 drop table medical_appointments cascade constraints;
 drop table medical_rooms cascade constraints;
+drop table medical_access_level cascade constraints;
 
 commit;
