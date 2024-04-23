@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+        <link rel="stylesheet"
+              href="{{ url_for('static', filename='styles.css') }}">
+        {% block header %}
+        {% endblock header %}
+    </head>
+    <body>
+        <header>
+            <h1>Welcome to Our Site</h1>
+        </header>
+        {% block content %}
+        {% endblock content %}
+        <nav>
+            <ol type="i">
+                <li><a href="{{ url_for('home.index') }}">Home</a></li>
+                <li><a href="{{ url_for('appointments.get_appointments') }}">Appointments</a></li>
+            </ol>
+        </nav>
+
+        <footer>
+            <p>Copyright © 2024</p>
+        </footer>
+    </body>
+</html>

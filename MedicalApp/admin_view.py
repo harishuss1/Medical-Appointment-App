@@ -1,6 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user
-from werkzeug.security import generate_password_hash
 from .db.dbmanager import get_db
 from .user import User
 
