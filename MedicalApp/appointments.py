@@ -3,13 +3,14 @@ class Appointments:
         if not isinstance(id, int) or id < 0:
             raise ValueError('Illegal type for patient id')
         self.id = id
-        
+
         if not isinstance(patient_id, int) or patient_id < 0:
             raise ValueError('Illegal type for patient id')
         self.patient_id = patient_id
 
         if not isinstance(doctor_id, int) or doctor_id < 0:
-            raise ValueError('Id must be positive or Illegal type for doctor id')
+            raise ValueError(
+                'Id must be positive or Illegal type for doctor id')
         self.doctor_id = doctor_id
 
         if not isinstance(appointment_time, str):

@@ -4,6 +4,8 @@ from flask import g
 from ..appointments import Appointments
 from ..user import MedicalPatient
 
+from MedicalApp.user import User
+
 
 class Database:
     def __init__(self, autocommit=True):
@@ -66,7 +68,29 @@ class Database:
         with self.__get_cursor() as cursor:
             cursor.execute("UPDATE medical_appointments SET status = :status WHERE id = :id",
                            status=status, id=id)
-            
+
+    def create_user(self, user):
+        if not isinstance(user, User):
+            raise TypeError("expected User object")
+        with self.__get_cursor() as cursor:
+            cursor.execute('insert into medical_users (email, password, first_name,last_name,avatar_path,user_type)  values (:email, :password, :first_name, :last_name, :access_level)', {
+                           'email': user.email,
+                           'password': user.password,
+                           'first_name': user.first_name,
+                           'last_name': user.last_name,
+                           'user_type': user.access_level})
+
+    def get_user_by_email(self, email):
+        user = None
+        with self.__get_cursor() as cursor:
+            cursor.execute(
+                'select id, email, password, first_name, last_name,avatar_path,user_typefrom medical_users where email=:email', email=email)
+            row = cursor.fetchone()
+            if row:
+                user = User(row[0], row[1], row[2],
+                            row[3], row[4], row[5], row[6])
+        return user
+
     def __get_cursor(self):
         for i in range(3):
             try:
@@ -86,12 +110,19 @@ class Database:
         return oracledb.connect(user=os.environ['DBUSER'], password=os.environ['DBPWD'],
                                 host="198.168.52.211", port=1521, service_name="pdbora19c.dawsoncollege.qc.ca")
 
-    def close(self):
-        '''Closes the connection'''
-        if self.__connection is not None:
-            self.__connection.close()
-            self.__connection = None
 
+<< << << < HEAD
+
+
+def close(self):
+    '''Closes the connection'''
+    if self.__connection is not None:
+        self.__connection.close()
+        self.__connection = None
+
+
+== == == =
+>>>>>> > 97cc10ce2a48be63593e57de0984cf7f77d4ca3c
 
 if __name__ == '__main__':
     print('Provide file to initialize database')

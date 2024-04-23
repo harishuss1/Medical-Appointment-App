@@ -10,7 +10,7 @@ class Note:
             raise TypeError("Illegal type for note date")
         if not isinstance(note, str):
             raise TypeError("Illegal type for note")
-        
+
         self.id = id
         self.patient_id = patient_id
         self.note_taker_id = note_taker_id

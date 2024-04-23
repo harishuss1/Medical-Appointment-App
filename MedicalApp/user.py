@@ -1,5 +1,8 @@
-class User:
-    def __init__(self, email, password, first_name, last_name, access_level, avatar_path=None, id=None):
+from flask_login import UserMixin
+
+
+class User(UserMixin):
+    def __init__(self, email, password, first_name, last_name, access_level="patient", avatar_path=None, id=None):
         if not isinstance(email, str):
             raise ValueError("Illegal type for email")
         if not isinstance(password, str):
@@ -25,8 +28,9 @@ class User:
 
 
 class MedicalPatient(User):
-    def __init__(self,  weight, email, password, first_name, last_name, access_level, dob, blood_type, height, avatar_path=None, id=None):
-        super().__init__(email, password, first_name, last_name, access_level, avatar_path, id)
+    def __init__(self, weight, email, password, first_name, last_name, access_level, dob, blood_type, height, avatar_path=None, id=None):
+        super().__init__(email, password, first_name,
+                         last_name, access_level, avatar_path, id)
         if not isinstance(dob, str):
             raise ValueError("Illegal type for dob")
         if not isinstance(blood_type, str):

@@ -10,13 +10,13 @@ bp = Blueprint('doctor', __name__, url_prefix="/doctor/")
 
 
 @bp.route('/')
-#@login_required
+# @login_required
 def dashboard():
     return render_template("doctor.html")
 
 
 @bp.route('/appointments/')
-#@login_required
+# @login_required
 def confirmed_appointments():
     try:
         appointments = get_db().get__appointments_by_status(1)
@@ -30,7 +30,7 @@ def confirmed_appointments():
 
 
 @bp.route('/requests/')
-#@login_required
+# @login_required
 def requested_appointments():
     try:
         appointments = get_db().get__appointments_by_status(0)
@@ -44,7 +44,7 @@ def requested_appointments():
 
 
 @bp.route('/requests/<int:id>/', methods=['GET', 'POST'])
-#@login_required
+# @login_required
 def update_appointment(id):
     form = AppointmentResponseForm()
     appointment = get_db().get__appointment_by_id(id)
