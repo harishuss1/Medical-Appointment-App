@@ -2,7 +2,7 @@ from flask_login import UserMixin
 
 
 class User(UserMixin):
-    def __init__(self, email, password, first_name, last_name, access_level="patient", avatar_path=None, id=None):
+    def __init__(self, email, password, first_name, last_name, access_level="PATIENT", avatar_path=None, id=None):
         if not isinstance(email, str):
             raise ValueError("Illegal type for email")
         if not isinstance(password, str):

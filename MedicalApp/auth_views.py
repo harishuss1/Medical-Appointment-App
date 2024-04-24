@@ -13,9 +13,9 @@ def signup():
     form = SignupForm()
     if request.method == 'POST' and form.validate_on_submit():
         pwd_hash = generate_password_hash(form.password.data)
-        user = User(form.first_name, form.last_name, form.email.data, pwd_hash)
+        user = User(form.email.data, pwd_hash, form.first_name.data, form.last_name.data)
         get_db().create_user(user)
-        redirect(url_for('auth.login'))
+        return redirect(url_for('auth.login'))
     return render_template('signup.html', form=form)
 
 # Change the templates once they are completed

@@ -6,7 +6,7 @@ INSERT INTO medical_users (email, password, first_name, last_name, avatar_path, 
 VALUES ('patient1@example.com', 'password123', 'John', 'Doe', '/avatars/john_doe.jpg', 'PATIENT');
 
 INSERT INTO medical_users (email, password, first_name, last_name, avatar_path, user_type)
-VALUES ('doctor@example.com', '49f267a17793be90862b8ee747596d4c68799dd040d976343c32e10e2d983883', 'Dr. Sarah', 'Smith', '/avatars/dr_smith.jpg', 'STAFF');
+VALUES ('doctor@example.com', '$2a$12$k2cHDHcLrYwEuj/IY582kObGVqcjSZSLprsvmwHKW4D5hTn6H3.Ya', 'Dr. Sarah', 'Smith', '/avatars/dr_smith.jpg', 'STAFF');
 
 INSERT INTO medical_users (email, password, first_name, last_name, avatar_path, user_type)
 VALUES ('admin@example.com', 'admin789', 'Admin', 'Adminson', '/avatars/admin.jpg', 'ADMIN');
