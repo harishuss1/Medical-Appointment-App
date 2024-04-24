@@ -43,7 +43,7 @@ create table medical_appointments(
     status integer not null,
     location varchar2(20),
     description nclob,
-    CONSTRAINT status_value CHECK (status = 0 OR status = -1 or status = 0),
+    CONSTRAINT status_value CHECK (status = 0 OR status = -1 or status = 1),
     CONSTRAINT location_fk FOREIGN KEY (location) REFERENCES medical_rooms(room_number),
     CONSTRAINT pid_fk FOREIGN KEY (patient_id) REFERENCES medical_users(id),
     CONSTRAINT did_fk FOREIGN KEY (doctor_id) REFERENCES medical_users(id)
@@ -67,12 +67,6 @@ create table medical_note_attachments(
     note_id integer,
     attachment_path varchar2(1000) not null,
     CONSTRAINT note_fk FOREIGN KEY (note_id) REFERENCES medical_notes(id)
-);
-
-create table medical_access_level(
-    user_type varchar2(20) PRIMARY KEY,
-    CONSTRAINT check_user_type
-    CHECK (user_type IN('PATIENT', 'STAFF', 'ADMIN_USER', 'ADMIN'))
 );
 
 commit;

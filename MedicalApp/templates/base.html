@@ -15,12 +15,11 @@
         </header>
         {% block content %}
         {% endblock content %}
-        <nav>
-            <ol type="i">
-                <li><a href="{{ url_for('home.index') }}">Home</a></li>
-                <li><a href="{{ url_for('appointments.get_appointments') }}">Appointments</a></li>
-            </ol>
-        </nav>
+        <section>
+            {% for message in get_flashed_messages() %}
+                <p class="flash">{{ message }}</p>
+            {% endfor %}
+        </section>
 
         <footer>
             <p>Copyright © 2024</p>

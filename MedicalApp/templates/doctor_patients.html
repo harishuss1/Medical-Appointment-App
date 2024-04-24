@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<nav id="navbar">
+    <ul>
+        <li><a href="{{ url_for('doctor.confirmed_appointments') }}">See all confirmed appointments</a></li>
+        <li><a href="{{ url_for('doctor.requested_appointments') }}">See appointment requests</a></li>
+        <li><a href="{{ url_for('doctor.patients') }}">See all patients</a></li>
+    </ul>
+</nav>
+<h1>{% block title %}Doctor Patients{% endblock title %}</h1>
+    <dl id="doctor-patients">
+        {% for patient in patients %}
+            <dt>Patient name: {{ patient.first_name }} {{ patient.last_name }}</dt>
+            <dd>Contact information: {{ patient.email }}.</dd>
+            <dd><a href="{{ url_for('doctor.notes', patient_id=patient.id) }}">See notes.</a></dd>
+        {% endfor %}
+    </dl>
+{% endblock content %}

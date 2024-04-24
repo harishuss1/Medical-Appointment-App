@@ -1,4 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
-    <h1>Medical App</h1>
+    <nav id="navbar">
+        <ul>
+            <li><a href="{{ url_for('home.index') }}">Home</a></li>
+            <li><a href="{{ url_for('appointments.get_appointments') }}">Appointments</a></li>
+            <li><a href="{{ url_for('auth.login') }}">Login</a></li>
+            <li><a href="{{ url_for('auth.signup') }}">Sign Up</a></li>
+            <li><a href="{{ url_for('doctor.dashboard') }}">Doctor Dashboard</a></li>
+        </ul>
+    </nav>
+    <h1>
+        {% block title %}Home{% endblock title %}
+    </h1>
 {% endblock content %}
