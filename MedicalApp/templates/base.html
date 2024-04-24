@@ -1,28 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Document</title>
-        <link rel="stylesheet"
-              href="{{ url_for('static', filename='styles.css') }}">
-        {% block header %}
-        {% endblock header %}
-    </head>
-    <body>
-        <header>
-            <h1>Welcome to Our Site</h1>
-        </header>
-        {% block content %}
-        {% endblock content %}
-        <section>
-            {% for message in get_flashed_messages() %}
-                <p class="flash">{{ message }}</p>
-            {% endfor %}
-        </section>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script> <!-- For dropdown functionality -->
+    <title>Document</title>
+    {% block header %}
+    {% endblock %}
+</head>
+<body>
+    <header class="header">
+        <h1>Welcome to our Site</h1>
+        <nav id="navbar">
+            <ul>
+                <li id="user-icon">
+                    <img src="{{ url_for('static', filename='avatar.jpeg') }}" alt="User Avatar" class="avatar" onclick="toggleDropdown()">
+                    <div id="user-dropdown" class="dropdown hidden">
+                        <a href="{{ url_for('auth.login') }}">Login</a>
+                        <a href="{{ url_for('auth.signup') }}">Sign Up</a>
+                    </div>
+                </li>
+            </ul>
+        </nav>
+    </header>
 
-        <footer>
-            <p>Copyright © 2024</p>
-        </footer>
-    </body>
+    {% block content %}
+    {% endblock %}
+
+    <footer class="footer">
+        Copyright © 2024
+    </footer>
+</body>
 </html>
