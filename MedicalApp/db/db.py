@@ -1,6 +1,7 @@
 import oracledb
 import os
 from flask import g
+from werkzeug.security import generate_password_hash
 
 from MedicalApp.user import User
 from MedicalApp.appointments import Appointments
@@ -27,6 +28,44 @@ class Database:
                             except Exception as e:
                                 print(e)
                         statement_parts = []
+        
+    def delete_user(self, user_email):
+        try:
+            with self.__connection.cursor() as cursor:
+                cursor.execute(
+                    "DELETE FROM medical_users WHERE email = :email",
+                    {'email': user_email}
+                )
+                self.__connection.commit()
+        except Exception as e:
+            print("Error deleting user:", e)
+            raise
+        
+    def block_user(self, email):
+        try:
+            with self.__connection.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE medical_users SET account_status = 'blocked' WHERE email = :email",
+                    {'email': email}
+                )
+                self.__connection.commit()
+        except Exception as e:
+            print("Error blocking user:", e)
+            raise
+        
+    def change_user_type(self, user_email, new_user_type):
+        try:
+            with self.__connection.cursor() as cursor:
+                cursor.execute(
+                    "UPDATE medical_users SET user_type = :user_type WHERE email = :email",
+                    {'user_type': new_user_type, 'email': user_email}
+                )
+                self.__connection.commit()
+        except Exception as e:
+            print("Error changing user type:", e)
+            raise
+    
+    
 
     def create_user(self, user):
         if not isinstance(user, User):
