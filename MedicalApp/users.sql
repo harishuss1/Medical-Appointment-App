@@ -13,7 +13,7 @@ CREATE TABLE medical_users (
     first_name  VARCHAR2(1000) NOT NULL,
     last_name   VARCHAR2(1000) NOT NULL,
     avatar_path VARCHAR2(2000),
-    user_type   VARCHAR2(20) REFERENCES medical_access_level(user_type),
+    user_type   VARCHAR2(20) REFERENCES medical_access_level(user_type)
 );
 
 /* account_status VARCHAR2(20) */

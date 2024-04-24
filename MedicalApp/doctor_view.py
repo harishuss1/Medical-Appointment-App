@@ -70,7 +70,7 @@ def update_appointment(id):
 
     if appointment is None:
         abort(404, "This address does not exist")
-    return render_template('requested_appointment.html', appointment=appointment, form=form)
+    return render_template('requested_appointment.html', appointment=appointment, form=form, get_db=get_db, get_user_by_id=get_db().get_user_by_id)
 
 @bp.route('/patients/')
 @login_required

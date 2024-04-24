@@ -91,7 +91,7 @@ class Database:
             row = results.fetchone()
             if row:
                 appointment = Appointments(int(row[0]), int(row[1]), int(
-                    row[2]), str(row[3]), int(row[4]), row[5], row[6])
+                    row[2]), str(row[3]), int(row[4]), row[5], str(row[6]))
         return appointment
 
     def get_user_by_id(self, id):
