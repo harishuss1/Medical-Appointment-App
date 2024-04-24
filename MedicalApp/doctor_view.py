@@ -3,7 +3,7 @@ from flask import (Blueprint, render_template, redirect,
 from .user import User
 from .db.dbmanager import get_db
 from oracledb import InternalError, DatabaseError
-from flask_login import login_user, logout_user, login_required
+from flask_login import current_user, login_user, logout_user, login_required
 from .forms import AppointmentResponseForm
 from .db.db import Database
 
@@ -11,13 +11,13 @@ bp = Blueprint('doctor', __name__, url_prefix="/doctor/")
 
 
 @bp.route('/')
-# @login_required
+@login_required
 def dashboard():
     return render_template("doctor.html")
 
 
 @bp.route('/appointments/')
-# @login_required
+@login_required
 def confirmed_appointments():
     try:
         appointments = get_db().get_appointments_by_status(1)
@@ -31,7 +31,7 @@ def confirmed_appointments():
 
 
 @bp.route('/requests/')
-# @login_required
+@login_required
 def requested_appointments():
     try:
         appointments = get_db().get_appointments_by_status(0)
@@ -45,7 +45,7 @@ def requested_appointments():
 
 
 @bp.route('/requests/<int:id>/', methods=['GET', 'POST'])
-# @login_required
+@login_required
 def update_appointment(id):
     form = AppointmentResponseForm()
     appointment = get_db().get_appointment_by_id(id)
@@ -65,10 +65,10 @@ def update_appointment(id):
     return render_template('requested_appointment.html', appointment=appointment, form=form)
 
 @bp.route('/patients/')
-# @login_required
+@login_required
 def patients():
     try:
-        patients = get_db().get_patients_by_doctor(DOCTOR_ID)
+        patients = get_db().get_patients_by_doctor(current_user.id)
         if patients is None or len(patients) == 0:
             flash("No patients are currently being supervised by you")
             return redirect(url_for('doctor.dashboard'))
@@ -78,7 +78,7 @@ def patients():
         return redirect(url_for('doctor.dashboard'))
 
 @bp.route('/notes/<int:patient_id>')
-# @login_required
+@login_required
 def notes(patient_id):
     try:
         notes = get_db().get_notes_by_patient_id(patient_id)

@@ -8,7 +8,7 @@ from MedicalApp.user import User
 bp = Blueprint('auth', __name__, url_prefix='/auth/')
 
 
-@bp.route('signup', methods=['GET', 'POST'])
+@bp.route('/signup/', methods=['GET', 'POST'])
 def signup():
     form = SignupForm()
     if request.method == 'POST' and form.validate_on_submit():
@@ -21,7 +21,7 @@ def signup():
 # Change the templates once they are completed
 
 
-@bp.route('login', methods=['GET', 'POST'])
+@bp.route('/login/', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if request.method == 'POST' and form.validate_on_submit():

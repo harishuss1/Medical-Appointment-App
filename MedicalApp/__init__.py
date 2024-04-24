@@ -28,11 +28,14 @@ def init_app(app):
 
     @login_manager.user_loader
     def load_user(user_id):
-        user = get_db().get_user_by_email(user_id)
+        user = get_db().get_user_by_id(user_id)
         return user
 
 
     # REGISTER BLUEPRINTS HERE
+    from .auth_views import bp as login_bp
+    app.register_blueprint(login_bp)
+    
     from .doctor_view import bp as doctor_bp
     app.register_blueprint(doctor_bp)
 
