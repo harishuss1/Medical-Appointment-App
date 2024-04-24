@@ -26,7 +26,7 @@ def login():
     form = LoginForm()
     if request.method == 'POST' and form.validate_on_submit():
         user = get_db().get_user_by_email(form.email.data)
-        if check_password_hash(user.password, form.password.data):
+        if user is not None and check_password_hash(user.password, form.password.data):
             login_user(user, remember=False)
             if current_user.access_level == 'STAFF':
                 return redirect(url_for('doctor.dashboard'))
