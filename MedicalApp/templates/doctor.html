@@ -1,11 +1,15 @@
-{% extends "home.html" %}
+{% extends "base.html" %}
+
 {% block content %}
+    <nav id="navbar">
+        <ul>
+            <li><a href="{{ url_for('doctor.confirmed_appointments') }}">See all confirmed appointments</a></li>
+            <li><a href="{{ url_for('doctor.requested_appointments') }}">See appointment requests</a></li>
+            <li><a href="{{ url_for('doctor.patients') }}">See all patients</a></li>
+        </ul>
+    </nav>
     <h1>{% block title %}Doctor Dashboard{% endblock title %}</h1>
     <main>
-        <section>
-            <h3><a href="{{ url_for('doctor.confirmed_appointments') }}">See all confirmed appointments</a></h3>
-            <h3><a href="{{ url_for('doctor.requested_appointments') }}">See appointment requests</a></h3>
-            <h3><a href="{{ url_for('doctor.patients') }}">See all patients</a></h3>
-        </section>
+        Welcome to your dashboard
     </main>
 {% endblock content %}

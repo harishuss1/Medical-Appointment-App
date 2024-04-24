@@ -1,4 +1,4 @@
-{% extends "home.html" %}
+{% extends "base.html" %}
 {% block content %}
 <h1>{% block title %}Requested Appointment{% endblock title %}</h1>
     {% set patient=get_db().get_user_by_id(appointment.patient_id) %}

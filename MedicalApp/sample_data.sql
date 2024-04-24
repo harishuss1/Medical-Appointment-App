@@ -6,10 +6,10 @@ INSERT INTO medical_users (email, password, first_name, last_name, avatar_path, 
 VALUES ('patient1@example.com', 'password123', 'John', 'Doe', '/avatars/john_doe.jpg', 'PATIENT');
 
 INSERT INTO medical_users (email, password, first_name, last_name, avatar_path, user_type)
-VALUES ('doctor@example.com', '$2a$12$k2cHDHcLrYwEuj/IY582kObGVqcjSZSLprsvmwHKW4D5hTn6H3.Ya', 'Dr. Sarah', 'Smith', '/avatars/dr_smith.jpg', 'STAFF');
+VALUES ('doctor@example.com', 'scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68', 'Dr. Sarah', 'Smith', '/avatars/dr_smith.jpg', 'STAFF');
 
 INSERT INTO medical_users (email, password, first_name, last_name, avatar_path, user_type)
-VALUES ('admin@example.com', 'admin789', 'Admin', 'Adminson', '/avatars/admin.jpg', 'ADMIN');
+VALUES ('admin@example.com', 'scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68', 'Admin', 'Adminson', '/avatars/admin.jpg', 'ADMIN');
 
 INSERT INTO medical_patients (id, dob, blood_type, height, weight)
 VALUES (1, '1990-05-15', 'A+', 175.5, 70.3);

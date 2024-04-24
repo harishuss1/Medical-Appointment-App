@@ -1,5 +1,5 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
-from flask_login import login_user
+from flask_login import current_user, login_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from MedicalApp.db.dbmanager import get_db
 from MedicalApp.forms import LoginForm, SignupForm
@@ -28,6 +28,8 @@ def login():
         user = get_db().get_user_by_email(form.email.data)
         if check_password_hash(user.password, form.password.data):
             login_user(user, remember=False)
+            if current_user.access_level == 'STAFF':
+                return redirect(url_for('doctor.dashboard'))
             return redirect(url_for('home.index'))
         else:
             flash('Incorrect info')
