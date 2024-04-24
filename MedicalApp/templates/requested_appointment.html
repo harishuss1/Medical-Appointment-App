@@ -1,5 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
+<nav id="navbar">
+    <ul>
+        <li><a href="{{ url_for('doctor.confirmed_appointments') }}">See all confirmed appointments</a></li>
+        <li><a href="{{ url_for('doctor.requested_appointments') }}">See appointment requests</a></li>
+        <li><a href="{{ url_for('doctor.patients') }}">See all patients</a></li>
+    </ul>
+</nav>
 <h1>{% block title %}Requested Appointment{% endblock title %}</h1>
     {% set patient=get_db().get_user_by_id(appointment.patient_id) %}
     <h2>Appointment with {{ patient.first_name }} {{ patient.last_name }}</h2>
