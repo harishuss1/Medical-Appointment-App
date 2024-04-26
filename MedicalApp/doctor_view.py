@@ -72,6 +72,7 @@ def update_appointment(id):
         abort(404, "This address does not exist")
     return render_template('requested_appointment.html', appointment=appointment, form=form, get_db=get_db, get_user_by_id=get_db().get_user_by_id)
 
+
 @bp.route('/patients/')
 @login_required
 def patients():
@@ -86,6 +87,7 @@ def patients():
     except DatabaseError as e:
         flash("Something went wrong with the database")
         return redirect(url_for('doctor.dashboard'))
+
 
 @bp.route('/notes/<int:patient_id>')
 @login_required

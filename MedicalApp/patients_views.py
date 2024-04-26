@@ -15,3 +15,14 @@ def patient_dashboard():
 
     appointments = get_db().get_patient_appointments(current_user.id)
     return render_template('patient_dashboard.html', appointments=appointments)
+
+
+@bp.route('/appointments')
+@login_required
+def view_appointments():
+    if current_user.access_level != 'PATIENT':
+        flash("You do not have permission to access this page.")
+        return redirect(url_for('home.index'))
+
+    appointments = get_db().get_patient_appointments(current_user.id)
+    return render_template('appointments.html', appointments=appointments)

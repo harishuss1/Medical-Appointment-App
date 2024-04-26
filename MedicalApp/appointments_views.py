@@ -30,11 +30,11 @@ def get_appointments():
         # the new appointment, if match then it flashed that it already exist and
         # will not take the new appointment
         if any(
-                appointment.id == new_appointment.id and
-                appointment.patient_id == new_appointment.patient_id and
-                appointment.doctor_id == new_appointment.doctor_id
-                for appointment in appointments
-            ):
+            appointment.id == new_appointment.id and
+            appointment.patient_id == new_appointment.patient_id and
+            appointment.doctor_id == new_appointment.doctor_id
+            for appointment in appointments
+        ):
             flash("Appointment already exists", "error")
         else:
             new_appointment = Appointments(

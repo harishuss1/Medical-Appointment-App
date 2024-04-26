@@ -3,7 +3,7 @@ from flask import Flask, render_template
 from .db.dbmanager import close_db, init_db_command
 from .admin_view import admin_bp
 from flask_login import LoginManager
-from MedicalApp.db.dbmanager import close_db, init_db_command,get_db
+from MedicalApp.db.dbmanager import close_db, init_db_command, get_db
 
 
 def create_app(test_config=None):
@@ -23,7 +23,7 @@ def create_app(test_config=None):
 
 
 def init_app(app):
-    #REGISTER BLUEPRINTS HERE
+    # REGISTER BLUEPRINTS HERE
     app.register_blueprint(admin_bp)
 
     login_manager = LoginManager()
@@ -35,11 +35,10 @@ def init_app(app):
         user = get_db().get_user_by_id(user_id)
         return user
 
-
     # REGISTER BLUEPRINTS HERE
     from .auth_views import bp as login_bp
     app.register_blueprint(login_bp)
-    
+
     from .doctor_view import bp as doctor_bp
     app.register_blueprint(doctor_bp)
 
@@ -56,4 +55,4 @@ def init_app(app):
 
     app.cli.add_command(init_db_command)
 
-    #Resolving Merge Conflicts
+    # Resolving Merge Conflicts

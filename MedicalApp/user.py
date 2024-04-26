@@ -25,7 +25,6 @@ class User(UserMixin):
         self.last_name = last_name
         self.access_level = access_level
         self.avatar_path = avatar_path
-        
 
 
 class MedicalPatient(User):
