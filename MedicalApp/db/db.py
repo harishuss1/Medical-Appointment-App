@@ -142,6 +142,12 @@ class Database:
                     row[2]), str(row[3]), int(row[4]), row[5], str(row[6])))
         return appointments
 
+    def update_patient_details(self, patient_id, dob, blood_type, height, weight):
+        with self.__get_cursor() as cursor:
+            cursor.execute(
+                "UPDATE medical_patients SET dob = :dob, blood_type = :blood_type, height = :height, weight = :weight WHERE id = :patient_id",
+                dob=dob, blood_type=blood_type, height=height, weight=weight, patient_id=patient_id)
+
     def get_notes_by_patient_id(self, patient_id, doctor_id):
         notes = []
         with self.__get_cursor() as cursor:
