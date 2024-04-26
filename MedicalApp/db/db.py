@@ -69,7 +69,6 @@ class Database:
             raise
     
     
-
     # status 0 = pending, status 1 = confirmed, status -1 = cancel
     def get_appointments_by_status(self, status, doctor_id):
         appointments = []
@@ -93,6 +92,7 @@ class Database:
                 appointment = Appointments(int(row[0]), int(row[1]), int(
                     row[2]), str(row[3]), int(row[4]), row[5], str(row[6]))
         return appointment
+
 
     def get_user_by_id(self, id):
         patient = None
@@ -178,16 +178,6 @@ class Database:
                                location=appointment.location,
                                description=appointment.description)
 
-    def get_appointment_id(self, id):
-        appointment = None
-        with self.__get_cursor() as cursor:
-            cursor.execute(
-                'select id, patient_id, doctor_id, appointment_time, status, location, description from medical_appointments where name=:name', id=id)
-            row = cursor.fetchone()
-            if row:
-                appointment = Appointments(
-                    row[0], row[1], row[2], row[3], row[4], row[5], row[6])
-        return appointment
 
     def get_appointments(self):
         appointments = []
