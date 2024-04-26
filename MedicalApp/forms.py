@@ -1,6 +1,9 @@
+from flask_login import current_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField, EmailField, PasswordField, SubmitField, RadioField
+from wtforms import FileField, StringField, IntegerField, EmailField, PasswordField, TextAreaField , SubmitField, RadioField, SelectField
 from wtforms.validators import DataRequired, Email, Length, EqualTo
+
+from MedicalApp.db.dbmanager import get_db
 
 
 class AppointmentResponseForm(FlaskForm):
@@ -36,3 +39,16 @@ class AppointmentForm(FlaskForm):
     status = StringField("Status:", validators=[DataRequired()])
     location = StringField("Location:", validators=[DataRequired()])
     description = StringField("Description:", validators=[DataRequired()])
+    
+class NoteForm(FlaskForm):
+    def get_choices():
+        patients = get_db().get_patients_by_doctor(current_user.id)
+        choices = []
+        for patient in patients:
+            choices.append((patient.id, "{patient.first_name} {patient.last_name}"))
+        return choices
+    
+    patient = SelectField('Patient', validators=[DataRequired()], choices=get_choices())
+    note = TextAreaField('Note', validators=[DataRequired()], choices=get_choices())
+    attachement = FileField('Attachement')
+    

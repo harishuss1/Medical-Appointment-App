@@ -131,15 +131,18 @@ class Database:
                 patient = MedicalPatient(float(row[0]), row[1], row[2], row[3], row[4], str(row[5]), str(row[6]), str(row[7]), float(row[8]), avatar_path=row[9], id=int(row[10]))
         return patient
 
-    def get_notes_by_patient_id(self, patient_id, doctor_id):
+    def get_notes_by_patient_id(self, patient_id):
         notes = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
-                "SELECT id, patient_id, note_taker_id, note_date, note FROM medical_notes WHERE note_taker_id = :doctor_id AND patient_id = :patient_id",
-                doctor_id=doctor_id, patient_id=patient_id)
+                "SELECT n.id, n.note_date, n.note, p.weight, p.email, p.password, p.first_name, p.last_name, p.user_type, p.dob, p.blood_type, p.height, p.avatar_path, p.id, d.email, d.password, d.first_name, d.last_name, d.user_type, d.avatar_path, d.id, a.attachement_path FROM medical_notes n INNER JOIN medical_patients p ON (n.patient_id = p.id) INNER JOIN medical_users u ON(d.id = n.note_taker_id) INNER JOIN medical_note_attachements a ON(a.note_id = n.id) WHERE patient_id = :patient_id",
+                patient_id=patient_id)
             for row in results:
+                doctor = User(
+                    row[14], row[15], row[16], row[17], row[18], avatar_path=row[19], id=int(row[20]))
+                patient = MedicalPatient(float(row[3]), row[4], row[5], row[6], row[7], str(row[8]), str(row[9]), str(row[10]), float(row[11]), avatar_path=row[12], id=int(row[13]))
                 notes.append(Note(
-                    int(row[0]), int(row[1]), int(row[2]), str(row[3]), str(row[4])))
+                    int(row[0]), patient, doctor, str(row[1]), str(row[2]), str(row[21])))
         return notes
 
     def create_user(self, user):
