@@ -145,8 +145,27 @@ class Database:
     def update_patient_details(self, patient_id, dob, blood_type, height, weight):
         with self.__get_cursor() as cursor:
             cursor.execute(
-                "UPDATE medical_patients SET dob = :dob, blood_type = :blood_type, height = :height, weight = :weight WHERE id = :patient_id",
-                dob=dob, blood_type=blood_type, height=height, weight=weight, patient_id=patient_id)
+                """
+                MERGE INTO medical_patients p
+                USING (SELECT :patient_id as id FROM dual) new_patient
+                ON (p.id = new_patient.id)
+                WHEN MATCHED THEN
+                    UPDATE SET p.dob = :dob, p.blood_type = :blood_type, p.height = :height, p.weight = :weight
+                WHEN NOT MATCHED THEN
+                    INSERT (id, dob, blood_type, height, weight) VALUES (:patient_id, :dob, :blood_type, :height, :weight)
+                """,
+                patient_id=patient_id, dob=dob, blood_type=blood_type, height=height, weight=weight)
+
+    def get_patient_details(self, patient_id):
+        patient = None
+        with self.__get_cursor() as cursor:
+            results = cursor.execute("SELECT weight, email, password, first_name, last_name, user_type, dob, blood_type, height, avatar_path, id FROM medical_users u INNER JOIN medical_patients p USING(id) WHERE id = :id",
+                                     id=patient_id)
+            row = results.fetchone()
+            if row:
+                patient = MedicalPatient(float(row[0]), row[1], row[2], row[3], row[4], str(
+                    row[5]), str(row[6]), str(row[7]), float(row[8]), avatar_path=row[9], id=int(row[10]))
+        return patient
 
     def get_notes_by_patient_id(self, patient_id, doctor_id):
         notes = []
