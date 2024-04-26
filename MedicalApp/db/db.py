@@ -31,7 +31,7 @@ class Database:
                             except Exception as e:
                                 print(e)
                         statement_parts = []
-        
+
     def delete_user(self, user_email):
         try:
             with self.__connection.cursor() as cursor:
@@ -43,7 +43,7 @@ class Database:
         except Exception as e:
             print("Error deleting user:", e)
             raise
-        
+
     def block_user(self, email):
         try:
             with self.__connection.cursor() as cursor:
@@ -55,7 +55,7 @@ class Database:
         except Exception as e:
             print("Error blocking user:", e)
             raise
-        
+
     def change_user_type(self, user_email, new_user_type):
         try:
             with self.__connection.cursor() as cursor:
@@ -67,10 +67,9 @@ class Database:
         except Exception as e:
             print("Error changing user type:", e)
             raise
-    
-    
 
     # status 0 = pending, status 1 = confirmed, status -1 = cancel
+
     def get_appointments_by_status(self, status, doctor_id):
         appointments = []
         with self.__get_cursor() as cursor:
@@ -118,7 +117,7 @@ class Database:
                 id=doctor_id)
             for row in results:
                 patients.append(MedicalPatient(
-                    float(row[0]), row[1], row[2], row[3], row[4], str(row[5]), str(row[6]), str(row[7]), float(row[8]), avatar_path= str(row[9]), id=int(row[10])))
+                    float(row[0]), row[1], row[2], row[3], row[4], str(row[5]), str(row[6]), str(row[7]), float(row[8]), avatar_path=str(row[9]), id=int(row[10])))
         return patients
 
     def get_patients_by_id(self, patient_id):
@@ -128,8 +127,20 @@ class Database:
                                      id=patient_id)
             row = results.fetchone()
             if row:
-                patient = MedicalPatient(float(row[0]), row[1], row[2], row[3], row[4], str(row[5]), str(row[6]), str(row[7]), float(row[8]), avatar_path=row[9], id=int(row[10]))
+                patient = MedicalPatient(float(row[0]), row[1], row[2], row[3], row[4], str(
+                    row[5]), str(row[6]), str(row[7]), float(row[8]), avatar_path=row[9], id=int(row[10]))
         return patient
+
+    def get_patient_appointments(self, patient_id):
+        appointments = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                "SELECT id, patient_id, doctor_id, appointment_time, status, location, description FROM medical_appointments WHERE patient_id = :patient_id",
+                patient_id=patient_id)
+            for row in results:
+                appointments.append(Appointments(int(row[0]), int(row[1]), int(
+                    row[2]), str(row[3]), int(row[4]), row[5], str(row[6])))
+        return appointments
 
     def get_notes_by_patient_id(self, patient_id, doctor_id):
         notes = []
