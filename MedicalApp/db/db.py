@@ -144,6 +144,44 @@ class Database:
                 notes.append(Note(
                     int(row[0]), patient, doctor, str(row[1]), str(row[2]), str(row[21])))
         return notes
+    
+    def get_notes_by_doctor_id(self, doctor_id):
+        notes = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                """
+                SELECT n.id, n.note_date, n.note, p.weight, up.email, up.password, up.first_name, up.last_name, up.user_type, p.dob, p.blood_type, p.height, up.avatar_path, p.id, d.email, d.password, d.first_name, d.last_name, d.user_type, d.avatar_path, d.id, a.attachment_path
+                FROM medical_notes n INNER JOIN medical_users up
+                    ON (n.patient_id = up.id) INNER JOIN medical_patients p
+                    ON (up.id = p.id)
+                    INNER JOIN medical_users d ON(d.id = n.note_taker_id)
+                    INNER JOIN medical_note_attachments a ON(a.note_id = n.id)
+                WHERE note_taker_id = :doctor_id
+                """,
+                doctor_id=doctor_id)
+            for row in results:
+                doctor = User(
+                    row[14], row[15], row[16], row[17], row[18], avatar_path=row[19], id=int(row[20]))
+                patient = MedicalPatient(float(row[3]), row[4], row[5], row[6], row[7], str(row[8]), str(row[9]), str(row[10]), float(row[11]), avatar_path=row[12], id=int(row[13]))
+                notes.append(Note(
+                    patient, doctor, str(row[1]), str(row[2]), attachement_path=str(row[21]), id=int(row[0])))
+        return notes
+    
+    def create_note(self, note):
+        if not isinstance(note, Note):
+            raise TypeError("expected Note object")
+        with self.__get_cursor() as cursor:
+            new_id = cursor.var(oracledb.NUMBER)
+            cursor.execute('insert into medical_notes (patient_id, note_taker_id, note_date, note)  values (:patient_id, :note_taker_id, :note_date, :note) returning id into :id',
+                           patient_id=note.patient.id,
+                           note_taker_id=note.note_taker.id,
+                           note_date=note.note_date,
+                           note=note.note,
+                           id=new_id)
+            cursor.execute('insert into medical_note_attachments (note_id, attachement_path)  values (:note_id, :attachement_path)',
+                           note_id=new_id.getvalue(),
+                           attachement_path=note.attachement_path)
+
 
     def create_user(self, user):
         if not isinstance(user, User):
