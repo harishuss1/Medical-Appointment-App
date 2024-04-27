@@ -97,18 +97,19 @@ class Database:
         appointment = None
         with self.__get_cursor() as cursor:
             cursor.execute(
-                'select app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description from medical_appointments app INNER JOIN medical_users mu ON app.doctor_id = mu.id INNER JOIN medical_access_level mal ON mu.user_type = mal.user_type WHERE user_type=STAFF')
+                'SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description,d.ID, d.AVATAR_PATH, d.EMAIL, d.FIRST_NAME, d.LAST_NAME, d.PASSWORD, d.USER_TYPE,p.id, p.AVATAR_PATH, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE,mp.BLOOD_TYPE, mp.DOB, mp.HEIGHT, mp.WEIGHT FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id WHERE d.id = :doctor_id')
             row = cursor.fetchone()
             if row:
                 appointment = Appointments(
                     row[0], row[1], row[2], row[3], row[4], row[5], row[6])
         return appointment
     
+    
     def get_appointment_for_patients(self):
         appointment = None
         with self.__get_cursor() as cursor:
             cursor.execute(
-                'select app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description from medical_appointments app INNER JOIN medical_users mu ON app.doctor_id = mu.id INNER JOIN medical_access_level mal ON mu.user_type = mal.user_type WHERE user_type=PATIENT')
+                'SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description,d.ID, d.AVATAR_PATH, d.EMAIL, d.FIRST_NAME, d.LAST_NAME, d.PASSWORD, d.USER_TYPE,p.id, p.AVATAR_PATH, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE,mp.BLOOD_TYPE, mp.DOB, mp.HEIGHT, mp.WEIGHT FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id WHERE p.id = :patient_id')
             row = cursor.fetchone()
             if row:
                 appointment = Appointments(
