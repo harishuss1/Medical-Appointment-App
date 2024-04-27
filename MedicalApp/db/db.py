@@ -69,7 +69,6 @@ class Database:
             raise
     
     
-
     # status 0 = pending, status 1 = confirmed, status -1 = cancel
     def get_appointments_by_status(self, status, doctor_id):
         appointments = []
@@ -200,14 +199,23 @@ class Database:
                                location=appointment.location,
                                description=appointment.description)
 
+    def delete_appointment_by_id(self, id):
+        with self.__get_cursor() as cursor:
+            if not isinstance(id, int):
+                raise TypeError("expected Appointment object")
+            with self.__get_cursor() as cursor:
+                    cursor.execute("DELETE FROM medical_appointments WHERE id = :id", id=id)
+
+
+
     def get_appointments(self):
         appointments = []
         with self.__get_cursor() as cursor:
             results = cursor.execute('SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, p.dob, p.blood_type, p.height, p.weight, mu1.email as patient_email, mu1.first_name as patient_first_name, mu1.last_name as patient_last_name, mu2.email as doctor_email, mu2.first_name as doctor_first_name, mu2.last_name as doctor_last_name FROM medical_appointments app INNER JOIN medical_users mu1 ON app.patient_id = mu1.id INNER JOIN medical_users mu2 ON app.doctor_id = mu2.id INNER JOIN medical_patients p ON app.patient_id = p.id')
             for row in results:
                 patient = MedicalPatient(
-                    row[10], row[11], row[12], row[13], row[14], 'PATIENT', row[7], row[8], row[9], row[10])  # Assuming you have a constructor for the MedicalPatient class
-                doctor = User(row[15], None, row[16], row[17])  # Assuming you have a constructor for the User class
+                    row[10], row[11], row[12], row[13], row[14], 'PATIENT', row[7], row[8], row[9], row[10])  
+                doctor = User(row[15], None, row[16], row[17])  
                 appointment = Appointments(
                     row[0], patient, doctor, row[3], row[4], row[5], row[6])
                 appointments.append(appointment)
