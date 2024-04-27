@@ -57,3 +57,16 @@ class AddUserForm(FlaskForm):
         validators=[DataRequired()]
     )
     submit = SubmitField('Add User')
+
+class DeleteUserForm(FlaskForm):
+    email = EmailField('User Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Delete User')
+
+class ChangeUserRoleForm(FlaskForm):
+    email = EmailField('User Email', validators=[DataRequired(), Email()])
+    user_type = SelectField(
+        'New Role',
+        choices=[('PATIENT', 'Patient'), ('STAFF', 'Staff'), ('ADMIN_USER', 'Admin User'), ('ADMIN', 'Admin')],
+        validators=[DataRequired()]
+    )
+    submit = SubmitField('Change Role')
