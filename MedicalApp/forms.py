@@ -36,3 +36,7 @@ class AppointmentForm(FlaskForm):
     status = StringField("Status:", validators=[DataRequired()])
     location = StringField("Location:", validators=[DataRequired()])
     description = StringField("Description:", validators=[DataRequired()])
+    
+class BlockUserForm(FlaskForm):
+    email = EmailField('User Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Block User')

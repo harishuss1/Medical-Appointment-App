@@ -1,7 +1,6 @@
 import os
 from flask import Flask, render_template
 from .db.dbmanager import close_db, init_db_command
-from .admin_view import admin_bp
 from flask_login import LoginManager
 from MedicalApp.db.dbmanager import close_db, init_db_command,get_db
 
@@ -23,8 +22,6 @@ def create_app(test_config=None):
 
 
 def init_app(app):
-    #REGISTER BLUEPRINTS HERE
-    app.register_blueprint(admin_bp)
 
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'
@@ -37,6 +34,9 @@ def init_app(app):
 
 
     # REGISTER BLUEPRINTS HERE
+    from .admin_view import admin_bp
+    app.register_blueprint(admin_bp)
+    
     from .auth_views import bp as login_bp
     app.register_blueprint(login_bp)
     
@@ -52,5 +52,3 @@ def init_app(app):
     app.teardown_appcontext(close_db)
 
     app.cli.add_command(init_db_command)
-
-    #Resolving Merge Conflicts
