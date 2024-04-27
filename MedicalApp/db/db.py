@@ -193,8 +193,8 @@ class Database:
             with self.__get_cursor() as cursor:
                 cursor.execute('insert into medical_appointments (id, patient_id, doctor_id, appointment_time, status, location, description) values (:id, :patient_id, :doctor_id, :appointment_time, :status, :location, :description)',
                                id=appointment.id,
-                               patient_id=appointment.patient.id,
-                               doctor_id=appointment.doctor.id,
+                               patient_id=appointment.patients.id,
+                               doctor_id=appointment.doctors.id,
                                appointment_time=appointment.appointment_time,
                                status=appointment.status,
                                location=appointment.location,
@@ -203,10 +203,9 @@ class Database:
     def delete_appointment_by_id(self, id):
         with self.__get_cursor() as cursor:
             if not isinstance(id, int):
-                raise TypeError("expected Appointment object")
+                raise TypeError("expected type of integer")
             with self.__get_cursor() as cursor:
                     cursor.execute("DELETE FROM medical_appointments WHERE id = :id", id=id)
-
 
 
     def get_appointments(self):
