@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, IntegerField, EmailField, PasswordField, SubmitField, RadioField
+from wtforms import StringField, IntegerField, EmailField, PasswordField, SubmitField, RadioField, SelectField
 from wtforms.validators import DataRequired, Email, Length, EqualTo
 
 
@@ -40,3 +40,20 @@ class AppointmentForm(FlaskForm):
 class BlockUserForm(FlaskForm):
     email = EmailField('User Email', validators=[DataRequired(), Email()])
     submit = SubmitField('Block User')
+
+class AddUserForm(FlaskForm):
+    email = EmailField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[
+        DataRequired(),
+        Length(min=8, message='Password must be at least 8 characters long'),
+        EqualTo('confirm_password', message='Passwords must match')
+    ])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired()])
+    first_name = StringField('First Name', validators=[DataRequired()])
+    last_name = StringField('Last Name', validators=[DataRequired()])
+    user_type = SelectField(
+        'User Type',
+        choices=[('PATIENT', 'Patient'), ('STAFF', 'Staff'), ('ADMIN_USER', 'Admin User'), ('ADMIN', 'Admin')],
+        validators=[DataRequired()]
+    )
+    submit = SubmitField('Add User')

@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <script src="{{ url_for('static', filename='scripts.js') }}"></script> <!-- For dropdown functionality -->
-    <title>Document</title>
-    {% block header %}
-    {% endblock %}
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+    <title>{% block title %}Document{% endblock title %}</title>
+    {% block header %}{% endblock header %}
 </head>
 <body>
     <header class="header">
@@ -15,7 +14,7 @@
         <nav id="navbar">
             <ul>
                 <li id="user-icon">
-                    <img src="{{ url_for('static', filename='avatar.jpeg') }}" alt="User Avatar" class="avatar" onclick="toggleDropdown()">
+                    <img src="{{ url_for('static', filename='avatar.jpeg') }}" alt="User Avatar" class="avatar" onclick="toggleDropdown()" width="32" height="32">  <!-- Added width and height -->
                     <div id="user-dropdown" class="dropdown hidden">
                         <a href="{{ url_for('auth.login') }}">Login</a>
                         <a href="{{ url_for('auth.signup') }}">Sign Up</a>
@@ -25,8 +24,7 @@
         </nav>
     </header>
 
-    {% block content %}
-    {% endblock %}
+    {% block content %}{% endblock content %}
 
     <footer class="footer">
         Copyright © 2024
