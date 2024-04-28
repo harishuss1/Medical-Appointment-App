@@ -56,6 +56,7 @@ class AddUserForm(FlaskForm):
         choices=[('PATIENT', 'Patient'), ('STAFF', 'Staff'), ('ADMIN_USER', 'Admin User'), ('ADMIN', 'Admin')],
         validators=[DataRequired()]
     )
+    avatar_path = StringField('Avatar Path', validators=[])  # Optional field
     submit = SubmitField('Add User')
 
 class DeleteUserForm(FlaskForm):

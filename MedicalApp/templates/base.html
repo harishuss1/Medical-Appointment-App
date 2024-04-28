@@ -26,6 +26,16 @@
 
     {% block content %}{% endblock content %}
 
+    {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+    <div class="flash-messages">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
     <footer class="footer">
         Copyright © 2024
     </footer>
