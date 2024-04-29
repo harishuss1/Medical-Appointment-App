@@ -20,6 +20,7 @@ def notes(user_id):
     notes = None
     try:
         #<dd><a href="{{ url_for('note.notes', user_id=patient.id) }}">See notes.</a></dd> what to do about this...
+        #CHANGE TO RELATIVE PATH
         if current_user.access_level == 'STAFF':
             notes = get_db().get_notes_by_doctor_id(user_id)
         else:
@@ -40,14 +41,17 @@ def add():
     if request.method == 'POST' and form.validate_on_submit():
         file = form.attachement.data
         filename = file.filename
-        folder = os.path.join(current_app.config['ATTACHEMENTS'], form.email.data)
+        folder = os.path.join(current_app.config['ATTACHEMENTS'], form.patient.data)
         if not os.path.exists(folder):
             os.makedirs(folder)
         path = os.path.join(folder, filename)
+        path = os.path.relpath(path, start=os.curdir) #??? from what starting directory should we be?
         file.save(path)
-
-        note = Note(form.patient.data, current_user.id, form.date.data, note.note.data, path)
+        
+        patient = get_db().get_patients_by_id(form.patient.data)
+        #form.date.data.strftime('%Y-%m-%d')
+        note = Note(patient, current_user, form.date.data, form.note.data, path)
         
         get_db().create_note(note)
-        return redirect(url_for('note.notes', user_id=current_user))
+        return redirect(url_for('note.notes', user_id=current_user.id))
     return render_template('add_note.html', form=form)

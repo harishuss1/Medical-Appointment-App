@@ -164,7 +164,7 @@ class Database:
                     row[14], row[15], row[16], row[17], row[18], avatar_path=row[19], id=int(row[20]))
                 patient = MedicalPatient(float(row[3]), row[4], row[5], row[6], row[7], str(row[8]), str(row[9]), str(row[10]), float(row[11]), avatar_path=row[12], id=int(row[13]))
                 notes.append(Note(
-                    patient, doctor, str(row[1]), str(row[2]), attachement_path=str(row[21]), id=int(row[0])))
+                    patient, doctor, row[1], str(row[2]), attachement_path=str(row[21]), id=int(row[0])))
         return notes
     
     def create_note(self, note):
@@ -178,9 +178,9 @@ class Database:
                            note_date=note.note_date,
                            note=note.note,
                            id=new_id)
-            cursor.execute('insert into medical_note_attachments (note_id, attachement_path)  values (:note_id, :attachement_path)',
-                           note_id=new_id.getvalue(),
-                           attachement_path=note.attachement_path)
+            cursor.execute('insert into medical_note_attachments (note_id, attachment_path)  values (:note_id, :attachement_path)',
+                           note_id=int(new_id.values[0][0]),
+                           attachement_path=str(note.attachement_path))
 
 
     def create_user(self, user):

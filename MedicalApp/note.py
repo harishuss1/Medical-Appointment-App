@@ -1,3 +1,4 @@
+import datetime
 from .user import MedicalPatient, User 
 
 class Note:
@@ -10,7 +11,7 @@ class Note:
             raise TypeError("Illegal type for note taker")
         if note_taker.access_level != 'STAFF':
             raise TypeError("Notes can only be taken by doctors")
-        if not isinstance(note_date, str):
+        if not isinstance(note_date, datetime.date):
             raise TypeError("Illegal type for note date")
         if not isinstance(note, str):
             raise TypeError("Illegal type for note")
@@ -20,5 +21,6 @@ class Note:
         self.id = id
         self.patient = patient
         self.note_taker = note_taker
+        self.note_date = note_date
         self.note = note
         self.attachement_path = attachement_path
