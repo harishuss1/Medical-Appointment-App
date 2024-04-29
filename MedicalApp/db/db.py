@@ -69,7 +69,6 @@ class Database:
             raise
     
     
-
     # status 0 = pending, status 1 = confirmed, status -1 = cancel
     def get_appointments_by_status(self, status, doctor_id):
         appointments = []
@@ -92,6 +91,29 @@ class Database:
             if row:
                 appointment = Appointments(int(row[0]), int(row[1]), int(
                     row[2]), str(row[3]), int(row[4]), row[5], str(row[6]))
+        return appointment
+    
+    def get_appointment_for_doctors(self):
+        appointment = None
+        with self.__get_cursor() as cursor:
+            cursor.execute(
+                'SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description,d.ID, d.AVATAR_PATH, d.EMAIL, d.FIRST_NAME, d.LAST_NAME, d.PASSWORD, d.USER_TYPE,p.id, p.AVATAR_PATH, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE,mp.BLOOD_TYPE, mp.DOB, mp.HEIGHT, mp.WEIGHT FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id WHERE d.id = :doctor_id')
+            row = cursor.fetchone()
+            if row:
+                appointment = Appointments(
+                    row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+        return appointment
+    
+    
+    def get_appointment_for_patients(self):
+        appointment = None
+        with self.__get_cursor() as cursor:
+            cursor.execute(
+                'SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description,d.ID, d.AVATAR_PATH, d.EMAIL, d.FIRST_NAME, d.LAST_NAME, d.PASSWORD, d.USER_TYPE,p.id, p.AVATAR_PATH, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE,mp.BLOOD_TYPE, mp.DOB, mp.HEIGHT, mp.WEIGHT FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id WHERE p.id = :patient_id')
+            row = cursor.fetchone()
+            if row:
+                appointment = Appointments(
+                    row[0], row[1], row[2], row[3], row[4], row[5], row[6])
         return appointment
 
     def get_user_by_id(self, id):
@@ -171,34 +193,41 @@ class Database:
             with self.__get_cursor() as cursor:
                 cursor.execute('insert into medical_appointments (id, patient_id, doctor_id, appointment_time, status, location, description) values (:id, :patient_id, :doctor_id, :appointment_time, :status, :location, :description)',
                                id=appointment.id,
-                               patient_id=appointment.patient_id,
-                               doctor_id=appointment.doctor_id,
+                               patient_id=appointment.patients.id,
+                               doctor_id=appointment.doctors.id,
                                appointment_time=appointment.appointment_time,
                                status=appointment.status,
                                location=appointment.location,
                                description=appointment.description)
 
-    def get_appointment_id(self, id):
-        appointment = None
+    def delete_appointment_by_id(self, id):
         with self.__get_cursor() as cursor:
-            cursor.execute(
-                'select id, patient_id, doctor_id, appointment_time, status, location, description from medical_appointments where name=:name', id=id)
-            row = cursor.fetchone()
-            if row:
-                appointment = Appointments(
-                    row[0], row[1], row[2], row[3], row[4], row[5], row[6])
-        return appointment
+            if not isinstance(id, int):
+                raise TypeError("expected type of integer")
+            with self.__get_cursor() as cursor:
+                    cursor.execute("DELETE FROM medical_appointments WHERE id = :id", id=id)
+
+
+    def update_appointment(self,appointment):
+        with self.__get_cursor() as cursor:
+            if not isinstance(appointment, Appointments):
+                raise TypeError("expected type of Appointmentsr")
+            with self.__get_cursor() as cursor:
+                    cursor.execute(" UPDATE medical_appointments SET patient_id =: patient_id, doctor_id =: doctor_id, appointment_time =: appointment_time, status =: status, location =: location, description =: description WHERE id =:id", patient_id=appointment.patients.id, doctor_id=appointment.doctors.id, appointment_time=appointment.appointment_time, status=appointment.status, location=appointment.location, description=appointment.description, id=appointment.id)
 
     def get_appointments(self):
         appointments = []
         with self.__get_cursor() as cursor:
-            results = cursor.execute(
-                'select id, patient_id, doctor_id, appointment_time, status, location, description from medical_appointments')
+            results = cursor.execute('SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, p.dob, p.blood_type, p.height, p.weight, mu1.email as patient_email, mu1.first_name as patient_first_name, mu1.last_name as patient_last_name, mu2.email as doctor_email, mu2.first_name as doctor_first_name, mu2.last_name as doctor_last_name FROM medical_appointments app INNER JOIN medical_users mu1 ON app.patient_id = mu1.id INNER JOIN medical_users mu2 ON app.doctor_id = mu2.id INNER JOIN medical_patients p ON app.patient_id = p.id')
             for row in results:
+                patient = MedicalPatient(
+                    row[10], row[11], row[12], row[13], row[14], 'PATIENT', row[7], row[8], row[9], row[10])  
+                doctor = User(row[15], None, row[16], row[17])  
                 appointment = Appointments(
-                    row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+                    row[0], patient, doctor, row[3], row[4], row[5], row[6])
                 appointments.append(appointment)
         return appointments
+
 
     def __get_cursor(self):
         for i in range(3):
