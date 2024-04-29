@@ -208,6 +208,13 @@ class Database:
                     cursor.execute("DELETE FROM medical_appointments WHERE id = :id", id=id)
 
 
+    def update_appointment(self,appointment):
+        with self.__get_cursor() as cursor:
+            if not isinstance(appointment, Appointments):
+                raise TypeError("expected type of Appointmentsr")
+            with self.__get_cursor() as cursor:
+                    cursor.execute(" UPDATE medical_appointments SET patient_id =: patient_id, doctor_id =: doctor_id, appointment_time =: appointment_time, status =: status, location =: location, description =: description WHERE id =:id", patient_id=appointment.patients.id, doctor_id=appointment.doctors.id, appointment_time=appointment.appointment_time, status=appointment.status, location=appointment.location, description=appointment.description, id=appointment.id)
+
     def get_appointments(self):
         appointments = []
         with self.__get_cursor() as cursor:
