@@ -162,8 +162,11 @@ class Database:
                 "SELECT id, patient_id, doctor_id, appointment_time, status, location, description FROM medical_appointments WHERE patient_id = :patient_id",
                 patient_id=patient_id)
             for row in results:
-                appointments.append(Appointments(int(row[0]), int(row[1]), int(
-                    row[2]), str(row[3]), int(row[4]), row[5], str(row[6])))
+                patient = self.get_patients_by_id(int(row[1]))
+                doctor = self.get_user_by_id(int(row[2]))
+                if patient is not None and doctor is not None:
+                    appointments.append(Appointments(int(row[0]), patient, doctor,
+                                                    str(row[3]), int(row[4]), row[5], str(row[6])))
         return appointments
 
     def update_patient_details(self, patient_id, dob, blood_type, height, weight, allergies):
@@ -187,7 +190,6 @@ class Database:
             """,
                 patient_id=patient_id)
 
-        
             for allergy_id in allergies:
                 cursor.execute(
                     """

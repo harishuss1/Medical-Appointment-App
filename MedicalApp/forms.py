@@ -40,8 +40,8 @@ class AppointmentForm(FlaskForm):
 
 class PatientDetailsForm(FlaskForm):
     dob = DateField('Date of Birth', validators=[DataRequired()])
-    blood_type = SelectField('Blood Type', choices=[('A+', 'A+'),('A-', 'A-'), ('B+', 'B+'),('B-', 'B-'), ('AB+', 'AB+'), ('AB-', 'AB-'),('O+', 'O+'), ('O-', 'O-')], validators=[DataRequired()])
+    blood_type = SelectField('Blood Type', choices=[('A+', 'A+'), ('A-', 'A-'), ('B+', 'B+'), (
+        'B-', 'B-'), ('AB+', 'AB+'), ('AB-', 'AB-'), ('O+', 'O+'), ('O-', 'O-')], validators=[DataRequired()])
     height = FloatField('Height (in cm)', validators=[DataRequired()])
     weight = FloatField('Weight (in kg)', validators=[DataRequired()])
-    allergies = SelectMultipleField('Allergies', choices=[]) 
-
+    allergies = SelectMultipleField('Allergies', choices=[])

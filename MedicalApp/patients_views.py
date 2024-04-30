@@ -56,7 +56,7 @@ def update_patient():
 
         patient_allergies = get_db().get_patient_allergies(current_user.id)
         form.allergies.data = [Allergy.id for Allergy in patient_allergies]
-        
+
         flash('Your information has been updated.')
         return redirect(url_for('patient.view_patient'))
 
@@ -80,6 +80,5 @@ def view_patient():
                              access_level=patient_details.access_level, dob=patient_details.dob, blood_type=patient_details.blood_type, height=patient_details.height, avatar_path=patient_details.avatar_path, id=patient_details.id)
 
     patient.allergies = get_db().get_patient_allergies(patient.id)
-        
 
     return render_template('patient_details.html', patient=patient)
