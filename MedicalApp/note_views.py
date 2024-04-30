@@ -1,3 +1,4 @@
+import io
 import os
 import shutil
 import tempfile
@@ -70,15 +71,18 @@ def add():
         return redirect(url_for('note.notes', user_id=current_user.id))
     return render_template('add_note.html', form=form)
 
+#source: https://stackoverflow.com/questions/27337013/how-to-send-zip-files-in-the-python-flask-framework
 @bp.route('/note/<int:note_id>/attachments/', methods=['GET', 'POST'])
 @login_required
 def get_attachments(note_id):
-    attachements = get_db().get_attachements_by_note_id(note_id)
-    
-    secure_temp = tempfile.TemporaryDirectory(dir=current_app.config['ATTACHEMENTS'])
-    for attachement in attachements:
-        os.system(f'cp {attachement} {secure_temp.name}')
-    shutil.make_archive(base_name=os.path.join(secure_temp.name, 'attachements.zip')[:-4], format='zip', root_dir=secure_temp.name)
-    
-    return send_file(os.path.join(secure_temp.name, 'attachements.zip'),
-                    as_attachment=True)
+    attachments = get_db().get_attachements_by_note_id(note_id)
+    buffer = io.BytesIO()
+
+    # Create a ZipFile object with the BytesIO buffer
+    with ZipFile(buffer, 'w') as zipf:
+        for attachment in attachments:
+            zipf.write(attachment, os.path.basename(attachment))  # Add attachment to zip archive
+        
+    buffer.seek(0)
+
+    return send_file(buffer, as_attachment=True, download_name='attachements.zip', mimetype='application/zip')
