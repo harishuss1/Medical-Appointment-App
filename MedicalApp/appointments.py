@@ -1,3 +1,4 @@
+import datetime
 import json
 from MedicalApp.user import User,MedicalPatient
 
@@ -20,20 +21,20 @@ class Appointments:
             'description': self.description
         }
 
-    def __init__(self, id, patients, doctors, appointment_time, status, location, description):
+    def __init__(self, id, patient, doctor, appointment_time, status, location, description):
         if not isinstance(id, int) or id < 0:
             raise ValueError('Illegal type for patient id')
         self.id = id
 
-        if not isinstance(patients, MedicalPatient):
+        if not isinstance(patient, MedicalPatient):
             raise ValueError('Illegal type for patients objects')
-        self.patients = patients
+        self.patient = patient
 
-        if not isinstance(doctors, User):
+        if not isinstance(doctor, User):
             raise ValueError('Illegal type for doctor objects')
-        self.doctors = doctors
+        self.doctor = doctor
 
-        if not isinstance(appointment_time, str):
+        if not isinstance(appointment_time, datetime.date):
             raise ValueError('Illegal type for appointment_time')
         self.appointment_time = appointment_time
 

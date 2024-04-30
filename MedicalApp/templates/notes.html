@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<nav id="navbar">
+    <ul>
+        <li><a href="{{ url_for('appointments.confirmed_appointments') }}">See all confirmed appointments</a></li>
+        <li><a href="{{ url_for('appointments.requested_appointments') }}">See appointment requests</a></li>
+        <li><a href="{{ url_for('doctor.patients') }}">See all patients</a></li>
+    </ul>
+</nav>
+<h1>{% block title %}Notes{% endblock title %}</h1>
+<ul id="notes">
+    {% for note in notes %}
+        <li>Note taker: {{ note.note_taker.first_name }} {{ note.note_taker.last_name }}</li>
+        <li>Patient: {{ note.patient.first_name }} {{ note.patient.last_name }}</li>
+        <li>Note date: {{ note.note_date }}</li>
+        <li>Note: {{ note.note }}.</li>
+    {% endfor %}
+</ul>
+{% if current_user.access_level == 'STAFF' %}
+    <h3><a href="{{ url_for('note.add') }}">Add Note</a></h3>
+{% endif %}
+
+{% endblock content %}

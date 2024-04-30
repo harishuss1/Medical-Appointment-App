@@ -7,11 +7,13 @@
         <li><a href="{{ url_for('doctor.patients') }}">See all patients</a></li>
     </ul>
 </nav>
-<h1>{% block title %}Doctor Patients{% endblock title %}</h1>
-    <dl id="doctor-patients">
-        {% for patient in patients %}
-            <dt>Patient name: {{ patient.first_name }} {{ patient.last_name }}</dt>
-            <dd>Contact information: {{ patient.email }}.</dd>
-        {% endfor %}
-    </dl>
+<h1>{% block title %}Add Note{% endblock title %}</h1>
+<form method="post" id="add-note" enctype="multipart/form-data">
+    {{ form.csrf_token }}
+    {{ form.patient.label }} {{ form.patient() }}
+    {{ form.note.label }} {{ form.note() }}
+    {{ form.date.label }} {{ form.date() }}
+    {{ form.attachement.label }} {{ form.attachement() }}
+    <button type="submit">Add Note</button>
+</form>
 {% endblock content %}
