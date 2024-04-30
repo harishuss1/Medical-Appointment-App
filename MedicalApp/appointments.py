@@ -1,5 +1,5 @@
 import json
-from MedicalApp.user import User,MedicalPatient
+from MedicalApp.user import User, MedicalPatient
 
 
 class Appointments:

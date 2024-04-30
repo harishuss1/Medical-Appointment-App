@@ -8,4 +8,18 @@
     <p>Height: {{ patient.height }}</p>
     <p>Weight: {{ patient.weight }}</p>
 </div>
+
+<div>
+    <h2>Allergies</h2>
+    {% if patient.allergies %}
+    <ul>
+        {% for allergy in patient.allergies %}
+        <li>{{ allergy.name }}: {{ allergy.description }}</li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No allergies recorded.</p>
+    {% endif %}
+
+</div>
 {% endblock content %}

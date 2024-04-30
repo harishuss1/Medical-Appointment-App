@@ -1,6 +1,6 @@
 from flask import Blueprint, request, render_template, redirect, url_for, flash, abort
 from flask_login import login_required, current_user
-
+from MedicalApp.allergy import Allergy
 from MedicalApp.forms import PatientDetailsForm
 from MedicalApp.user import MedicalPatient
 from .db.dbmanager import get_db
@@ -40,14 +40,23 @@ def update_patient():
 
     form = PatientDetailsForm()
 
+    allergies = get_db().get_all_allergies()
+    form.allergies.choices = [(Allergy['id'], Allergy['name'])
+                              for Allergy in allergies]
+
     if request.method == 'POST' and form.validate_on_submit():
         dob = form.dob.data
         blood_type = form.blood_type.data
         height = form.height.data
         weight = form.weight.data
+        selected_allergies = form.allergies.data  # Storing ids
 
-        get_db().update_patient_details(current_user.id, dob, blood_type, height, weight)
+        get_db().update_patient_details(current_user.id, dob,
+                                        blood_type, height, weight, selected_allergies)
 
+        patient_allergies = get_db().get_patient_allergies(current_user.id)
+        form.allergies.data = [Allergy.id for Allergy in patient_allergies]
+        
         flash('Your information has been updated.')
         return redirect(url_for('patient.view_patient'))
 
@@ -69,5 +78,8 @@ def view_patient():
 
     patient = MedicalPatient(weight=patient_details.weight, email=patient_details.email, password=patient_details.password, first_name=patient_details.first_name, last_name=patient_details.last_name,
                              access_level=patient_details.access_level, dob=patient_details.dob, blood_type=patient_details.blood_type, height=patient_details.height, avatar_path=patient_details.avatar_path, id=patient_details.id)
+
+    patient.allergies = get_db().get_patient_allergies(patient.id)
+        
 
     return render_template('patient_details.html', patient=patient)

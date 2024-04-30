@@ -1,4 +1,5 @@
 from flask_login import UserMixin
+from MedicalApp.allergy import Allergy
 
 
 class User(UserMixin):
@@ -28,7 +29,7 @@ class User(UserMixin):
 
 
 class MedicalPatient(User):
-    def __init__(self, weight, email, password, first_name, last_name, access_level, dob, blood_type, height, avatar_path=None, id=None):
+    def __init__(self, weight, email, password, first_name, last_name, access_level, dob, blood_type, height, allergies=None, avatar_path=None, id=None):
         super().__init__(email, password, first_name,
                          last_name, access_level, avatar_path, id)
         if not isinstance(dob, str):
@@ -39,7 +40,10 @@ class MedicalPatient(User):
             raise ValueError("Illegal type for height")
         if not isinstance(weight, float):
             raise ValueError("Illegal type for weight")
+        if allergies is not None and not all(isinstance(alleg, Allergy) for alleg in allergies):
+            raise ValueError("All allergies must be strings")
         self.dob = dob
         self.blood_type = blood_type
         self.height = height
         self.weight = weight
+        self.allergies = allergies if allergies is not None else []

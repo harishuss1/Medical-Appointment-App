@@ -1,6 +1,8 @@
 import oracledb
 import os
 from flask import g
+
+from MedicalApp.allergy import Allergy
 from ..appointments import Appointments
 from ..user import MedicalPatient
 from ..note import Note
@@ -92,7 +94,7 @@ class Database:
                 appointment = Appointments(int(row[0]), int(row[1]), int(
                     row[2]), str(row[3]), int(row[4]), row[5], str(row[6]))
         return appointment
-    
+
     def get_appointment_for_doctors(self):
         appointment = None
         with self.__get_cursor() as cursor:
@@ -103,8 +105,7 @@ class Database:
                 appointment = Appointments(
                     row[0], row[1], row[2], row[3], row[4], row[5], row[6])
         return appointment
-    
-    
+
     def get_appointment_for_patients(self):
         appointment = None
         with self.__get_cursor() as cursor:
@@ -165,7 +166,7 @@ class Database:
                     row[2]), str(row[3]), int(row[4]), row[5], str(row[6])))
         return appointments
 
-    def update_patient_details(self, patient_id, dob, blood_type, height, weight):
+    def update_patient_details(self, patient_id, dob, blood_type, height, weight, allergies):
         with self.__get_cursor() as cursor:
             cursor.execute(
                 """
@@ -178,6 +179,65 @@ class Database:
                     INSERT (id, dob, blood_type, height, weight) VALUES (:patient_id, :dob, :blood_type, :height, :weight)
                 """,
                 patient_id=patient_id, dob=dob, blood_type=blood_type, height=height, weight=weight)
+
+            cursor.execute(
+                """
+            DELETE FROM medical_patient_allergies 
+            WHERE patient_id = :patient_id
+            """,
+                patient_id=patient_id)
+
+        
+            for allergy_id in allergies:
+                cursor.execute(
+                    """
+                    INSERT INTO medical_patient_allergies (patient_id, allergy_id) 
+                    VALUES (:patient_id, :allergy_id)
+                    """,
+                    patient_id=patient_id, allergy_id=allergy_id)
+
+    def get_all_allergies(self):
+        allergies = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                "SELECT id, name, description FROM medical_allergies")
+            for row in results:
+                allergies.append({
+                    'id': int(row[0]),
+                    'name': str(row[1]),
+                    'description': str(row[2])
+                })
+        return allergies
+
+    def get_allergy_by_id(self, allergy_id):
+        with self.__get_cursor() as cursor:
+            result = cursor.execute(
+                """
+                SELECT name, description 
+                FROM medical_allergies 
+                WHERE id = :allergy_id
+                """,
+                allergy_id=allergy_id).fetchone()
+            if result is None:
+                return None
+            else:
+                return str(result[0]), str(result[1])
+
+    def get_patient_allergies(self, patient_id):
+        allergies = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                """
+                SELECT a.id, a.name, a.description 
+                FROM medical_allergies a 
+                INNER JOIN medical_patient_allergies pa ON a.id = pa.allergy_id 
+                WHERE pa.patient_id = :patient_id
+                """,
+                patient_id=patient_id)
+            for row in results:
+                allergies.append(
+                    Allergy(int(row[0]), str(row[1]), str(row[2])))
+        return allergies
 
     def get_patient_details(self, patient_id):
         patient = None
@@ -242,15 +302,16 @@ class Database:
             if not isinstance(id, int):
                 raise TypeError("expected type of integer")
             with self.__get_cursor() as cursor:
-                    cursor.execute("DELETE FROM medical_appointments WHERE id = :id", id=id)
+                cursor.execute(
+                    "DELETE FROM medical_appointments WHERE id = :id", id=id)
 
-
-    def update_appointment(self,appointment):
+    def update_appointment(self, appointment):
         with self.__get_cursor() as cursor:
             if not isinstance(appointment, Appointments):
                 raise TypeError("expected type of Appointmentsr")
             with self.__get_cursor() as cursor:
-                    cursor.execute(" UPDATE medical_appointments SET patient_id =: patient_id, doctor_id =: doctor_id, appointment_time =: appointment_time, status =: status, location =: location, description =: description WHERE id =:id", patient_id=appointment.patients.id, doctor_id=appointment.doctors.id, appointment_time=appointment.appointment_time, status=appointment.status, location=appointment.location, description=appointment.description, id=appointment.id)
+                cursor.execute(" UPDATE medical_appointments SET patient_id =: patient_id, doctor_id =: doctor_id, appointment_time =: appointment_time, status =: status, location =: location, description =: description WHERE id =:id",
+                               patient_id=appointment.patients.id, doctor_id=appointment.doctors.id, appointment_time=appointment.appointment_time, status=appointment.status, location=appointment.location, description=appointment.description, id=appointment.id)
 
     def get_appointments(self):
         appointments = []
@@ -258,13 +319,12 @@ class Database:
             results = cursor.execute('SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, p.dob, p.blood_type, p.height, p.weight, mu1.email as patient_email, mu1.first_name as patient_first_name, mu1.last_name as patient_last_name, mu2.email as doctor_email, mu2.first_name as doctor_first_name, mu2.last_name as doctor_last_name FROM medical_appointments app INNER JOIN medical_users mu1 ON app.patient_id = mu1.id INNER JOIN medical_users mu2 ON app.doctor_id = mu2.id INNER JOIN medical_patients p ON app.patient_id = p.id')
             for row in results:
                 patient = MedicalPatient(
-                    row[10], row[11], row[12], row[13], row[14], 'PATIENT', row[7], row[8], row[9], row[10])  
-                doctor = User(row[15], None, row[16], row[17])  
+                    row[10], row[11], row[12], row[13], row[14], 'PATIENT', row[7], row[8], row[9], row[10])
+                doctor = User(row[15], None, row[16], row[17])
                 appointment = Appointments(
                     row[0], patient, doctor, row[3], row[4], row[5], row[6])
                 appointments.append(appointment)
         return appointments
-
 
     def __get_cursor(self):
         for i in range(3):

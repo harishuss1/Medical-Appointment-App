@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import DateField, FloatField, StringField, IntegerField, EmailField, PasswordField, SubmitField, RadioField
+from wtforms import DateField, FloatField, SelectField, SelectMultipleField, StringField, IntegerField, EmailField, PasswordField, SubmitField, RadioField
 from wtforms.validators import DataRequired, Email, Length, EqualTo
 
 
@@ -40,8 +40,8 @@ class AppointmentForm(FlaskForm):
 
 class PatientDetailsForm(FlaskForm):
     dob = DateField('Date of Birth', validators=[DataRequired()])
-    blood_type = StringField('Blood Type', validators=[
-                             DataRequired(), Length(max=3)])
+    blood_type = SelectField('Blood Type', choices=[('A+', 'A+'),('A-', 'A-'), ('B+', 'B+'),('B-', 'B-'), ('AB+', 'AB+'), ('AB-', 'AB-'),('O+', 'O+'), ('O-', 'O-')], validators=[DataRequired()])
     height = FloatField('Height (in cm)', validators=[DataRequired()])
     weight = FloatField('Weight (in kg)', validators=[DataRequired()])
-    # Missing allergies
+    allergies = SelectMultipleField('Allergies', choices=[]) 
+
