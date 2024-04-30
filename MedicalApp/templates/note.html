@@ -1,5 +1,9 @@
 {% extends "base.html" %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='attachement_download.js') }}"></script>
+{% endblock scripts %}
 {% block content %}
+
 <nav id="navbar">
     <ul>
         <li><a href="{{ url_for('appointments.confirmed_appointments') }}">See all confirmed appointments</a></li>
@@ -8,17 +12,12 @@
     </ul>
 </nav>
 <h1>{% block title %}Notes{% endblock title %}</h1>
-<ul id="notes">
-    {% for note in notes %}
+<ul id="note">
         <li>Note taker: {{ note.note_taker.first_name }} {{ note.note_taker.last_name }}</li>
         <li>Patient: {{ note.patient.first_name }} {{ note.patient.last_name }}</li>
         <li>Note date: {{ note.note_date }}</li>
         <li>Note: {{ note.note }}.</li>
-        <li><a href="{{ url_for('note.note', note_id=note.id) }}">View full note</a></li>
-    {% endfor %}
+        <button id="download-attachements" data-attachements="{{ note.attachement_path }}">Download PDF file</button>
 </ul>
-{% if current_user.access_level == 'STAFF' %}
-    <h3><a href="{{ url_for('note.add') }}">Add Note</a></h3>
-{% endif %}
 
 {% endblock content %}

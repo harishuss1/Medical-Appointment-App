@@ -180,15 +180,40 @@ class Database:
         notes = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
-                "SELECT n.id, n.note_date, n.note, p.weight, p.email, p.password, p.first_name, p.last_name, p.user_type, p.dob, p.blood_type, p.height, p.avatar_path, p.id, d.email, d.password, d.first_name, d.last_name, d.user_type, d.avatar_path, d.id, a.attachement_path FROM medical_notes n INNER JOIN medical_patients p ON (n.patient_id = p.id) INNER JOIN medical_users u ON(d.id = n.note_taker_id) INNER JOIN medical_note_attachements a ON(a.note_id = n.id) WHERE patient_id = :patient_id",
+                "SELECT n.id, n.note_date, n.note, p.weight, p.email, p.password, p.first_name, p.last_name, p.user_type, p.dob, p.blood_type, p.height, p.avatar_path, p.id, d.email, d.password, d.first_name, d.last_name, d.user_type, d.avatar_path, d.id, a.attachement_path FROM medical_notes n INNER JOIN medical_patients p ON (n.patient_id = p.id) INNER JOIN medical_users u ON(d.id = n.note_taker_id) INNER JOIN medical_note_attachements a ON(a.note_id = n.id) WHERE n.patient_id = :patient_id",
                 patient_id=patient_id)
             for row in results:
                 doctor = User(
                     row[14], row[15], row[16], row[17], row[18], avatar_path=row[19], id=int(row[20]))
                 patient = MedicalPatient(float(row[3]), row[4], row[5], row[6], row[7], str(row[8]), row[9], str(row[10]), float(row[11]), avatar_path=row[12], id=int(row[13]))
+                attachements = self.get_attachements_by_note_id(int(row[0]))
                 notes.append(Note(
-                    int(row[0]), patient, doctor, str(row[1]), str(row[2]), str(row[21])))
+                    patient, doctor, str(row[1]), str(row[2]), attachement_path=attachements, id=int(row[0])))
         return notes
+    
+    def get_note_by_id(self, id):
+        note = None
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                """
+                SELECT n.id, n.note_date, n.note, p.weight, up.email, up.password, up.first_name, up.last_name, up.user_type, p.dob, p.blood_type, p.height, up.avatar_path, p.id, d.email, d.password, d.first_name, d.last_name, d.user_type, d.avatar_path, d.id, a.attachment_path
+                FROM medical_notes n INNER JOIN medical_users up
+                    ON (n.patient_id = up.id) INNER JOIN medical_patients p
+                    ON (up.id = p.id)
+                    INNER JOIN medical_users d ON(d.id = n.note_taker_id)
+                    INNER JOIN medical_note_attachments a ON(a.note_id = n.id)
+                WHERE n.id = :id
+                """,
+                id=id)
+            row = results.fetchone()
+            if row:
+                doctor = User(
+                    row[14], row[15], row[16], row[17], row[18], avatar_path=row[19], id=int(row[20]))
+                patient = MedicalPatient(float(row[3]), row[4], row[5], row[6], row[7], str(row[8]), row[9], str(row[10]), float(row[11]), avatar_path=row[12], id=int(row[13]))
+                attachements = self.get_attachements_by_note_id(int(row[0]))
+                note = (Note(
+                    patient, doctor, row[1], str(row[2]), attachement_path=attachements, id=int(row[0])))
+        return note
     
     def get_notes_by_doctor_id(self, doctor_id):
         notes = []
@@ -208,9 +233,25 @@ class Database:
                 doctor = User(
                     row[14], row[15], row[16], row[17], row[18], avatar_path=row[19], id=int(row[20]))
                 patient = MedicalPatient(float(row[3]), row[4], row[5], row[6], row[7], str(row[8]), row[9], str(row[10]), float(row[11]), avatar_path=row[12], id=int(row[13]))
+                attachements = self.get_attachements_by_note_id(int(row[0]))
                 notes.append(Note(
-                    patient, doctor, row[1], str(row[2]), attachement_path=str(row[21]), id=int(row[0])))
+                    patient, doctor, row[1], str(row[2]), attachements, id=int(row[0])))
         return notes
+    
+    def get_attachements_by_note_id(self, id):
+        attachements = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                """
+                SELECT a.attachment_path
+                FROM medical_notes n INNER JOIN medical_note_attachments a 
+                ON(a.note_id = n.id)
+                WHERE n.id = :note_id
+                """,
+                note_id=id)
+            for row in results:
+                attachements.append(str(row[0]))
+        return attachements
     
     def create_note(self, note):
         if not isinstance(note, Note):
@@ -223,9 +264,11 @@ class Database:
                            note_date=note.note_date,
                            note=note.note,
                            id=new_id)
-            cursor.execute('insert into medical_note_attachments (note_id, attachment_path)  values (:note_id, :attachement_path)',
-                           note_id=int(new_id.values[0][0]),
-                           attachement_path=str(note.attachement_path))
+            note_id = int(new_id.values[0][0])
+            for path in note.attachement_path: 
+                cursor.execute('insert into medical_note_attachments (note_id, attachment_path)  values (:note_id, :attachement_path)',
+                                note_id=note_id,
+                                attachement_path=str(path))
 
 
     def create_user(self, user):

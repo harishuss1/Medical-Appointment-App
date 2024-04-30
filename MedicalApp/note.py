@@ -2,7 +2,7 @@ import datetime
 from .user import MedicalPatient, User 
 
 class Note:
-    def __init__(self, patient, note_taker, note_date, note, attachement_path=None, id=None):
+    def __init__(self, patient, note_taker, note_date, note, attachement_path=[], id=None):
         if id != None and not isinstance(id, int):
             raise TypeError("Illegal type for id")
         if not isinstance(patient, MedicalPatient):
@@ -15,7 +15,7 @@ class Note:
             raise TypeError("Illegal type for note date")
         if not isinstance(note, str):
             raise TypeError("Illegal type for note")
-        if attachement_path != None and not isinstance(attachement_path, str):
+        if attachement_path != None and not isinstance(attachement_path, list):
             raise TypeError("Illegal type for attachement_path")
 
         self.id = id

@@ -1,6 +1,6 @@
 from flask_login import current_user
 from flask_wtf import FlaskForm
-from wtforms import FileField, StringField, IntegerField, EmailField, DateField, PasswordField, TextAreaField , SubmitField, RadioField, SelectField
+from wtforms import MultipleFileField, StringField, IntegerField, EmailField, DateField, PasswordField, TextAreaField , SubmitField, RadioField, SelectField
 from wtforms.validators import DataRequired, Email, Length, EqualTo
 
 from .db.dbmanager import get_db
@@ -45,7 +45,7 @@ class NoteForm(FlaskForm):
     patient = SelectField('Patient', validators=[DataRequired()], choices=[])
     note = TextAreaField('Note', validators=[DataRequired()])
     date = DateField('Date', validators=[DataRequired()])
-    attachement = FileField('Attachement')
+    attachement = MultipleFileField('Attachement')
     
     def set_choices(self):
         patients = get_db().get_patients_by_doctor(current_user.id)

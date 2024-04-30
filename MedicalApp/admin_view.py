@@ -10,6 +10,7 @@ admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 def admin_dashboard():
     return render_template('admin_dashboard.html')
 
+@admin_bp.route('/delete_user/', methods=['GET', 'POST'])
 @login_required
 def add_user():
     if request.method == 'POST':
@@ -26,14 +27,14 @@ def add_user():
         try:
             db.create_user(new_user)
             flash("User created successfully!")
-            return redirect(url_for('admin_view.admin_dashboard'))
+            return redirect(url_for('admin.admin_dashboard'))
         except Exception as e:
             flash(f"Error creating user: {e}")
     
     return render_template('add_user.html')
 
 # Delete User Route
-@admin_bp.route('/delete_user', methods=['GET', 'POST'])
+@admin_bp.route('/delete_user/', methods=['GET', 'POST'])
 @login_required
 def delete_user():
     if request.method == 'POST':
@@ -62,7 +63,7 @@ def block_user():
     
     return render_template('block_user.html')
 
-@admin_bp.route('/change_user_role', methods=['GET', 'POST'])
+@admin_bp.route('/change_user_role/', methods=['GET', 'POST'])
 @login_required
 def change_user_role():
     if request.method == 'POST':
