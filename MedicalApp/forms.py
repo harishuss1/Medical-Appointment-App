@@ -71,3 +71,5 @@ class ChangeUserRoleForm(FlaskForm):
         validators=[DataRequired()]
     )
     submit = SubmitField('Change Role')
+
+#added comment to fix git issue, please remove this comment later
