@@ -1,12 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
+{% if current_user.access_level == 'STAFF' %}
 <nav id="navbar">
     <ul>
         <li><a href="{{ url_for('appointments.confirmed_appointments') }}">See all confirmed appointments</a></li>
         <li><a href="{{ url_for('appointments.requested_appointments') }}">See appointment requests</a></li>
         <li><a href="{{ url_for('doctor.patients') }}">See all patients</a></li>
+        <li><a href="{{ url_for('note.notes', user_id=current_user.id) }}">See all patients</a></li>
     </ul>
 </nav>
+{% endif %}
 <h1>{% block title %}Requested Appointment{% endblock title %}</h1>
     <h2>Appointment with {{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</h2>
     <p>Appointment at {{ appointment.appointment_time }} in room {{ appointment.location }}.</p>
