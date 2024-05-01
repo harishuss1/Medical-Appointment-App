@@ -393,14 +393,13 @@ class Database:
     def get_appointments(self):
         appointments = []
         with self.__get_cursor() as cursor:
-            results = cursor.execute('SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, p.dob, p.blood_type, p.height, p.weight, mu1.email as patient_email, mu1.first_name as patient_first_name, mu1.last_name as patient_last_name, mu2.email as doctor_email, mu2.first_name as doctor_first_name, mu2.last_name as doctor_last_name FROM medical_appointments app INNER JOIN medical_users mu1 ON app.patient_id = mu1.id INNER JOIN medical_users mu2 ON app.doctor_id = mu2.id INNER JOIN medical_patients p ON app.patient_id = p.id')
+            results = cursor.execute('SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, p.id, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, p.AVATAR_PATH, mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT, mp.WEIGHT FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id')
             for row in results:
-                patient = MedicalPatient(
-                    row[10], row[11], row[12], row[13], row[14], 'PATIENT', row[7], row[8], row[9], row[10])
-                doctor = User(row[15], None, row[16], row[17])
-                appointment = Appointments(
-                    row[0], patient, doctor, row[3], row[4], row[5], str(row[6]))
-                appointments.append(appointment)
+                doctor = User(row[8], row[9], row[10], row[11], row[12], avatar_path=row[13], id=int(row[7]))
+                allergies=self.get_patient_allergies(int(row[14]))
+                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(row[23]), avatar_path=row[20], id=int(row[14]),allergies=allergies)
+                appointments.append(Appointments(
+                    row[0], patient, doctor, row[3], row[4], row[5], str(row[6])))
         return appointments
 
     def __get_cursor(self):

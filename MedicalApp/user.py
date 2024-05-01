@@ -28,6 +28,9 @@ class User(UserMixin):
         self.access_level = access_level
         self.avatar_path = avatar_path
 
+    def __str__(self):
+        return f'{self.first_name} {self.last_name}'
+
 
 class MedicalPatient(User):
     def __init__(self, weight, email, password, first_name, last_name, access_level, dob, blood_type, height, allergies=None, avatar_path=None, id=None):
@@ -48,3 +51,6 @@ class MedicalPatient(User):
         self.height = height
         self.weight = weight
         self.allergies = allergies if allergies is not None else []
+
+    def __str__(self):
+        return f'{self.first_name} {self.last_name}'
