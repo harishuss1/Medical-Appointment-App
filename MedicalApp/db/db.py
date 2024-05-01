@@ -79,12 +79,14 @@ class Database:
                 'SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, p.id, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, p.AVATAR_PATH, mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT, mp.WEIGHT FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id WHERE app.status = :status AND app.doctor_id = :doctor_id',
                 status=status, doctor_id=doctor_id)
             for row in results:
-                doctor = User(row[8], row[9], row[10], row[11], row[12], avatar_path=row[13], id=int(row[7]))
-                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(row[23]), avatar_path=row[20], id=int(row[14]))
+                doctor = User(row[8], row[9], row[10], row[11],
+                              row[12], avatar_path=row[13], id=int(row[7]))
+                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
+                    row[23]), avatar_path=row[20], id=int(row[14]))
                 appointments.append(Appointments(
                     row[0], patient, doctor, row[3], row[4], row[5], str(row[6])))
         return appointments
-    
+
     def get_appointments_by_status_patient(self, status, patient_id):
         appointments = []
         with self.__get_cursor() as cursor:
@@ -92,8 +94,10 @@ class Database:
                 'SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, p.id, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, p.AVATAR_PATH, mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT, mp.WEIGHT FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id WHERE app.status = :status AND app.patient_id = :patient_id',
                 status=status, patient_id=patient_id)
             for row in results:
-                doctor = User(row[8], row[9], row[10], row[11], row[12], avatar_path=row[13], id=int(row[7]))
-                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(row[23]), avatar_path=row[20], id=int(row[14]))
+                doctor = User(row[8], row[9], row[10], row[11],
+                              row[12], avatar_path=row[13], id=int(row[7]))
+                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
+                    row[23]), avatar_path=row[20], id=int(row[14]))
                 appointments.append(Appointments(
                     row[0], patient, doctor, row[3], row[4], row[5], str(row[6])))
         return appointments
@@ -106,12 +110,14 @@ class Database:
                 id=id)
             row = results.fetchone()
             if row:
-                doctor = User(row[8], row[9], row[10], row[11], row[12], avatar_path=row[13], id=int(row[7]))
-                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(row[23]), avatar_path=row[20], id=int(row[14]))
+                doctor = User(row[8], row[9], row[10], row[11],
+                              row[12], avatar_path=row[13], id=int(row[7]))
+                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
+                    row[23]), avatar_path=row[20], id=int(row[14]))
                 appointment = Appointments(
                     row[0], patient, doctor, row[3], row[4], row[5], str(row[6]))
         return appointment
-    
+
     def get_appointment_for_doctors(self, id):
         appointments = []
         with self.__get_cursor() as cursor:
@@ -120,13 +126,14 @@ class Database:
                 doctor_id=id)
             row = cursor.fetchone()
             if row:
-                doctor = User(row[8], row[9], row[10], row[11], row[12], avatar_path=row[13], id=int(row[7]))
-                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(row[23]), avatar_path=row[20], id=int(row[14]))
+                doctor = User(row[8], row[9], row[10], row[11],
+                              row[12], avatar_path=row[13], id=int(row[7]))
+                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
+                    row[23]), avatar_path=row[20], id=int(row[14]))
                 appointments.append(Appointments(
                     row[0], patient, doctor, row[3], row[4], row[5], str(row[6])))
         return appointments
-    
-    
+
     def get_appointment_for_patients(self, id):
         appointments = []
         with self.__get_cursor() as cursor:
@@ -135,8 +142,10 @@ class Database:
                 patient_id=id)
             row = cursor.fetchone()
             if row:
-                doctor = User(row[8], row[9], row[10], row[11], row[12], avatar_path=row[13], id=int(row[7]))
-                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(row[23]), avatar_path=row[20], id=int(row[14]))
+                doctor = User(row[8], row[9], row[10], row[11],
+                              row[12], avatar_path=row[13], id=int(row[7]))
+                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
+                    row[23]), avatar_path=row[20], id=int(row[14]))
                 appointments.append(Appointments(
                     row[0], patient, doctor, row[3], row[4], row[5], str(row[6])))
         return appointments
@@ -176,7 +185,7 @@ class Database:
             row = results.fetchone()
             if row:
                 patient = MedicalPatient(float(row[0]), row[1], row[2], row[3], row[4], str(
-                    row[5]), str(row[6]), str(row[7]), float(row[8]), avatar_path=row[9], id=int(row[10]))
+                    row[5]), row[6], str(row[7]), float(row[8]), avatar_path=row[9], id=int(row[10]))
         return patient
 
     def get_patient_appointments(self, patient_id):
@@ -190,7 +199,7 @@ class Database:
                 doctor = self.get_user_by_id(int(row[2]))
                 if patient is not None and doctor is not None:
                     appointments.append(Appointments(int(row[0]), patient, doctor,
-                                                    str(row[3]), int(row[4]), row[5], str(row[6])))
+                                                    row[3], int(row[4]), row[5], str(row[6])))
         return appointments
 
     def update_patient_details(self, patient_id, dob, blood_type, height, weight, allergies):
@@ -209,7 +218,7 @@ class Database:
 
             cursor.execute(
                 """
-            DELETE FROM medical_patient_allergies 
+            DELETE FROM medical_patient_allergies
             WHERE patient_id = :patient_id
             """,
                 patient_id=patient_id)
@@ -217,7 +226,7 @@ class Database:
             for allergy_id in allergies:
                 cursor.execute(
                     """
-                    INSERT INTO medical_patient_allergies (patient_id, allergy_id) 
+                    INSERT INTO medical_patient_allergies (patient_id, allergy_id)
                     VALUES (:patient_id, :allergy_id)
                     """,
                     patient_id=patient_id, allergy_id=allergy_id)
@@ -239,8 +248,8 @@ class Database:
         with self.__get_cursor() as cursor:
             result = cursor.execute(
                 """
-                SELECT name, description 
-                FROM medical_allergies 
+                SELECT name, description
+                FROM medical_allergies
                 WHERE id = :allergy_id
                 """,
                 allergy_id=allergy_id).fetchone()
@@ -265,6 +274,7 @@ class Database:
                     Allergy(int(row[0]), str(row[1]), str(row[2])))
         return allergies
 
+
     def get_patient_details(self, patient_id):
         patient = None
         with self.__get_cursor() as cursor:
@@ -273,7 +283,7 @@ class Database:
             row = results.fetchone()
             if row:
                 patient = MedicalPatient(float(row[0]), row[1], row[2], row[3], row[4], str(
-                    row[5]), str(row[6]), str(row[7]), float(row[8]), avatar_path=row[9], id=int(row[10]))
+                    row[5]), row[6], str(row[7]), float(row[8]), avatar_path=row[9], id=int(row[10]))
         return patient
 
     def get_notes_by_patient_id(self, patient_id):
