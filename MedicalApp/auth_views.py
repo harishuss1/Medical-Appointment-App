@@ -31,6 +31,11 @@ def login():
             login_user(user, remember=False)
             if current_user.access_level == 'STAFF':
                 return redirect(url_for('doctor.dashboard'))
+            if current_user.access_level == 'BLOCKED':
+                flash("Adminstrators has blocked this account.", "error")
+                #use logout() needs to be implemented
+            if current_user.access_level in ('ADMIN', 'ADMIN_USER'):
+                return redirect(url_for('admin.admin_dashboard'))
             return redirect(url_for('home.index'))
         else:
             flash('Incorrect info')

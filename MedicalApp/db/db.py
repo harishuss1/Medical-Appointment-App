@@ -50,7 +50,7 @@ class Database:
         try:
             with self.__connection.cursor() as cursor:
                 cursor.execute(
-                    "UPDATE medical_users SET account_status = 'blocked' WHERE email = :email",
+                    "UPDATE medical_users SET user_type = 'BLOCKED' WHERE email = :email",
                     {'email': email}
                 )
                 self.__connection.commit()
