@@ -8,9 +8,18 @@ from .db.dbmanager import get_db
 
 bp = Blueprint('patient', __name__, url_prefix="/patients")
 
+def patient_access(func):
+    def wrapper():
+        if current_user.access_level != 'PATIENT' and current_user.access_level != 'STAFF' and current_user.access_level != 'ADMIN' and current_user.access_level != 'ADMIN_USER':
+            return abort(401, "You do not have access to this page!")
+        func()
+    wrapper.__name__ = func.__name__
+    return wrapper
+
 
 @bp.route('/')
 @login_required
+@patient_access
 def patient_dashboard():
     if current_user.access_level != 'PATIENT':
         flash("You do not have permission to access this page.")
@@ -19,25 +28,10 @@ def patient_dashboard():
     appointments = get_db().get_patient_appointments(current_user.id)
     return render_template('patient_dashboard.html', appointments=appointments)
 
-
-@bp.route('/appointments')
+@bp.route('/details/update/', methods=['GET', 'POST'])
 @login_required
-def view_appointments():
-    if current_user.access_level != 'PATIENT':
-        flash("You do not have permission to access this page.")
-        return redirect(url_for('home.index'))
-
-    appointments = get_db().get_patient_appointments(current_user.id)
-    return render_template('patient_appointments.html', appointments=appointments)
-
-
-@bp.route('/details/update', methods=['GET', 'POST'])
-@login_required
+@patient_access
 def update_patient():
-    if current_user.access_level != 'PATIENT':
-        flash("You do not have permission to access this page.")
-        return redirect(url_for('home.index'))
-
     form = PatientDetailsForm()
 
     allergies = get_db().get_all_allergies()
@@ -63,13 +57,9 @@ def update_patient():
     return render_template('update_patient.html', form=form)
 
 
-@bp.route('/details', methods=['GET'])
+@bp.route('/details/', methods=['GET'])
 @login_required
 def view_patient():
-    if current_user.access_level != 'PATIENT':
-        flash("You do not have permission to access this page.")
-        return redirect(url_for('home.index'))
-
     patient_details = get_db().get_patient_details(current_user.id)
 
     if patient_details is None:

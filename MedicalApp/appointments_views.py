@@ -7,9 +7,32 @@ from .db.dbmanager import get_db
 
 bp = Blueprint('appointments', __name__, url_prefix='/appointments/')
 
+def patient_access(func):
+    def wrapper():
+        if current_user.access_level != 'PATIENT' and current_user.access_level != 'STAFF' and current_user.access_level != 'ADMIN' and current_user.access_level != 'ADMIN_USER':
+            return abort(401, "You do not have access to this page!")
+        return func()
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+def doctor_access(func):
+    def wrapper():
+        if current_user.access_level != 'STAFF' and current_user.access_level != 'ADMIN' and current_user.access_level != 'ADMIN_USER':
+            return abort(401, "You do not have access to this page!")
+        return func()
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+@bp.route('/appointments/')
+@login_required
+@patient_access
+def view_appointments():
+    appointments = get_db().get_patient_appointments(current_user.id)
+    return render_template('patient_appointments.html', appointments=appointments)
 
 @bp.route('', methods=['GET', 'POST'])
-# @login_required
+@login_required
+@patient_access
 def get_appointments():
     db = get_db()
     appointments = db.get_appointments()
@@ -47,11 +70,12 @@ def get_appointments():
             return redirect(
                 url_for('appointments.get_appointment', id=new_appointment.id))
 
-    return render_template('appointments.html', appointments=appointments, form=form)
+    return render_template('appointments.html', form=form)
 
 
 @bp.route('/<int:id>/')
-# @login_required
+@login_required
+@patient_access
 def get_appointment(id):
     db = get_db()
     appointment = db.get_appointment_id(id)
@@ -61,14 +85,18 @@ def get_appointment(id):
     return render_template('specific_appointment.html', appointment=appointment)
 
 
-@bp.route('/confirmed/')
+@bp.route('/confirmed/<string:user_type>/')
 @login_required
-def confirmed_appointments():
+@patient_access
+def confirmed_appointments(user_type):
+    if user_type not in ('doctor', 'patient'):
+        flash("Incorrect user type")
+        return redirect(url_for('hone.index'))
     try:
         appointments = None
-        if current_user.access_level == 'STAFF':
+        if user_type == 'doctor':
             appointments = get_db().get_appointments_by_status_doctor(1, current_user.id)
-        if current_user.access_level == 'PATIENT':
+        if user_type == 'patient':
             appointments = get_db().get_appointments_by_status_patient(1, current_user.id)
         if appointments is None or len(appointments) == 0:
             flash("No confirmed appointments")
@@ -79,14 +107,18 @@ def confirmed_appointments():
         return redirect(url_for('doctor.dashboard'))
 
 
-@bp.route('/requests/')
+@bp.route('/requests/<string:user_type>/')
 @login_required
-def requested_appointments():
+@patient_access
+def requested_appointments(user_type):
+    if user_type not in ('doctor', 'patient'):
+        flash("Incorrect user type")
+        return redirect(url_for('hone.index'))
     try:
         appointments = None
-        if current_user.access_level == 'STAFF':
+        if user_type == 'doctor':
             appointments = get_db().get_appointments_by_status_doctor(0, current_user.id)
-        if current_user.access_level == 'PATIENT':
+        if user_type == 'patient':
             appointments = get_db().get_appointments_by_status_patient(0, current_user.id)
         if appointments is None or len(appointments) == 0:
             flash("No requested appointments")
@@ -96,9 +128,10 @@ def requested_appointments():
         flash("Something went wrong with the database")
         return redirect(url_for('doctor.dashboard'))
 
-
+# CHANGE!!!
 @bp.route('/requests/<int:id>/', methods=['GET', 'POST'])
 @login_required
+@doctor_access
 def update_appointment(id):
     if current_user.access_level != 'STAFF':
         return redirect(url_for('home.index'))

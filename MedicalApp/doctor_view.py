@@ -9,20 +9,25 @@ from .db.db import Database
 
 bp = Blueprint('doctor', __name__, url_prefix="/doctor/")
 
+def doctor_access(func):
+    def wrapper():
+        if current_user.access_level != 'STAFF' and current_user.access_level != 'ADMIN' and current_user.access_level != 'ADMIN_USER':
+            return abort(401, "You do not have access to this page!")
+        return func()
+    wrapper.__name__ = func.__name__
+    return wrapper
 
 @bp.route('/')
 @login_required
+@doctor_access
 def dashboard():
-    if current_user.access_level != 'STAFF':
-        return redirect(url_for('home.index'))
     return render_template("doctor.html")
 
 
 @bp.route('/patients/')
 @login_required
+@doctor_access
 def patients():
-    if current_user.access_level != 'STAFF':
-        return redirect(url_for('home.index'))
     try:
         patients = get_db().get_patients_by_doctor(current_user.id)
         if patients is None or len(patients) == 0:
@@ -36,9 +41,8 @@ def patients():
 
 @bp.route('/notes/<int:patient_id>')
 @login_required
+@doctor_access
 def notes(patient_id):
-    if current_user.access_level != 'STAFF':
-        return redirect(url_for('home.index'))
     try:
         patient = get_db().get_patients_by_id(patient_id)
         notes = get_db().get_notes_by_patient_id(patient_id, current_user.id)

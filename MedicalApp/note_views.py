@@ -15,9 +15,17 @@ from .note import Note
 
 bp = Blueprint('note', __name__, url_prefix="/notes/")
 
+def doctor_access(func):
+    def wrapper():
+        if current_user.access_level != 'STAFF' and current_user.access_level != 'ADMIN' and current_user.access_level != 'ADMIN_USER':
+            return abort(401, "You do not have access to this page!")
+        return func()
+    wrapper.__name__ = func.__name__
+    return wrapper
 
 @bp.route('/<int:note_id>/')
 @login_required
+@doctor_access
 def note(note_id):
     note = get_db().get_note_by_id(note_id)
     if note == None:
@@ -28,6 +36,7 @@ def note(note_id):
 
 @bp.route('/note/<int:user_id>/')
 @login_required
+@doctor_access
 def notes(user_id):
     if current_user.access_level != 'STAFF' and current_user.access_level != 'PATIENT':
         return redirect(url_for('home.index'))
@@ -48,6 +57,7 @@ def notes(user_id):
 
 @bp.route('/add/', methods=['GET', 'POST'])
 @login_required
+@doctor_access
 def add():
     if current_user.access_level != 'STAFF':
         return redirect('home.index')
@@ -81,6 +91,7 @@ def add():
 
 @bp.route('/note/<int:note_id>/attachments/', methods=['GET', 'POST'])
 @login_required
+@doctor_access
 def get_attachments(note_id):
     attachments = get_db().get_attachements_by_note_id(note_id)
     buffer = io.BytesIO()

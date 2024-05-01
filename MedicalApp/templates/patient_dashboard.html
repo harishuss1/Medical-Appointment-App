@@ -2,7 +2,7 @@
 {% if current_user.access_level == 'PATIENT' %}
 {% block nav %}
         <li><a href="{{ url_for('patient.patient_dashboard') }}">Dashboard</a></li>
-        <li><a href="{{ url_for('patient.view_appointments') }}">View Appointments</a></li>
+        <li><a href="{{ url_for('appointment.view_appointments') }}">View Appointments</a></li>
         <li><a href="{{ url_for('patient.update_patient') }}">Update Details</a></li>
         <li><a href="{{ url_for('patient.view_patient') }}">View Details</a></li>
 {% endblock nav %}
