@@ -13,7 +13,7 @@ Admin Dashboard
         <ul>
             <li><a href="{{ url_for('admin.add_user') }}">Add New User</a></li>
             <li><a href="{{ url_for('admin.delete_user') }}">Delete User</a></li>
-            <a href="{{ url_for('admin.block_user', user_email=user.email) }}">Block</a>
+            <li><a href="{{ url_for('admin.block_user', user_email=user.email) }}">Block</a></li>
             <li><a href="{{ url_for('admin.change_user_role') }}">Change User Role</a></li>
         </ul>
     </section>

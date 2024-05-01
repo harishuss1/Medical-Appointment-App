@@ -1,30 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Document</title>
-        <link rel="stylesheet"
-              href="{{ url_for('static', filename='styles.css') }}">
-        {% block scripts %}
-        {% endblock scripts %}
-        {% block header %}
-        {% endblock header %}
-    </head>
-    <body>
-        <header>
-            <h1>Welcome to Our Site</h1>
-        </header>
-        {% block content %}
-        {% endblock content %}
-        <section>
-            {% for message in get_flashed_messages() %}
-                <p class="flash">{{ message }}</p>
-            {% endfor %}
-        </section>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="{{ url_for('static', filename='/scripts/scripts.js') }}"></script>
+    <title>{% block title %}Document{% endblock title %}</title>
+    {% block header %}{% endblock header %}
+</head>
+<body>
+    <header class="header">
+        <img src="{{ url_for('static', filename='/images/logo.webp') }}" alt="Company Logo"  width="120" height="120"> 
+        <h1 id="titlePage">First Responders</h1>
+        <nav id="navbar">
+            <ul>
+                <li id="user-icon">
+                    <img src="{{ url_for('static', filename='/images/avatar.jpeg') }}" alt="User Avatar" class="avatar" onclick="toggleDropdown()" width="60" height="60"> 
+                    <div id="user-dropdown" class="dropdown hidden">
+                        <a href="{{ url_for('auth.login') }}">Login</a>
+                        <a href="{{ url_for('auth.signup') }}">Sign Up</a>
+                    </div>
+                </li>
+            </ul>
+        </nav>
+    </header>
 
-        <footer>
-            <p>Copyright © 2024</p>
-        </footer>
-    </body>
+    <nav id="navbar">
+        <ul>
+            {% block nav %}
+            <li><a href="{{ url_for('home.index') }}">Home</a></li>
+            <li><a href="{{ url_for('appointments.get_appointments') }}">Appointments</a></li>
+            <li><a href="{{ url_for('doctor.dashboard') }}">Doctor Dashboard</a></li>
+            <li><a href="{{ url_for('admin.admin_dashboard') }}">Admin Dashboard</a></li>
+            {% endblock nav %}
+        </ul>
+    </nav>
+    {% block content %}{% endblock content %}
+
+    {% with messages = get_flashed_messages(with_categories=True) %}
+    {% if messages %}
+    <div class="flash-messages">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <footer class="footer">
+       <br><strong>Copyright © 2024</strong>
+    </footer>
+</body>
 </html>

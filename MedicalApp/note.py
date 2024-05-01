@@ -1,5 +1,6 @@
 import datetime
-from .user import MedicalPatient, User 
+from .user import MedicalPatient, User
+
 
 class Note:
     def __init__(self, patient, note_taker, note_date, note, attachement_path=[], id=None):

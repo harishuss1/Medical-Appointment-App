@@ -15,6 +15,7 @@ from .note import Note
 
 bp = Blueprint('note', __name__, url_prefix="/notes/")
 
+
 @bp.route('/<int:note_id>/')
 @login_required
 def note(note_id):
@@ -24,6 +25,7 @@ def note(note_id):
         return redirect(url_for('note.notes', user_id=current_user.id))
     return render_template('note.html', note=note)
 
+
 @bp.route('/note/<int:user_id>/')
 @login_required
 def notes(user_id):
@@ -31,8 +33,8 @@ def notes(user_id):
         return redirect(url_for('home.index'))
     notes = None
     try:
-        #<dd><a href="{{ url_for('note.notes', user_id=patient.id) }}">See notes.</a></dd> what to do about this...
-        #CHANGE TO RELATIVE PATH
+        # <dd><a href="{{ url_for('note.notes', user_id=patient.id) }}">See notes.</a></dd> what to do about this...
+        # CHANGE TO RELATIVE PATH
         if current_user.access_level == 'STAFF':
             notes = get_db().get_notes_by_doctor_id(user_id)
         else:
@@ -42,7 +44,8 @@ def notes(user_id):
     except DatabaseError as e:
         flash("Something went wrong with the database")
     return render_template('notes.html', notes=notes)
-    
+
+
 @bp.route('/add/', methods=['GET', 'POST'])
 @login_required
 def add():
@@ -55,23 +58,27 @@ def add():
         paths = []
         for file in files:
             filename = file.filename
-            folder = os.path.join(current_app.config['ATTACHEMENTS'], form.patient.data)
+            folder = os.path.join(
+                current_app.config['ATTACHEMENTS'], form.patient.data)
             if not os.path.exists(folder):
                 os.makedirs(folder)
             path = os.path.join(folder, filename)
-            path = os.path.relpath(path, start=os.curdir) 
+            path = os.path.relpath(path, start=os.curdir)
             paths.append(path)
-            file.save(path) #actually adds it to the directory
-        
+            file.save(path)  # actually adds it to the directory
+
         patient = get_db().get_patients_by_id(form.patient.data)
-        #form.date.data.strftime('%Y-%m-%d')
-        note = Note(patient, current_user, form.date.data, form.note.data, paths)
-        
+        # form.date.data.strftime('%Y-%m-%d')
+        note = Note(patient, current_user,
+                    form.date.data, form.note.data, paths)
+
         get_db().create_note(note)
         return redirect(url_for('note.notes', user_id=current_user.id))
     return render_template('add_note.html', form=form)
 
-#source: https://stackoverflow.com/questions/27337013/how-to-send-zip-files-in-the-python-flask-framework
+# source: https://stackoverflow.com/questions/27337013/how-to-send-zip-files-in-the-python-flask-framework
+
+
 @bp.route('/note/<int:note_id>/attachments/', methods=['GET', 'POST'])
 @login_required
 def get_attachments(note_id):
@@ -81,8 +88,9 @@ def get_attachments(note_id):
     # Create a ZipFile object with the BytesIO buffer
     with ZipFile(buffer, 'w') as zipf:
         for attachment in attachments:
-            zipf.write(attachment, os.path.basename(attachment))  # Add attachment to zip archive
-        
+            # Add attachment to zip archive
+            zipf.write(attachment, os.path.basename(attachment))
+
     buffer.seek(0)
 
     return send_file(buffer, as_attachment=True, download_name='attachements.zip', mimetype='application/zip')

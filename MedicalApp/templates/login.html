@@ -5,7 +5,7 @@
 {% block content %}
 
 <h2>Login</h2>
-<form method="post" novalidate>
+<form method="post" >
     {{ form.csrf_token }}
     <div class="form-group">
         {{ form.email.label }} {{ form.email() }}
