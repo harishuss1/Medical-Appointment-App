@@ -199,7 +199,7 @@ class Database:
                 doctor = self.get_user_by_id(int(row[2]))
                 if patient is not None and doctor is not None:
                     appointments.append(Appointments(int(row[0]), patient, doctor,
-                                                    row[3], int(row[4]), row[5], str(row[6])))
+                                                     row[3], int(row[4]), row[5], str(row[6])))
         return appointments
 
     def update_patient_details(self, patient_id, dob, blood_type, height, weight, allergies):
@@ -274,7 +274,6 @@ class Database:
                     Allergy(int(row[0]), str(row[1]), str(row[2])))
         return allergies
 
-
     def get_patient_details(self, patient_id):
         patient = None
         with self.__get_cursor() as cursor:
@@ -295,11 +294,12 @@ class Database:
             for row in results:
                 doctor = User(
                     row[14], row[15], row[16], row[17], row[18], avatar_path=row[19], id=int(row[20]))
-                patient = MedicalPatient(float(row[3]), row[4], row[5], row[6], row[7], str(row[8]), row[9], str(row[10]), float(row[11]), avatar_path=row[12], id=int(row[13]))
+                patient = MedicalPatient(float(row[3]), row[4], row[5], row[6], row[7], str(
+                    row[8]), row[9], str(row[10]), float(row[11]), avatar_path=row[12], id=int(row[13]))
                 notes.append(Note(
                     int(row[0]), patient, doctor, str(row[1]), str(row[2]), str(row[21])))
         return notes
-    
+
     def get_notes_by_doctor_id(self, doctor_id):
         notes = []
         with self.__get_cursor() as cursor:
@@ -317,11 +317,12 @@ class Database:
             for row in results:
                 doctor = User(
                     row[14], row[15], row[16], row[17], row[18], avatar_path=row[19], id=int(row[20]))
-                patient = MedicalPatient(float(row[3]), row[4], row[5], row[6], row[7], str(row[8]), row[9], str(row[10]), float(row[11]), avatar_path=row[12], id=int(row[13]))
+                patient = MedicalPatient(float(row[3]), row[4], row[5], row[6], row[7], str(
+                    row[8]), row[9], str(row[10]), float(row[11]), avatar_path=row[12], id=int(row[13]))
                 notes.append(Note(
                     patient, doctor, row[1], str(row[2]), attachement_path=str(row[21]), id=int(row[0])))
         return notes
-    
+
     def create_note(self, note):
         if not isinstance(note, Note):
             raise TypeError("expected Note object")
@@ -336,7 +337,6 @@ class Database:
             cursor.execute('insert into medical_note_attachments (note_id, attachment_path)  values (:note_id, :attachement_path)',
                            note_id=int(new_id.values[0][0]),
                            attachement_path=str(note.attachement_path))
-
 
     def create_user(self, user):
         if not isinstance(user, User):
@@ -395,9 +395,11 @@ class Database:
         with self.__get_cursor() as cursor:
             results = cursor.execute('SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, p.id, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, p.AVATAR_PATH, mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT, mp.WEIGHT FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id')
             for row in results:
-                doctor = User(row[8], row[9], row[10], row[11], row[12], avatar_path=row[13], id=int(row[7]))
-                allergies=self.get_patient_allergies(int(row[14]))
-                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(row[23]), avatar_path=row[20], id=int(row[14]),allergies=allergies)
+                doctor = User(row[8], row[9], row[10], row[11],
+                              row[12], avatar_path=row[13], id=int(row[7]))
+                allergies = self.get_patient_allergies(int(row[14]))
+                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
+                    row[23]), avatar_path=row[20], id=int(row[14]), allergies=allergies)
                 appointments.append(Appointments(
                     row[0], patient, doctor, row[3], row[4], row[5], str(row[6])))
         return appointments

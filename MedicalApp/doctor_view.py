@@ -17,6 +17,7 @@ def dashboard():
         return redirect(url_for('home.index'))
     return render_template("doctor.html")
 
+
 @bp.route('/patients/')
 @login_required
 def patients():
