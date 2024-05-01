@@ -3,6 +3,7 @@ import os
 from flask import g
 
 from MedicalApp.allergy import Allergy
+from MedicalApp.medical_room import MedicalRoom
 from ..appointments import Appointments
 from ..user import MedicalPatient
 from ..note import Note
@@ -477,6 +478,26 @@ class Database:
                 appointments.append(Appointments(
                     row[0], patient, doctor, row[3], row[4], row[5], str(row[6])))
         return appointments
+
+    def get_medical_rooms(self):
+        medical_rooms = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                'SELECT room_number, description FROM medical_rooms')
+            for row in results:
+                medical_room = MedicalRoom(row[0], row[1])
+                medical_rooms.append(medical_room)
+        return medical_rooms
+
+    def get_room_number_by_room_name(self,room_number):
+        medical_room = None
+        with self.__get_cursor() as cursor:
+            cursor.execute(
+                'select room_number, description, medical_rooms where room_number=:room_number', room_number=room_number)
+            row = cursor.fetchone()
+            if row:
+                medical_room = MedicalRoom(row[0], row[1])
+        return medical_room
 
     def __get_cursor(self):
         for i in range(3):
