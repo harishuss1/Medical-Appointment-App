@@ -17,6 +17,7 @@ def dashboard():
         return redirect(url_for('home.index'))
     return render_template("doctor.html")
 
+
 @bp.route('/patients/')
 @login_required
 def patients():
@@ -31,6 +32,23 @@ def patients():
     except DatabaseError as e:
         flash("Something went wrong with the database")
         return redirect(url_for('doctor.dashboard'))
-    
 
 
+@bp.route('/notes/<int:patient_id>')
+@login_required
+def notes(patient_id):
+    if current_user.access_level != 'STAFF':
+        return redirect(url_for('home.index'))
+    try:
+        patient = get_db().get_patients_by_id(patient_id)
+        notes = get_db().get_notes_by_patient_id(patient_id, current_user.id)
+        if notes is None or len(notes) == 0:
+            flash("No notes are currently written for this patient")
+            return redirect(url_for('doctor.dashboard'))
+        if patient is None:
+            flash("Patient does not exist")
+            return redirect(url_for('doctor.dashboard'))
+        return render_template('patient_notes.html', notes=notes, patient=patient)
+    except DatabaseError as e:
+        flash("Something went wrong with the database")
+        return redirect(url_for('doctor.dashboard'))

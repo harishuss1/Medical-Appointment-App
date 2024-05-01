@@ -1,9 +1,8 @@
 import os
 from flask import Flask, render_template
 from .db.dbmanager import close_db, init_db_command
-from .admin_view import admin_bp
 from flask_login import LoginManager
-from MedicalApp.db.dbmanager import close_db, init_db_command,get_db
+from MedicalApp.db.dbmanager import close_db, init_db_command, get_db
 
 
 def create_app(test_config=None):
@@ -14,10 +13,10 @@ def create_app(test_config=None):
         app.config.from_mapping(test_config)
 
     app.config.from_mapping(
-        SECRET_KEY = os.environ['FLASK_SECRET'],
-        ATTACHEMENTS = os.path.join(app.instance_path, "attachements")
+        SECRET_KEY=os.environ['FLASK_SECRET'],
+        ATTACHEMENTS=os.path.join(app.instance_path, "attachements")
     )
-    
+
     os.makedirs(app.instance_path, exist_ok=True)
     os.makedirs(app.config['ATTACHEMENTS'], exist_ok=True)
     app.config['TESTING'] = False
@@ -27,8 +26,6 @@ def create_app(test_config=None):
 
 
 def init_app(app):
-    #REGISTER BLUEPRINTS HERE
-    app.register_blueprint(admin_bp)
 
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'
@@ -39,11 +36,13 @@ def init_app(app):
         user = get_db().get_user_by_id(user_id)
         return user
 
-
     # REGISTER BLUEPRINTS HERE
+    from .admin_view import admin_bp
+    app.register_blueprint(admin_bp)
+
     from .auth_views import bp as login_bp
     app.register_blueprint(login_bp)
-    
+
     from .doctor_view import bp as doctor_bp
     app.register_blueprint(doctor_bp)
 
@@ -52,12 +51,13 @@ def init_app(app):
 
     from .appointments_views import bp as appointments_bp
     app.register_blueprint(appointments_bp)
-    
+
     from .note_views import bp as notes_bp
     app.register_blueprint(notes_bp)
+
+    from .patients_views import bp as patient_bp
+    app.register_blueprint(patient_bp)
 
     app.teardown_appcontext(close_db)
 
     app.cli.add_command(init_db_command)
-
-    #Resolving Merge Conflicts

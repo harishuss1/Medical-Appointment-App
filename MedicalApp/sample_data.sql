@@ -1,6 +1,8 @@
+INSERT INTO medical_access_level (user_type) VALUES ('BLOCKED');
 INSERT INTO medical_access_level (user_type) VALUES ('PATIENT');
 INSERT INTO medical_access_level (user_type) VALUES ('STAFF');
 INSERT INTO medical_access_level (user_type) VALUES ('ADMIN');
+INSERT INTO medical_access_level (user_type) VALUES ('ADMIN_USER');
 
 INSERT INTO medical_users (email, password, first_name, last_name, avatar_path, user_type)
 VALUES ('patient1@example.com', 'scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68', 'Evan', 'Buckley', '/avatars/evan_buckley.jpg', 'PATIENT');

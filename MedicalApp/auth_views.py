@@ -13,7 +13,8 @@ def signup():
     form = SignupForm()
     if request.method == 'POST' and form.validate_on_submit():
         pwd_hash = generate_password_hash(form.password.data)
-        user = User(form.email.data, pwd_hash, form.first_name.data, form.last_name.data)
+        user = User(form.email.data, pwd_hash,
+                    form.first_name.data, form.last_name.data)
         get_db().create_user(user)
         return redirect(url_for('auth.login'))
     return render_template('signup.html', form=form)
@@ -30,6 +31,11 @@ def login():
             login_user(user, remember=False)
             if current_user.access_level == 'STAFF':
                 return redirect(url_for('doctor.dashboard'))
+            if current_user.access_level == 'BLOCKED':
+                flash("Adminstrators has blocked this account.", "error")
+                #use logout() needs to be implemented
+            if current_user.access_level in ('ADMIN', 'ADMIN_USER'):
+                return redirect(url_for('admin.admin_dashboard'))
             return redirect(url_for('home.index'))
         else:
             flash('Incorrect info')

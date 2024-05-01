@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}
+Change User Role
+{% endblock title %}
+
+{% block content %}
+<h1>Change User Role</h1>
+
+<form method="post" action="{{ url_for('admin.change_user_role') }}">
+    {{ form.hidden_tag() }}
+
+    <div>
+        {{ form.email.label }}
+        {{ form.email() }}
+    </div>
+
+    <div>
+        {{ form.user_type.label }}
+        {{ form.user_type() }}
+    </div>
+
+    {{ form.submit() }}
+</form>
+
+{% if messages %}
+<div class="feedback-messages">
+    {% for message in messages %}
+    <p>{{ message }}</p>
+    {% endfor %}
+</div>
+{% endif %}
+
+<p><a href="{{ url_for('admin.admin_dashboard') }}">Back to Admin Dashboard</a></p>
+{% endblock content %}

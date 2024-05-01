@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% if current_user.access_level == 'PATIENT' %}
+{% block nav %}
+        <li><a href="{{ url_for('patient.patient_dashboard') }}">Dashboard</a></li>
+        <li><a href="{{ url_for('patient.view_appointments') }}">View Appointments</a></li>
+        <li><a href="{{ url_for('patient.update_patient') }}">Update Details</a></li>
+        <li><a href="{{ url_for('patient.view_patient') }}">View Details</a></li>
+{% endblock nav %}
+{% endif %}
+{% block content %}
+<h2>Patient Dashboard</h2>
+<div>
+    <h3>Welcome, {{ current_user.first_name }}!</h3>
+    <!-- Add Book appointments -->
+</div>
+<div>
+    <h4>Pending Appointments:</h4>
+    <ul>
+        {% for appointment in appointments %}
+        {% if appointment.status == 'pending' %}
+        <li>
+            <strong>Date:</strong> {{ appointment.date }}
+            <strong>Status:</strong> {{ appointment.status }}
+            <strong>Doctor:</strong> {{ appointment.doctor.name }}
+            <strong>Location:</strong> {{ appointment.location }}
+            <strong>Description:</strong> {{ appointment.description }}
+        </li>
+        {% endif %}
+        {% endfor %}
+    </ul>
+</div>
+<div>
+    <h4>Accepted Appointments:</h4>
+    <ul>
+        {% for appointment in appointments %}
+        {% if appointment.status == 'accepted' %}
+        <li>
+            <strong>Date:</strong> {{ appointment.date }} <br>
+            <strong>Status:</strong> {{ appointment.status }} <br>
+            <strong>Doctor:</strong> {{ appointment.doctor.name }} <br>
+            <strong>Location:</strong> {{ appointment.location }} <br>
+            <strong>Description:</strong> {{ appointment.description }} <br>
+        </li>
+        {% endif %}
+        {% endfor %}
+    </ul>
+</div>
+{% endblock content %}

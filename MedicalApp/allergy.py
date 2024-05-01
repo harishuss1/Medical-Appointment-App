@@ -1,4 +1,4 @@
-class allergies:
+class Allergy:
     def __init__(self, id, name, description):
         if not isinstance(id, int):
             raise ValueError("Id must be an integer")
