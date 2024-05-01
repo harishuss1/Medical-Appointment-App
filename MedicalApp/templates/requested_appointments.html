@@ -2,19 +2,18 @@
 {% block content %}
 <nav id="navbar">
     <ul>
-        <li><a href="{{ url_for('doctor.confirmed_appointments') }}">See all confirmed appointments</a></li>
-        <li><a href="{{ url_for('doctor.requested_appointments') }}">See appointment requests</a></li>
+        <li><a href="{{ url_for('appointments.confirmed_appointments') }}">See all confirmed appointments</a></li>
+        <li><a href="{{ url_for('appointments.requested_appointments') }}">See appointment requests</a></li>
         <li><a href="{{ url_for('doctor.patients') }}">See all patients</a></li>
     </ul>
 </nav>
 <h1>{% block title %}Requested Appointments{% endblock title %}</h1>
     <dl id="doctor-appointments">
         {% for appointment in appointments %}
-            {% set patient=get_db().get_user_by_id(appointment.patient_id) %}
-            <dt>Appointment with {{ patient.first_name }} {{ patient.last_name }}</dt>
+            <dt>Appointment with {{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</dt>
             <dd>Appointment at {{ appointment.appointment_time }} in room {{ appointment.location }}.</dd>
             <dd>Reason for appointment: {{ appointment.description }}.</dd>
-            <dd><a href="{{ url_for('doctor.update_appointment', id=appointment.id) }}">See appointment details</a></dd>
+            <dd><a href="{{ url_for('appointments.update_appointment', id=appointment.id) }}">See appointment details</a></dd>
         {% endfor %}
     </dl>
 {% endblock content %}

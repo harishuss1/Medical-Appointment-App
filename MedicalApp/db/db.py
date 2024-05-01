@@ -69,30 +69,75 @@ class Database:
             raise
     
     
-
     # status 0 = pending, status 1 = confirmed, status -1 = cancel
-    def get_appointments_by_status(self, status, doctor_id):
+    def get_appointments_by_status_doctor(self, status, doctor_id):
         appointments = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
-                "SELECT id, patient_id, doctor_id, appointment_time, status, location, description FROM medical_appointments WHERE status = :status AND doctor_id = :doctor_id",
+                'SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, p.id, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, p.AVATAR_PATH, mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT, mp.WEIGHT FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id WHERE app.status = :status AND app.doctor_id = :doctor_id',
                 status=status, doctor_id=doctor_id)
             for row in results:
-                appointments.append(Appointments(int(row[0]), int(row[1]), int(
-                    row[2]), str(row[3]), int(row[4]), row[5], str(row[6])))
+                doctor = User(row[8], row[9], row[10], row[11], row[12], avatar_path=row[13], id=int(row[7]))
+                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(row[23]), avatar_path=row[20], id=int(row[14]))
+                appointments.append(Appointments(
+                    row[0], patient, doctor, row[3], row[4], row[5], str(row[6])))
+        return appointments
+    
+    def get_appointments_by_status_patient(self, status, patient_id):
+        appointments = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                'SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, p.id, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, p.AVATAR_PATH, mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT, mp.WEIGHT FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id WHERE app.status = :status AND app.patient_id = :patient_id',
+                status=status, patient_id=patient_id)
+            for row in results:
+                doctor = User(row[8], row[9], row[10], row[11], row[12], avatar_path=row[13], id=int(row[7]))
+                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(row[23]), avatar_path=row[20], id=int(row[14]))
+                appointments.append(Appointments(
+                    row[0], patient, doctor, row[3], row[4], row[5], str(row[6])))
         return appointments
 
     def get_appointment_by_id(self, id):
         appointment = None
         with self.__get_cursor() as cursor:
             results = cursor.execute(
-                "SELECT id, patient_id, doctor_id, appointment_time, status, location, description FROM medical_appointments WHERE id = :id",
+                'SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, p.id, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, p.AVATAR_PATH, mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT, mp.WEIGHT FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id WHERE app.id = :id',
                 id=id)
             row = results.fetchone()
             if row:
-                appointment = Appointments(int(row[0]), int(row[1]), int(
-                    row[2]), str(row[3]), int(row[4]), row[5], str(row[6]))
+                doctor = User(row[8], row[9], row[10], row[11], row[12], avatar_path=row[13], id=int(row[7]))
+                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(row[23]), avatar_path=row[20], id=int(row[14]))
+                appointment = Appointments(
+                    row[0], patient, doctor, row[3], row[4], row[5], str(row[6]))
         return appointment
+    
+    def get_appointment_for_doctors(self, id):
+        appointments = []
+        with self.__get_cursor() as cursor:
+            cursor.execute(
+                'SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, p.id, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, p.AVATAR_PATH, mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT, mp.WEIGHT FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id WHERE d.id = :doctor_id',
+                doctor_id=id)
+            row = cursor.fetchone()
+            if row:
+                doctor = User(row[8], row[9], row[10], row[11], row[12], avatar_path=row[13], id=int(row[7]))
+                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(row[23]), avatar_path=row[20], id=int(row[14]))
+                appointments.append(Appointments(
+                    row[0], patient, doctor, row[3], row[4], row[5], str(row[6])))
+        return appointments
+    
+    
+    def get_appointment_for_patients(self, id):
+        appointments = []
+        with self.__get_cursor() as cursor:
+            cursor.execute(
+                'SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, p.id, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, p.AVATAR_PATH, mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT, mp.WEIGHT FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id WHERE p.id = :patient_id',
+                patient_id=id)
+            row = cursor.fetchone()
+            if row:
+                doctor = User(row[8], row[9], row[10], row[11], row[12], avatar_path=row[13], id=int(row[7]))
+                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(row[23]), avatar_path=row[20], id=int(row[14]))
+                appointments.append(Appointments(
+                    row[0], patient, doctor, row[3], row[4], row[5], str(row[6])))
+        return appointments
 
     def get_user_by_id(self, id):
         patient = None
@@ -118,7 +163,7 @@ class Database:
                 id=doctor_id)
             for row in results:
                 patients.append(MedicalPatient(
-                    float(row[0]), row[1], row[2], row[3], row[4], str(row[5]), str(row[6]), str(row[7]), float(row[8]), avatar_path= str(row[9]), id=int(row[10])))
+                    float(row[0]), row[1], row[2], row[3], row[4], str(row[5]), row[6], str(row[7]), float(row[8]), avatar_path= str(row[9]), id=int(row[10])))
         return patients
 
     def get_patients_by_id(self, patient_id):
@@ -128,19 +173,60 @@ class Database:
                                      id=patient_id)
             row = results.fetchone()
             if row:
-                patient = MedicalPatient(float(row[0]), row[1], row[2], row[3], row[4], str(row[5]), str(row[6]), str(row[7]), float(row[8]), avatar_path=row[9], id=int(row[10]))
+                patient = MedicalPatient(float(row[0]), row[1], row[2], row[3], row[4], str(row[5]), row[6], str(row[7]), float(row[8]), avatar_path=row[9], id=int(row[10]))
         return patient
 
-    def get_notes_by_patient_id(self, patient_id, doctor_id):
+    def get_notes_by_patient_id(self, patient_id):
         notes = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
-                "SELECT id, patient_id, note_taker_id, note_date, note FROM medical_notes WHERE note_taker_id = :doctor_id AND patient_id = :patient_id",
-                doctor_id=doctor_id, patient_id=patient_id)
+                "SELECT n.id, n.note_date, n.note, p.weight, p.email, p.password, p.first_name, p.last_name, p.user_type, p.dob, p.blood_type, p.height, p.avatar_path, p.id, d.email, d.password, d.first_name, d.last_name, d.user_type, d.avatar_path, d.id, a.attachement_path FROM medical_notes n INNER JOIN medical_patients p ON (n.patient_id = p.id) INNER JOIN medical_users u ON(d.id = n.note_taker_id) INNER JOIN medical_note_attachements a ON(a.note_id = n.id) WHERE patient_id = :patient_id",
+                patient_id=patient_id)
             for row in results:
+                doctor = User(
+                    row[14], row[15], row[16], row[17], row[18], avatar_path=row[19], id=int(row[20]))
+                patient = MedicalPatient(float(row[3]), row[4], row[5], row[6], row[7], str(row[8]), row[9], str(row[10]), float(row[11]), avatar_path=row[12], id=int(row[13]))
                 notes.append(Note(
-                    int(row[0]), int(row[1]), int(row[2]), str(row[3]), str(row[4])))
+                    int(row[0]), patient, doctor, str(row[1]), str(row[2]), str(row[21])))
         return notes
+    
+    def get_notes_by_doctor_id(self, doctor_id):
+        notes = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                """
+                SELECT n.id, n.note_date, n.note, p.weight, up.email, up.password, up.first_name, up.last_name, up.user_type, p.dob, p.blood_type, p.height, up.avatar_path, p.id, d.email, d.password, d.first_name, d.last_name, d.user_type, d.avatar_path, d.id, a.attachment_path
+                FROM medical_notes n INNER JOIN medical_users up
+                    ON (n.patient_id = up.id) INNER JOIN medical_patients p
+                    ON (up.id = p.id)
+                    INNER JOIN medical_users d ON(d.id = n.note_taker_id)
+                    INNER JOIN medical_note_attachments a ON(a.note_id = n.id)
+                WHERE note_taker_id = :doctor_id
+                """,
+                doctor_id=doctor_id)
+            for row in results:
+                doctor = User(
+                    row[14], row[15], row[16], row[17], row[18], avatar_path=row[19], id=int(row[20]))
+                patient = MedicalPatient(float(row[3]), row[4], row[5], row[6], row[7], str(row[8]), row[9], str(row[10]), float(row[11]), avatar_path=row[12], id=int(row[13]))
+                notes.append(Note(
+                    patient, doctor, row[1], str(row[2]), attachement_path=str(row[21]), id=int(row[0])))
+        return notes
+    
+    def create_note(self, note):
+        if not isinstance(note, Note):
+            raise TypeError("expected Note object")
+        with self.__get_cursor() as cursor:
+            new_id = cursor.var(oracledb.NUMBER)
+            cursor.execute('insert into medical_notes (patient_id, note_taker_id, note_date, note)  values (:patient_id, :note_taker_id, :note_date, :note) returning id into :id',
+                           patient_id=note.patient.id,
+                           note_taker_id=note.note_taker.id,
+                           note_date=note.note_date,
+                           note=note.note,
+                           id=new_id)
+            cursor.execute('insert into medical_note_attachments (note_id, attachment_path)  values (:note_id, :attachement_path)',
+                           note_id=int(new_id.values[0][0]),
+                           attachement_path=str(note.attachement_path))
+
 
     def create_user(self, user):
         if not isinstance(user, User):
@@ -171,34 +257,41 @@ class Database:
             with self.__get_cursor() as cursor:
                 cursor.execute('insert into medical_appointments (id, patient_id, doctor_id, appointment_time, status, location, description) values (:id, :patient_id, :doctor_id, :appointment_time, :status, :location, :description)',
                                id=appointment.id,
-                               patient_id=appointment.patient_id,
-                               doctor_id=appointment.doctor_id,
+                               patient_id=appointment.patients.id,
+                               doctor_id=appointment.doctors.id,
                                appointment_time=appointment.appointment_time,
                                status=appointment.status,
                                location=appointment.location,
                                description=appointment.description)
 
-    def get_appointment_id(self, id):
-        appointment = None
+    def delete_appointment_by_id(self, id):
         with self.__get_cursor() as cursor:
-            cursor.execute(
-                'select id, patient_id, doctor_id, appointment_time, status, location, description from medical_appointments where name=:name', id=id)
-            row = cursor.fetchone()
-            if row:
-                appointment = Appointments(
-                    row[0], row[1], row[2], row[3], row[4], row[5], row[6])
-        return appointment
+            if not isinstance(id, int):
+                raise TypeError("expected type of integer")
+            with self.__get_cursor() as cursor:
+                    cursor.execute("DELETE FROM medical_appointments WHERE id = :id", id=id)
+
+
+    def update_appointment(self,appointment):
+        with self.__get_cursor() as cursor:
+            if not isinstance(appointment, Appointments):
+                raise TypeError("expected type of Appointmentsr")
+            with self.__get_cursor() as cursor:
+                    cursor.execute(" UPDATE medical_appointments SET patient_id =: patient_id, doctor_id =: doctor_id, appointment_time =: appointment_time, status =: status, location =: location, description =: description WHERE id =:id", patient_id=appointment.patients.id, doctor_id=appointment.doctors.id, appointment_time=appointment.appointment_time, status=appointment.status, location=appointment.location, description=appointment.description, id=appointment.id)
 
     def get_appointments(self):
         appointments = []
         with self.__get_cursor() as cursor:
-            results = cursor.execute(
-                'select id, patient_id, doctor_id, appointment_time, status, location, description from medical_appointments')
+            results = cursor.execute('SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, p.dob, p.blood_type, p.height, p.weight, mu1.email as patient_email, mu1.first_name as patient_first_name, mu1.last_name as patient_last_name, mu2.email as doctor_email, mu2.first_name as doctor_first_name, mu2.last_name as doctor_last_name FROM medical_appointments app INNER JOIN medical_users mu1 ON app.patient_id = mu1.id INNER JOIN medical_users mu2 ON app.doctor_id = mu2.id INNER JOIN medical_patients p ON app.patient_id = p.id')
             for row in results:
+                patient = MedicalPatient(
+                    row[10], row[11], row[12], row[13], row[14], 'PATIENT', row[7], row[8], row[9], row[10])  
+                doctor = User(row[15], None, row[16], row[17])  
                 appointment = Appointments(
-                    row[0], row[1], row[2], row[3], row[4], row[5], row[6])
+                    row[0], patient, doctor, row[3], row[4], row[5], str(row[6]))
                 appointments.append(appointment)
         return appointments
+
 
     def __get_cursor(self):
         for i in range(3):

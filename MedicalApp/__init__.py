@@ -13,8 +13,12 @@ def create_app(test_config=None):
         app.config.from_mapping(test_config)
 
     app.config.from_mapping(
-        SECRET_KEY=os.environ['FLASK_SECRET']
+        SECRET_KEY = os.environ['FLASK_SECRET'],
+        ATTACHEMENTS = os.path.join(app.instance_path, "attachements")
     )
+    
+    os.makedirs(app.instance_path, exist_ok=True)
+    os.makedirs(app.config['ATTACHEMENTS'], exist_ok=True)
     app.config['TESTING'] = False
 
     init_app(app)
@@ -48,6 +52,9 @@ def init_app(app):
 
     from .appointments_views import bp as appointments_bp
     app.register_blueprint(appointments_bp)
+    
+    from .note_views import bp as notes_bp
+    app.register_blueprint(notes_bp)
 
     app.teardown_appcontext(close_db)
 
