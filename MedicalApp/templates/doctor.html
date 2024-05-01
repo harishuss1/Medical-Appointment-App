@@ -1,14 +1,13 @@
 {% extends "base.html" %}
 
-{% block content %}
-{% if current_user.access_level == 'STAFF' %}
 {% block nav %}
-<li><a href="{{ url_for('appointments.confirmed_appointments') }}">See all confirmed appointments</a></li>
-<li><a href="{{ url_for('appointments.requested_appointments') }}">See appointment requests</a></li>
-<li><a href="{{ url_for('doctor.patients') }}">See all patients</a></li>
-<li><a href="{{ url_for('note.notes', user_id=current_user.id) }}">See all notes</a></li>
+    <li><a href="{{ url_for('appointments.confirmed_appointments') }}">See all confirmed appointments</a></li>
+    <li><a href="{{ url_for('appointments.requested_appointments') }}">See appointment requests</a></li>
+    <li><a href="{{ url_for('doctor.patients') }}">See all patients</a></li>
+    <li><a href="{{ url_for('note.notes', user_id=current_user.id) }}">See all notes</a></li>
 {% endblock nav %}
-{% endif %}
+{% block content %}
+
     <h1>{% block title %}Doctor Dashboard{% endblock title %}</h1>
     <main>
         Welcome to your dashboard
