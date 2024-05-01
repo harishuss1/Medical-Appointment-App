@@ -1,3 +1,4 @@
+import datetime
 from flask_login import UserMixin
 from MedicalApp.allergy import Allergy
 
@@ -32,7 +33,7 @@ class MedicalPatient(User):
     def __init__(self, weight, email, password, first_name, last_name, access_level, dob, blood_type, height, allergies=None, avatar_path=None, id=None):
         super().__init__(email, password, first_name,
                          last_name, access_level, avatar_path, id)
-        if not isinstance(dob, str):
+        if not isinstance(dob, datetime.date):
             raise ValueError("Illegal type for dob")
         if not isinstance(blood_type, str):
             raise ValueError("Illegal type for blood type")
