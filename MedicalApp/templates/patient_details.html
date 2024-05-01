@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<div>
+    <h1>Your Details</h1>
+    <p>Name: {{ patient.first_name }} {{ patient.last_name }}</p>
+    <p>Date of Birth: {{ patient.dob }}</p>
+    <p>Blood Type: {{ patient.blood_type }}</p>
+    <p>Height: {{ patient.height }}</p>
+    <p>Weight: {{ patient.weight }}</p>
+</div>
+
+<div>
+    <h2>Allergies</h2>
+    {% if patient.allergies %}
+    <ul>
+        {% for allergy in patient.allergies %}
+        <li>{{ allergy.name }}: {{ allergy.description }}</li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No allergies recorded.</p>
+    {% endif %}
+
+</div>
+{% endblock content %}

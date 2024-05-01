@@ -1,6 +1,6 @@
 import datetime
 import json
-from MedicalApp.user import User,MedicalPatient
+from MedicalApp.user import User, MedicalPatient
 
 
 class Appointments:
@@ -51,4 +51,4 @@ class Appointments:
         self.description = description
 
     def __str__(self):
-        return f'{self.id} {self.patients} {self.doctors} {self.appointment_time} {self.status} {self.location} {self.description}'
+        return f'{self.id} {self.patient} {self.doctor} {self.appointment_time} {self.status} {self.location} {self.description}'
