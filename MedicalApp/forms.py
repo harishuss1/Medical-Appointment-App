@@ -1,10 +1,10 @@
 from flask_login import current_user
 from flask_wtf import FlaskForm
-from wtforms import FileField, StringField, IntegerField, EmailField, DateField, PasswordField, TextAreaField , SubmitField, RadioField, SelectField
+from wtforms import FileField,StringField, IntegerField, EmailField, DateField, PasswordField, TextAreaField, SubmitField, RadioField, SelectField
 from wtforms.validators import DataRequired, Email, Length, EqualTo
 
-from .db.dbmanager import get_db
 
+from .db.dbmanager import get_db
 
 class AppointmentResponseForm(FlaskForm):
     select_confirmation = RadioField('Acceptance:', choices=[(
@@ -39,7 +39,7 @@ class AppointmentForm(FlaskForm):
     status = StringField("Status:", validators=[DataRequired()])
     location = StringField("Location:", validators=[DataRequired()])
     description = StringField("Description:", validators=[DataRequired()])
-    
+
 class NoteForm(FlaskForm):
     
     patient = SelectField('Patient', validators=[DataRequired()], choices=[])
@@ -53,4 +53,40 @@ class NoteForm(FlaskForm):
         for patient in patients:
             choices.append((patient.id, f"{patient.first_name} {patient.last_name}"))
         self.patient.choices = choices
-    
+
+class BlockUserForm(FlaskForm):
+    email = EmailField('User Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Block User')
+
+class AddUserForm(FlaskForm):
+    email = EmailField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[
+        DataRequired(),
+        Length(min=8, message='Password must be at least 8 characters long'),
+        EqualTo('confirm_password', message='Passwords must match')
+    ])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired()])
+    first_name = StringField('First Name', validators=[DataRequired()])
+    last_name = StringField('Last Name', validators=[DataRequired()])
+    user_type = SelectField(
+        'User Type',
+        choices=[('PATIENT', 'Patient'), ('STAFF', 'Staff'), ('ADMIN_USER', 'Admin User'), ('ADMIN', 'Admin')],
+        validators=[DataRequired()]
+    )
+    avatar_path = StringField('Avatar Path', validators=[]) 
+    submit = SubmitField('Add User')
+
+class DeleteUserForm(FlaskForm):
+    email = EmailField('User Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Delete User')
+
+class ChangeUserRoleForm(FlaskForm):
+    email = EmailField('User Email', validators=[DataRequired(), Email()])
+    user_type = SelectField(
+        'New Role',
+        choices=[('PATIENT', 'Patient'), ('STAFF', 'Staff'), ('ADMIN_USER', 'Admin User'), ('ADMIN', 'Admin')],
+        validators=[DataRequired()]
+    )
+    submit = SubmitField('Change Role')
+
+#added comment to fix git issue, please remove this comment later

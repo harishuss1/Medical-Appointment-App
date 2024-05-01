@@ -1,7 +1,7 @@
 create table medical_access_level(
     user_type varchar2(20) PRIMARY KEY,
     CONSTRAINT check_user_type
-    CHECK (user_type IN('PATIENT', 'STAFF', 'ADMIN_USER', 'ADMIN'))
+    CHECK (user_type IN('BLOCKED','PATIENT', 'STAFF', 'ADMIN_USER', 'ADMIN'))
 );
 
 CREATE TABLE medical_users (
@@ -16,7 +16,6 @@ CREATE TABLE medical_users (
     user_type   VARCHAR2(20) REFERENCES medical_access_level(user_type)
 );
 
-/* account_status VARCHAR2(20) */
 
 CREATE TABLE medical_api_tokens(
 user_id integer not null,
