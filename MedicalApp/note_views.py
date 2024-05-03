@@ -16,10 +16,10 @@ from .note import Note
 bp = Blueprint('note', __name__, url_prefix="/notes/")
 
 def doctor_access(func):
-    def wrapper():
+    def wrapper(*args, **kwargs):
         if current_user.access_level != 'STAFF' and current_user.access_level != 'ADMIN' and current_user.access_level != 'ADMIN_USER':
             return abort(401, "You do not have access to this page!")
-        return func()
+        return func(*args, **kwargs)
     wrapper.__name__ = func.__name__
     return wrapper
 

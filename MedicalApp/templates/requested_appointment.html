@@ -16,6 +16,7 @@
     <form method="post" id="appointment-confirmation-form">
         {{ form.csrf_token }}
         {{ form.select_confirmation.label }} {{ form.select_confirmation() }}
+        {{ form.room.label }} {{ form.room() }}
         <button type="submit">Confirm status</button>
     </form>
     {% endif %}

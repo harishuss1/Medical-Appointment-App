@@ -1,5 +1,6 @@
 from flask import Blueprint, request, render_template, redirect, url_for, flash, abort
 from flask_login import login_required, current_user
+from oracledb import DatabaseError
 from MedicalApp.allergy import Allergy
 from MedicalApp.forms import PatientDetailsForm
 from MedicalApp.user import MedicalPatient
@@ -9,10 +10,18 @@ from .db.dbmanager import get_db
 bp = Blueprint('patient', __name__, url_prefix="/patients")
 
 def patient_access(func):
-    def wrapper():
+    def wrapper(*args, **kwargs):
         if current_user.access_level != 'PATIENT' and current_user.access_level != 'STAFF' and current_user.access_level != 'ADMIN' and current_user.access_level != 'ADMIN_USER':
             return abort(401, "You do not have access to this page!")
-        func()
+        return func(*args, **kwargs)
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+def doctor_access(func):
+    def wrapper(*args, **kwargs):
+        if current_user.access_level != 'STAFF' and current_user.access_level != 'ADMIN' and current_user.access_level != 'ADMIN_USER':
+            return abort(401, "You do not have access to this page!")
+        return func(*args, **kwargs)
     wrapper.__name__ = func.__name__
     return wrapper
 
@@ -72,3 +81,18 @@ def view_patient():
     patient.allergies = get_db().get_patient_allergies(patient.id)
 
     return render_template('patient_details.html', patient=patient)
+
+
+@bp.route('/patients/')
+@login_required
+@doctor_access
+def patients():
+    try:
+        patients = get_db().get_patients_by_doctor(current_user.id)
+        if patients is None or len(patients) == 0:
+            flash("No patients are currently being supervised by you")
+            return redirect(url_for('doctor.dashboard'))
+        return render_template('doctor_patients.html', patients=patients)
+    except DatabaseError as e:
+        flash("Something went wrong with the database")
+        return redirect(url_for('doctor.dashboard'))

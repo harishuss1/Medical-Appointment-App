@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% block title %}Appointments{% endblock body %}
 {% if current_user.access_level == 'STAFF' %}
 {% block nav %}
     <li><a href="{{ url_for('appointments.confirmed_appointments', user_type='doctor') }}">See all confirmed appointments</a></li>
@@ -9,7 +8,7 @@
 {% endblock nav %}
 {% endif %}
 {% block content %}
-<h2>Appointments</h2>
+<h2>{% block title %}Appointments{% endblock title %}</h2>
 <ul>
     <li>ID: {{ appointment.id }}</li>
     <li>Patient ID: {{ appointment.patient_id }}</li>
@@ -19,4 +18,4 @@
     <li>Location: {{ appointment.location }}</li>  
     <li>Description: {{ appointment.description }}</li>  
 </ul>
-{% endblock body %}
+{% endblock content %}

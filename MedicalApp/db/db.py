@@ -88,14 +88,40 @@ class Database:
                               row[12], avatar_path=row[13], id=int(row[7]))
                 patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
                     row[23]), avatar_path=row[20], id=int(row[14]))
-                doctor = User(row[8], row[9], row[10], row[11],
-                              row[12], avatar_path=row[13], id=int(row[7]))
-                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
-                    row[23]), avatar_path=row[20], id=int(row[14]))
                 appointments.append(Appointments(
-                    row[0], patient, doctor, row[3], row[4], row[5], str(row[6])))
+                    patient, doctor, row[3], row[4], row[5], str(row[6]), id=row[0]))
         return appointments
 
+    def get_patients(self):
+        patients = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                """
+                SELECT 
+                mp.WEIGHT, p.id, p.AVATAR_PATH, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, 
+                mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT
+                FROM medical_users p INNER JOIN MEDICAL_PATIENTS mp 
+                ON(p.id = mp.id)
+                """)
+            for row in results:
+                patients.append(MedicalPatient(float(row[0]), row[3], row[4], row[5], row[6], row[7], row[8], row[9], float(
+                    row[10]), avatar_path=row[2], id=int(row[1])))
+        return patients
+    
+    def get_doctors(self):
+        doctors = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                """
+                SELECT 
+                u.id, u.AVATAR_PATH, u.EMAIL, u.PASSWORD, u.FIRST_NAME, u.LAST_NAME, u.USER_TYPE
+                FROM medical_users u
+                WHERE u.user_type = 'STAFF'
+                """)
+            for row in results:
+                doctors.append(User(row[2], row[3], row[4], row[5], row[6], 
+                avatar_path=row[1], id=int(row[0])))
+        return doctors
 
     def get_appointments_by_status_patient(self, status, patient_id):
         appointments = []
@@ -108,12 +134,8 @@ class Database:
                               row[12], avatar_path=row[13], id=int(row[7]))
                 patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
                     row[23]), avatar_path=row[20], id=int(row[14]))
-                doctor = User(row[8], row[9], row[10], row[11],
-                              row[12], avatar_path=row[13], id=int(row[7]))
-                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
-                    row[23]), avatar_path=row[20], id=int(row[14]))
                 appointments.append(Appointments(
-                    row[0], patient, doctor, row[3], row[4], row[5], str(row[6])))
+                    patient, doctor, row[3], row[4], row[5], str(row[6]), id=row[0]))
         return appointments
 
     def get_appointment_by_id(self, id):
@@ -128,12 +150,8 @@ class Database:
                               row[12], avatar_path=row[13], id=int(row[7]))
                 patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
                     row[23]), avatar_path=row[20], id=int(row[14]))
-                doctor = User(row[8], row[9], row[10], row[11],
-                              row[12], avatar_path=row[13], id=int(row[7]))
-                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
-                    row[23]), avatar_path=row[20], id=int(row[14]))
                 appointment = Appointments(
-                    row[0], patient, doctor, row[3], row[4], row[5], str(row[6]))
+                    patient, doctor, row[3], row[4], row[5], str(row[6]), id=row[0])
         return appointment
 
     def get_appointment_for_doctors(self, id):
@@ -148,12 +166,8 @@ class Database:
                               row[12], avatar_path=row[13], id=int(row[7]))
                 patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
                     row[23]), avatar_path=row[20], id=int(row[14]))
-                doctor = User(row[8], row[9], row[10], row[11],
-                              row[12], avatar_path=row[13], id=int(row[7]))
-                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
-                    row[23]), avatar_path=row[20], id=int(row[14]))
                 appointments.append(Appointments(
-                    row[0], patient, doctor, row[3], row[4], row[5], str(row[6])))
+                    patient, doctor, row[3], row[4], row[5], str(row[6]), id=row[0]))
         return appointments
 
 
@@ -169,12 +183,8 @@ class Database:
                               row[12], avatar_path=row[13], id=int(row[7]))
                 patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
                     row[23]), avatar_path=row[20], id=int(row[14]))
-                doctor = User(row[8], row[9], row[10], row[11],
-                              row[12], avatar_path=row[13], id=int(row[7]))
-                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
-                    row[23]), avatar_path=row[20], id=int(row[14]))
                 appointments.append(Appointments(
-                    row[0], patient, doctor, row[3], row[4], row[5], str(row[6])))
+                    patient, doctor, row[3], row[4], row[5], str(row[6]), id=row[0]))
         return appointments
 
     def get_user_by_id(self, id):
@@ -188,10 +198,13 @@ class Database:
                     row[0], row[1], row[2], row[3], row[4], avatar_path=row[5], id=int(row[6]))
         return (patient)
 
-    def update_appointment_status(self, id, status):
+    def update_appointment_status(self, id, status, room=None):
         with self.__get_cursor() as cursor:
             cursor.execute("UPDATE medical_appointments SET status = :status WHERE id = :id",
                            status=status, id=id)
+            if room:
+                cursor.execute("UPDATE medical_appointments SET location = :room WHERE id = :id",
+                           room=room, id=id)
 
     def get_patients_by_doctor(self, doctor_id):
         patients = []
@@ -225,8 +238,8 @@ class Database:
                 patient = self.get_patients_by_id(int(row[1]))
                 doctor = self.get_user_by_id(int(row[2]))
                 if patient is not None and doctor is not None:
-                    appointments.append(Appointments(int(row[0]), patient, doctor,
-                                                     row[3], int(row[4]), row[5], str(row[6])))
+                    appointments.append(Appointments(patient, doctor,
+                                                     row[3], int(row[4]), row[5], str(row[6]), id=row[0]))
         return appointments
 
     def update_patient_details(self, patient_id, dob, blood_type, height, weight, allergies):
@@ -436,14 +449,17 @@ class Database:
             if not isinstance(appointment, Appointments):
                 raise TypeError("expected Appointment object")
             with self.__get_cursor() as cursor:
-                cursor.execute('insert into medical_appointments (id, patient_id, doctor_id, appointment_time, status, location, description) values (:id, :patient_id, :doctor_id, :appointment_time, :status, :location, :description)',
-                               id=appointment.id,
-                               patient_id=appointment.patients.id,
-                               doctor_id=appointment.doctors.id,
+                id = cursor.var(oracledb.NUMBER)
+                cursor.execute('insert into medical_appointments (patient_id, doctor_id, appointment_time, status, location, description) values (:patient_id, :doctor_id, :appointment_time, :status, :location, :description) returning id into :id',
+                               patient_id=appointment.patient.id,
+                               doctor_id=appointment.doctor.id,
                                appointment_time=appointment.appointment_time,
                                status=appointment.status,
                                location=appointment.location,
-                               description=appointment.description)
+                               description=appointment.description,
+                               id=id)
+                new_id = id.values[0][0]
+                return new_id
 
     def delete_appointment_by_id(self, id):
         with self.__get_cursor() as cursor:
@@ -461,9 +477,9 @@ class Database:
                 raise TypeError("expected type of Appointmentsr")
             with self.__get_cursor() as cursor:
                 cursor.execute(" UPDATE medical_appointments SET patient_id =: patient_id, doctor_id =: doctor_id, appointment_time =: appointment_time, status =: status, location =: location, description =: description WHERE id =:id",
-                               patient_id=appointment.patients.id, doctor_id=appointment.doctors.id, appointment_time=appointment.appointment_time, status=appointment.status, location=appointment.location, description=appointment.description, id=appointment.id)
+                               patient_id=appointment.patient.id, doctor_id=appointment.doctor.id, appointment_time=appointment.appointment_time, status=appointment.status, location=appointment.location, description=appointment.description, id=appointment.id)
                 cursor.execute(" UPDATE medical_appointments SET patient_id =: patient_id, doctor_id =: doctor_id, appointment_time =: appointment_time, status =: status, location =: location, description =: description WHERE id =:id",
-                               patient_id=appointment.patients.id, doctor_id=appointment.doctors.id, appointment_time=appointment.appointment_time, status=appointment.status, location=appointment.location, description=appointment.description, id=appointment.id)
+                               patient_id=appointment.patient.id, doctor_id=appointment.doctor.id, appointment_time=appointment.appointment_time, status=appointment.status, location=appointment.location, description=appointment.description, id=appointment.id)
 
     def get_appointments(self):
         appointments = []
@@ -476,7 +492,7 @@ class Database:
                 patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
                     row[23]), avatar_path=row[20], id=int(row[14]), allergies=allergies)
                 appointments.append(Appointments(
-                    row[0], patient, doctor, row[3], row[4], row[5], str(row[6])))
+                    patient, doctor, row[3], row[4], row[5], str(row[6]), id=row[0]))
         return appointments
 
     def get_medical_rooms(self):
@@ -485,7 +501,7 @@ class Database:
             results = cursor.execute(
                 'SELECT room_number, description FROM medical_rooms')
             for row in results:
-                medical_room = MedicalRoom(row[0], row[1])
+                medical_room = MedicalRoom(row[0], str(row[1]))
                 medical_rooms.append(medical_room)
         return medical_rooms
 
