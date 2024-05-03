@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<ul>
+    {% for medical_room in medical_rooms %}
+    <li><a href="{{ url_for('medical_rooms.get_medical_room_by_room_number', room_number=room_number.room_number) }}">{{ medical_room }}</a></li>
+    {% endfor %}
+</ul>
+{% endblock body %}

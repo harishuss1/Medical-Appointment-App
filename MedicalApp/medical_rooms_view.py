@@ -2,10 +2,9 @@ from flask import Blueprint, abort, flash, redirect, render_template, request, u
 from flask_login import current_user, login_required
 from oracledb import DatabaseError
 from MedicalApp.medical_room import MedicalRoom
-from .forms import AppointmentForm, AppointmentResponseForm
 from .db.dbmanager import get_db
 
-bp = Blueprint('medicalrooms', __name__, url_prefix='/medicalrooms/')
+bp = Blueprint('medical_rooms', __name__, url_prefix='/medicalrooms/')
 
 
 @bp.route('')
