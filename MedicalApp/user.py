@@ -1,4 +1,5 @@
 import datetime
+import json
 from flask_login import UserMixin
 from MedicalApp.allergy import Allergy
 
@@ -54,3 +55,19 @@ class MedicalPatient(User):
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
+    
+    def to_json(self):
+        data = {}
+        data['id'] = str(self.id)
+        data['avatar_path'] = str(self.avatar_path)
+        #data['allergies'] = url_for(allergy)
+        data['email'] = str(self.email)
+        data['password'] = str(self.password)
+        data['first_name'] = str(self.first_name)
+        data['last_name'] = str(self.last_name)
+        data['access_level'] = str(self.access_level)
+        data['dob'] = str(self.dob)
+        data['blood_type'] = str(self.blood_type)
+        data['height'] = str(self.height)
+        data['weight'] = str(self.weight)
+        return data

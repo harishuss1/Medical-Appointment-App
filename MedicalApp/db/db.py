@@ -108,6 +108,26 @@ class Database:
                     row[10]), avatar_path=row[2], id=int(row[1])))
         return patients
     
+    def get_patients_page_number(self, page):
+        patients = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                """
+                SELECT 
+                mp.WEIGHT, p.id, p.AVATAR_PATH, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, 
+                mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT
+                FROM medical_users p INNER JOIN MEDICAL_PATIENTS mp 
+                ON(p.id = mp.id)
+                OFFSET :offset ROWS
+                FETCH NEXT :count ROWS ONLY
+                """,
+                offset=((page - 1)*1),
+                count=1)
+            for row in results:
+                patients.append(MedicalPatient(float(row[0]), row[3], row[4], row[5], row[6], row[7], row[8], row[9], float(
+                    row[10]), avatar_path=row[2], id=int(row[1])))
+        return patients
+    
     def get_doctors(self):
         doctors = []
         with self.__get_cursor() as cursor:

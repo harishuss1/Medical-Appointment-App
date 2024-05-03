@@ -48,6 +48,9 @@ def init_app(app):
 
     from .home_view import bp as home_bp
     app.register_blueprint(home_bp)
+    
+    from .patient_api import bp as patient_bp
+    app.register_blueprint(patient_bp)
 
     from .appointments_views import bp as appointments_bp
     app.register_blueprint(appointments_bp)
