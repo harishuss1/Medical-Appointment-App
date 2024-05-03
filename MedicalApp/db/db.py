@@ -489,7 +489,7 @@ class Database:
                 medical_rooms.append(medical_room)
         return medical_rooms
 
-    def get_room_number_by_room_name(self,room_number):
+    def get_medical_room_by_room_number(self,room_number):
         medical_room = None
         with self.__get_cursor() as cursor:
             cursor.execute(
