@@ -30,3 +30,5 @@ tqdm==4.66.2
 unittest-xml-reporting==3.2.0
 Werkzeug==3.0.2
 WTForms==3.1.2
+email_validator==2.1.1
+idna==3.7
