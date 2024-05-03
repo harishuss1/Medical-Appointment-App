@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1>Book Appointment</h1>
+
+<form method="post">   
+    {{ form.csrf_token }}
+    {{ form.id.label }} {{ form.id() }}
+    {{ form.patient_id.label }} {{ form.patient_id() }}
+    {{ form.doctor_id.label }} {{ form.doctor_id() }}
+    {{ form.appointment_time.label }} {{ form.appointment_time() }}
+    {{ form.status.label }} {{ form.status() }}
+    {{ form.location.label }} {{ form.location() }}
+    {{ form.description.label }} {{ form.description() }}
+    <input type="submit" />
+</form>
+{% endblock content %}

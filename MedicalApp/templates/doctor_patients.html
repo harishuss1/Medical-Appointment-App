@@ -1,0 +1,16 @@
+{% extends "doctor.html" %}
+{% block nav %}
+    <li><a href="{{ url_for('appointments.confirmed_appointments') }}">See all confirmed appointments</a></li>
+    <li><a href="{{ url_for('appointments.requested_appointments') }}">See appointment requests</a></li>
+    <li><a href="{{ url_for('doctor.patients') }}">See all patients</a></li>
+    <li><a href="{{ url_for('note.notes', user_id=current_user.id) }}">See all notes</a></li>
+{% endblock nav %}
+{% block content %}
+<h1>{% block title %}Doctor Patients{% endblock title %}</h1>
+    <dl id="doctor-patients">
+        {% for patient in patients %}
+            <dt>Patient name: {{ patient.first_name }} {{ patient.last_name }}</dt>
+            <dd>Contact information: {{ patient.email }}.</dd>
+        {% endfor %}
+    </dl>
+{% endblock content %}

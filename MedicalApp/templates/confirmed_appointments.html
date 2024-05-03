@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% if current_user.access_level == 'STAFF' %}
+{% block nav %}
+    <li><a href="{{ url_for('appointments.confirmed_appointments') }}">See all confirmed appointments</a></li>
+    <li><a href="{{ url_for('appointments.requested_appointments') }}">See appointment requests</a></li>
+    <li><a href="{{ url_for('doctor.patients') }}">See all patients</a></li>
+    <li><a href="{{ url_for('note.notes', user_id=current_user.id) }}">See all notes</a></li>
+{% endblock nav %}
+{% endif %}
+{% block content %}
+<h1>{% block title %}Doctor Appointments{% endblock title %}</h1>
+    <dl id="doctor-appointments">
+        {% for appointment in appointments %}
+            <dt>Appointment with {{ appointment.patient.first_name }} {{ appointment.patient.last_name }}.</dt>
+            <dd>Appointment at {{ appointment.appointment_time }} in room {{ appointment.location }}.</dd>
+            <dd>Reason for appointment: {{ appointment.description }}.</dd>
+        {% endfor %}
+    </dl>
+{% endblock content %}

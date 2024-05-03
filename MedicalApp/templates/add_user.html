@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}
+Add User
+{% endblock title %}
+
+{% block content %}
+<h1>Add New User</h1>
+
+<form method="post" action="{{ url_for('admin.add_user') }}">
+    {{ form.hidden_tag() }}
+
+    <div>
+        {{ form.email.label }}
+        {{ form.email() }}
+    </div>
+
+    <div>
+        {{ form.password.label }}
+        {{ form.password() }}
+    </div>
+
+    <div>
+        {{ form.confirm_password.label }}
+        {{ form.confirm_password() }}
+    </div>
+
+    <div>
+        {{ form.first_name.label }}
+        {{ form.first_name() }}
+    </div>
+
+    <div>
+        {{ form.last_name.label }}
+        {{ form.last_name() }}
+    </div>
+
+    <div>
+        {{ form.user_type.label }}
+        {{ form.user_type() }}
+    </div>
+
+    {{ form.submit() }}
+
+</form>
+
+{% if messages %}
+<div class="feedback-messages">
+    {% for message in messages %}
+    <p>{{ message }}</p>
+    {% endfor %}
+</div>
+{% endif %}
+
+<p><a href="{{ url_for('admin.admin_dashboard') }}">Back to Admin Dashboard</a></p>
+{% endblock content %}
