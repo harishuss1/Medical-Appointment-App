@@ -38,13 +38,14 @@ def book_appointment():
     appointments = db.get_appointments()
     if appointments is None or len(appointments) == 0:
         abort(404)
-
+    hide_patient = False
     form = AppointmentForm()
     form.set_patients()
     form.set_doctors()
     if current_user.access_level != 'STAFF':
-        form.patient.default = current_user.id
-        form.patient.render_kw = {'disabled' : 'disabled'} #... this is messing up my submission form validation
+        hide_patient = True
+        form.patient.data = str(current_user.id)
+        form.patient.render_kw = {'disabled' : ''} #... this is messing up my submission form validation
         form.set_doctors()
     form.set_rooms()
     if request.method == "POST" and form.validate_on_submit():
@@ -66,7 +67,7 @@ def book_appointment():
         return redirect(
             url_for('appointments.get_appointment', id=new_id))
 
-    return render_template('appointments.html', form=form)
+    return render_template('appointments.html', form=form, hide_patient=hide_patient)
 
 @bp.route('/<int:id>/')
 @login_required

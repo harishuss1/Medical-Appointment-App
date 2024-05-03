@@ -5,7 +5,11 @@
 
 <form method="post">   
     {{ form.csrf_token }}
+    {% if hide_patient %}
+    <span display="none">
     {{ form.patient.label }} {{ form.patient() }}
+    </span>
+    {% endif %}
     {{ form.doctor.label }} {{ form.doctor() }}
     {{ form.appointment_time.label }} {{ form.appointment_time() }}
     {{ form.location.label }} {{ form.location() }}
