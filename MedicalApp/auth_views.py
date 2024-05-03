@@ -1,9 +1,10 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
-from flask_login import current_user, login_user
+from flask_login import current_user, login_user, login_required, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from MedicalApp.db.dbmanager import get_db
-from MedicalApp.forms import LoginForm, SignupForm
+from MedicalApp.forms import LoginForm, SignupForm, ChangePasswordForm
 from MedicalApp.user import User
+
 
 bp = Blueprint('auth', __name__, url_prefix='/auth/')
 
@@ -18,8 +19,6 @@ def signup():
         get_db().create_user(user)
         return redirect(url_for('auth.login'))
     return render_template('signup.html', form=form)
-
-# Change the templates once they are completed
 
 
 @bp.route('/login/', methods=['GET', 'POST'])
@@ -40,3 +39,30 @@ def login():
         else:
             flash('Incorrect info')
     return render_template('login.html', form=form)
+
+@bp.route('/logout/')
+@login_required
+def logout():
+    logout_user()
+    flash("Succesfully Logged out!")
+    return redirect(url_for('auth.login'))
+
+@bp.route('/profile/', methods=['GET', 'POST'])
+@login_required
+def profile():
+    form = ChangePasswordForm()
+
+    if request.method == 'POST' and form.validate_on_submit():
+        if not check_password_hash(current_user.password, form.current_password.data):
+            flash("Current password is incorrect.", "error")
+            return render_template("profile.html", form=form)
+
+
+        new_password_hash = generate_password_hash(form.new_password.data)
+        current_user.password = new_password_hash
+        db = get_db()
+        db.update_user_password(current_user.id, new_password_hash)
+        flash("Password changed successfully.", "success")
+        return redirect(url_for("auth.profile"))
+
+    return render_template("profile.html", form=form, current_user=current_user)

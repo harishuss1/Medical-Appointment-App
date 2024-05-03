@@ -17,8 +17,13 @@
                 <li id="user-icon">
                     <img src="{{ url_for('static', filename='/images/avatar.jpeg') }}" alt="User Avatar" class="avatar" onclick="toggleDropdown()" width="60" height="60"> 
                     <div id="user-dropdown" class="dropdown hidden">
-                        <a href="{{ url_for('auth.login') }}">Login</a>
-                        <a href="{{ url_for('auth.signup') }}">Sign Up</a>
+                        {% if current_user.is_authenticated %}  
+                            <a href="{{ url_for('auth.profile') }}">Account Details</a>
+                            <a href ="{{ url_for('auth.logout') }}">Log Out</a>
+                        {% else %}
+                            <a href="{{ url_for('auth.login') }}">Login</a>
+                            <a href="{{ url_for('auth.signup') }}">Sign Up</a>
+                        {% endif %}
                     </div>
                 </li>
             </ul>
