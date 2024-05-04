@@ -1,17 +1,22 @@
 {% extends "base.html" %}
-{% if current_user.access_level == 'STAFF' %}
+
 {% block nav %}
-    <li><a href="{{ url_for('appointments.confirmed_appointments', user_type='doctor') }}">See all confirmed appointments</a></li>
-    <li><a href="{{ url_for('appointments.requested_appointments', user_type='doctor') }}">See appointment requests</a></li>
+    {% if current_user.access_level == 'STAFF' %}
     <li><a href="{{ url_for('doctor.patients') }}">See all patients</a></li>
     <li><a href="{{ url_for('note.notes', user_id=current_user.id) }}">See all notes</a></li>
+    {% endif %}
+    <li><a href="{{ url_for('patient.update_patient') }}">Update Details</a></li>
+    <li><a href="{{ url_for('patient.view_patient') }}">View Details</a></li>
+    <li><a href="{{ url_for('appointments.confirmed_appointments', user_type="{{ user_type }}") }}">See all confirmed appointments</a></li>
+    <li><a href="{{ url_for('appointments.requested_appointments', user_type="{{ user_type }}") }}">See appointment requests</a></li>
 {% endblock nav %}
-{% endif %}
+
 {% block content %}
 <h1>{% block title %}Requested Appointments{% endblock title %}</h1>
     <dl id="doctor-appointments">
         {% for appointment in appointments %}
-            <dt>Appointment with {{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</dt>
+            <dt>Appointment with Dr. {{ appointment.doctor }}</dt>
+            <dt>Booked by {{ appointment.patient }}</dt>
             <dd>Appointment at {{ appointment.appointment_time }} in room {{ appointment.location }}.</dd>
             <dd>Reason for appointment: {{ appointment.description }}.</dd>
             <dd><a href="{{ url_for('appointments.update_appointment', id=appointment.id) }}">See appointment details</a></dd>

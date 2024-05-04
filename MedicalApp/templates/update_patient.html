@@ -2,9 +2,11 @@
 {% if current_user.access_level == 'PATIENT' %}
 {% block nav %}
     <li><a href="{{ url_for('patient.patient_dashboard') }}">Dashboard</a></li>
-    <li><a href="{{ url_for('appointment.view_appointments') }}">View Appointments</a></li>
+    <li><a href="{{ url_for('appointments.view_appointments') }}">View Appointments</a></li>
     <li><a href="{{ url_for('patient.update_patient') }}">Update Details</a></li>
     <li><a href="{{ url_for('patient.view_patient') }}">View Details</a></li>
+    <li><a href="{{ url_for('appointments.confirmed_appointments', user_type='patient') }}">See all confirmed appointments</a></li>
+        <li><a href="{{ url_for('appointments.requested_appointments', user_type='patient') }}">See appointment requests</a></li>
 {% endblock nav %}
 {% endif %}
 {% block content %}

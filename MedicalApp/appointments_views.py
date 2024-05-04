@@ -87,7 +87,7 @@ def get_appointment(id):
 def confirmed_appointments(user_type):
     if user_type not in ('doctor', 'patient'):
         flash("Incorrect user type")
-        return redirect(url_for('hone.index'))
+        return redirect(url_for('home.index'))
     try:
         appointments = None
         if user_type == 'doctor':
@@ -127,7 +127,7 @@ def requested_appointments(user_type):
 # CHANGE!!!
 @bp.route('/requests/<int:id>/', methods=['GET', 'POST'])
 @login_required
-@doctor_access
+@patient_access
 def update_appointment(id):
     form = AppointmentResponseForm()
     form.set_choices()
@@ -145,4 +145,4 @@ def update_appointment(id):
 
     if appointment is None:
         abort(404, "This address does not exist")
-    return render_template('requested_appointment.html', appointment=appointment, form=form)
+    return render_template('specific_appointment.html', appointment=appointment, form=form)
