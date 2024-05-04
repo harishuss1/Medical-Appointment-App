@@ -1,14 +1,19 @@
 {% extends "base.html" %}
 
 {% block nav %}
-{% if current_user.access_level == 'STAFF' %}
-<li><a href="{{ url_for('doctor.patients') }}">See all patients</a></li>
-<li><a href="{{ url_for('note.notes', user_id=current_user.id) }}">See all notes</a></li>
-{% endif %}
-<li><a href="{{ url_for('patient.update_patient') }}">Update Details</a></li>
-<li><a href="{{ url_for('patient.view_patient') }}">View Details</a></li>
-<li><a href="{{ url_for('appointments.confirmed_appointments', user_type="{{ user_type }}") }}">See all confirmed appointments</a></li>
-<li><a href="{{ url_for('appointments.requested_appointments', user_type="{{ user_type }}") }}">See appointment requests</a></li>
+    {% set user = "patient" %}
+    {% if current_user.access_level == 'STAFF' %}
+        {% set user = "doctor" %}
+        <li><a href="{{ url_for('doctor.dashboard') }}">Dashboard</a></li>
+        <li><a href="{{ url_for('doctor.patients') }}">See all patients</a></li>
+        <li><a href="{{ url_for('note.notes', user_id=current_user.id) }}">See all notes</a></li>
+    {% else %}
+        <li><a href="{{ url_for('patient.patient_dashboard') }}">Dashboard</a></li>
+    {% endif %}
+    <li><a href="{{ url_for('patient.update_patient') }}">Update Details</a></li>
+    <li><a href="{{ url_for('patient.view_patient') }}">View Details</a></li>
+    <li><a href="{{ url_for('appointments.confirmed_appointments', user_type=user) }}">See all confirmed appointments</a></li>
+    <li><a href="{{ url_for('appointments.requested_appointments', user_type=user) }}">See appointment requests</a></li>
 {% endblock nav %}
 
 {% block content %}
@@ -30,5 +35,7 @@
         {{ form.room.label }} {{ form.room() }}
         <button type="submit">Confirm status</button>
     </form>
+{% else %}
+    <!-- update appointment here -->
 {% endif %}
 {% endblock content %}

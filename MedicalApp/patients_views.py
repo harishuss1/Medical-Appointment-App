@@ -7,7 +7,7 @@ from MedicalApp.user import MedicalPatient
 from .db.dbmanager import get_db
 # from .forms import PatientForm   will implement this later for updating
 
-bp = Blueprint('patient', __name__, url_prefix="/patients")
+bp = Blueprint('patient', __name__, url_prefix="/patients/")
 
 def patient_access(func):
     def wrapper(*args, **kwargs):

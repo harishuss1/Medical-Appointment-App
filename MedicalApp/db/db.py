@@ -108,21 +108,26 @@ class Database:
                     row[10]), avatar_path=row[2], id=int(row[1])))
         return patients
     
-    def get_patients_page_number(self, page):
+    def get_patients_page_number(self, page, first_name, last_name):
         patients = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
-                """
+                f"""
                 SELECT 
                 mp.WEIGHT, p.id, p.AVATAR_PATH, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, 
                 mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT
                 FROM medical_users p INNER JOIN MEDICAL_PATIENTS mp 
                 ON(p.id = mp.id)
+                WHERE
+                { "first_name = :first_name" if first_name is not None and first_name != '' else "0 = 1"} OR
+                { "last_name = :last_name" if last_name is not None and last_name != '' else "0 = 1"}
                 OFFSET :offset ROWS
                 FETCH NEXT :count ROWS ONLY
                 """,
                 offset=((page - 1)*1),
-                count=1)
+                count=1,
+                first_name=first_name,
+                last_name=last_name)
             for row in results:
                 patients.append(MedicalPatient(float(row[0]), row[3], row[4], row[5], row[6], row[7], row[8], row[9], float(
                     row[10]), avatar_path=row[2], id=int(row[1])))
