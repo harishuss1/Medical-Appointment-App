@@ -124,8 +124,8 @@ class Database:
                 OFFSET :offset ROWS
                 FETCH NEXT :count ROWS ONLY
                 """,
-                offset=((page - 1)*1),
-                count=1,
+                offset=((page - 1)*20),
+                count=20,
                 first_name=first_name,
                 last_name=last_name)
             for row in results:
