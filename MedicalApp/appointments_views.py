@@ -23,7 +23,7 @@ def doctor_access(func):
     wrapper.__name__ = func.__name__
     return wrapper
 
-@bp.route('/appointments/')
+@bp.route('/')
 @login_required
 @patient_access
 def view_appointments():
@@ -45,7 +45,7 @@ def book_appointment():
     if current_user.access_level != 'STAFF':
         hide_patient = True
         form.patient.data = str(current_user.id)
-        form.patient.render_kw = {'disabled' : ''} #... this is messing up my submission form validation
+        form.patient.render_kw = {'disabled' : ''} 
         form.set_doctors()
     form.set_rooms()
     if request.method == "POST" and form.validate_on_submit():

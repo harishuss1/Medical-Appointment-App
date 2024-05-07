@@ -30,9 +30,6 @@ def doctor_access(func):
 @login_required
 @patient_access
 def patient_dashboard():
-    if current_user.access_level != 'PATIENT':
-        flash("You do not have permission to access this page.")
-        return redirect(url_for('home.index'))
 
     appointments = get_db().get_patient_appointments(current_user.id)
     return render_template('patient_dashboard.html', appointments=appointments)
