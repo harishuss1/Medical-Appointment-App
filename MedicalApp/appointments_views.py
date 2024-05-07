@@ -4,16 +4,10 @@ from oracledb import DatabaseError
 from MedicalApp.appointments import Appointments
 from .forms import AppointmentForm, AppointmentResponseForm
 from .db.dbmanager import get_db
+from MedicalApp.db import dbmanager
 
 bp = Blueprint('appointments', __name__, url_prefix='/appointments/')
 
-
-from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
-from MedicalApp.appointments import Appointments
-from MedicalApp.forms import AppointmentForm
-from MedicalApp.db import db, dbmanager
-
-bp = Blueprint('appointments', __name__, url_prefix='/appointments/')
 
 
 @bp.route('', methods=['GET', 'POST'])
