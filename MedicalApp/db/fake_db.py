@@ -1,6 +1,6 @@
 from ..user import User, MedicalPatient
 from oracledb import IntegrityError
-from appointments import Appointments
+from ..appointments import Appointments
 
 
 
