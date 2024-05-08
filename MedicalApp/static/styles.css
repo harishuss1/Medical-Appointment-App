@@ -194,3 +194,21 @@ input[type="text"], input[type="password"], input[type="email"] {
     text-shadow: 0px 0px 10px #00c2cb, 0px 0px 20px #fff;
 }
 
+main 
+{
+    display: flex;
+    flex-direction: column;
+}
+
+#users-table td, #users-table th
+{
+    padding: 5px;
+    border: 1px solid black;
+}
+
+#users-table
+{
+    border: 2px solid black;
+    text-align: center;
+    align-self: center;
+}

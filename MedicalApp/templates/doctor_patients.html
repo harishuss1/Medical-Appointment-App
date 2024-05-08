@@ -11,10 +11,16 @@
 {% endblock nav %}
 {% block content %}
 <h1>{% block title %}Doctor Patients{% endblock title %}</h1>
-    <dl id="doctor-patients">
+    <table id="users-table">
+        <thead>
+            <tr>
+                <th>Patient Name:</th>
+                <th>Contact Information</th>
+            </tr>
+        </thead>
         {% for patient in patients %}
-            <dt>Patient name: {{ patient.first_name }} {{ patient.last_name }}</dt>
-            <dd>Contact information: {{ patient.email }}.</dd>
+            <td>{{ patient }}</td>
+            <td>{{ patient.email }}</td>
         {% endfor %}
-    </dl>
+    </table>
 {% endblock content %}

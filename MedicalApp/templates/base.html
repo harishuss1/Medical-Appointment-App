@@ -47,8 +47,11 @@
                 {% if current_user.access_level != 'PATIENT' and current_user.access_level != 'DOCTOR' %}
                     <li><a href="{{ url_for('admin.admin_dashboard') }}">Admin Dashboard</a></li>
                 {% endif %}
+                {% if current_user.access_level == 'ADMIN' %}
+                    <li><a href="{{ url_for('admin.add_user') }}">Add New User</a></li>
+                {% endif %}
                     <li><a href="{{ url_for('appointments.book_appointment') }}">Book an appointment</a></li>
-                <li><a href="{{ url_for('medical_rooms.get_medical_rooms') }}">Medical Rooms</a></li>
+                    <li><a href="{{ url_for('medical_rooms.get_medical_rooms') }}">Medical Rooms</a></li>
             {% endif %}
             {% endblock nav %}
         </ul>
