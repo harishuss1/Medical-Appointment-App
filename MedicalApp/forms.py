@@ -2,6 +2,7 @@ from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import DateField, FloatField, MultipleFileField, SelectField, SelectMultipleField, FileField, StringField, IntegerField, EmailField, DateField, PasswordField, TextAreaField, SubmitField, RadioField, SelectField
 from wtforms.validators import DataRequired, Email, Length, EqualTo
+from flask_wtf.file import FileField, FileRequired
 
 
 from .db.dbmanager import get_db
@@ -109,9 +110,18 @@ class PatientDetailsForm(FlaskForm):
     height = FloatField('Height (in cm)', validators=[DataRequired()])
     weight = FloatField('Weight (in kg)', validators=[DataRequired()])
     allergies = SelectMultipleField('Allergies', choices=[])
-    
+
+
 class ChangePasswordForm(FlaskForm):
-    current_password = PasswordField("Current Password", validators=[DataRequired()])
-    new_password = PasswordField("New Password", validators=[DataRequired(), Length(min=8)])
-    confirm_password = PasswordField("Confirm Password", validators=[DataRequired(), EqualTo("new_password", message="Passwords must match")])
+    current_password = PasswordField(
+        "Current Password", validators=[DataRequired()])
+    new_password = PasswordField("New Password", validators=[
+                                 DataRequired(), Length(min=8)])
+    confirm_password = PasswordField("Confirm Password", validators=[
+                                     DataRequired(), EqualTo("new_password", message="Passwords must match")])
     submit = SubmitField("Change Password")
+
+
+class AvatarForm(FlaskForm):
+    avatar = FileField('avatar')
+    submit = SubmitField('Update')

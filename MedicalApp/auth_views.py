@@ -1,11 +1,13 @@
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+import os
+from flask import Blueprint, current_app, flash, redirect, render_template, request, send_from_directory, url_for
 from flask_login import current_user, login_user, login_required, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from MedicalApp.db.dbmanager import get_db
-from MedicalApp.forms import LoginForm, SignupForm, ChangePasswordForm
+from MedicalApp.forms import AvatarForm, LoginForm, SignupForm, ChangePasswordForm
 from MedicalApp.user import User
 
 import secrets
+from werkzeug.utils import secure_filename
 
 
 bp = Blueprint('auth', __name__, url_prefix='/auth/')
@@ -34,13 +36,14 @@ def login():
                 return redirect(url_for('doctor.dashboard'))
             if current_user.access_level == 'BLOCKED':
                 flash("Adminstrators has blocked this account.", "error")
-                #use logout() needs to be implemented
+                # use logout() needs to be implemented
             if current_user.access_level in ('ADMIN', 'ADMIN_USER'):
                 return redirect(url_for('admin.admin_dashboard'))
             return redirect(url_for('home.index'))
         else:
             flash('Incorrect info')
     return render_template('login.html', form=form)
+
 
 @bp.route('/logout/')
 @login_required
@@ -49,9 +52,39 @@ def logout():
     flash("Succesfully Logged out!")
     return redirect(url_for('auth.login'))
 
+
 @bp.route('/profile/', methods=['GET', 'POST'])
 @login_required
 def profile():
+    form = AvatarForm()
+
+    if request.method == 'POST' and form.validate_on_submit():
+        if form.avatar.data:
+            avatar_file = form.avatar.data
+            filename = avatar_file.filename
+            folder = os.path.join(
+                current_app.config['IMAGES'], current_user.email)
+            if not os.path.exists(folder):
+                os.makedirs(folder)
+            avatar_path = os.path.join(folder, filename)
+            avatar_file.save(avatar_path)
+
+            # Convert the absolute path to a relative path
+            relative_path = os.path.relpath(avatar_path, start=os.curdir)
+            current_user.avatar_path = relative_path
+            db = get_db()
+            db.update_user_avatar(current_user.id, relative_path)
+            flash("Avatar updated successfully.", "success")
+            return redirect(url_for("auth.profile"))
+        else:
+            flash("No file was submitted.", "error")
+
+    return render_template("profile.html", form=form, current_user=current_user)
+
+
+@bp.route('/profile/changepassword', methods=['GET', 'POST'])
+@login_required
+def changepassword():
     form = ChangePasswordForm()
 
     if request.method == 'POST' and form.validate_on_submit():
@@ -59,15 +92,19 @@ def profile():
             flash("Current password is incorrect.", "error")
             return render_template("profile.html", form=form)
 
-
         new_password_hash = generate_password_hash(form.new_password.data)
         current_user.password = new_password_hash
         db = get_db()
         db.update_user_password(current_user.id, new_password_hash)
         flash("Password changed successfully.", "success")
         return redirect(url_for("auth.profile"))
-
     return render_template("profile.html", form=form, current_user=current_user)
+
+
+@bp.route('/profile/<email>/<filename>')
+@login_required
+def get_avatar(email, filename):
+    return send_from_directory(os.path.join(current_app.config['IMAGES'], email), filename)
 
 @bp.route('/profile/userApiToken/', methods=['GET'])
 @login_required

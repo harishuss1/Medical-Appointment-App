@@ -17,6 +17,11 @@ def create_app(test_config=None):
         ATTACHEMENTS=os.path.join(app.instance_path, "attachements")
     )
 
+    app.config['IMAGES'] = os.path.join(app.instance_path, "IMAGES")
+    
+    os.makedirs(app.instance_path, exist_ok=True)
+    os.makedirs(app.config['IMAGES'], exist_ok=True)
+
     os.makedirs(app.instance_path, exist_ok=True)
     os.makedirs(app.config['ATTACHEMENTS'], exist_ok=True)
     app.config['TESTING'] = False
