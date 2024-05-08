@@ -3,6 +3,7 @@ import os
 from flask import g
 
 from MedicalApp.allergy import Allergy
+from MedicalApp.medical_room import MedicalRoom
 from ..appointments import Appointments
 from ..user import MedicalPatient
 from ..note import Note
@@ -76,7 +77,7 @@ class Database:
         appointments = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
-                'SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, p.id, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, p.AVATAR_PATH, mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT, mp.WEIGHT FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id WHERE app.status = :status AND app.doctor_id = :doctor_id',
+                'SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, p.id, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, p.AVATAR_PATH, mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT, mp.WEIGHT, mr.room_number, mr.description FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id INNER JOIN MEDICAL_ROOMS mr ON app.location = mr.room_number WHERE app.status = :status AND app.doctor_id = :doctor_id ',
                 status=status, doctor_id=doctor_id)
             for row in results:
                 doctor = User(row[8], row[9], row[10], row[11],
@@ -87,15 +88,16 @@ class Database:
                               row[12], avatar_path=row[13], id=int(row[7]))
                 patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
                     row[23]), avatar_path=row[20], id=int(row[14]))
+                location = MedicalRoom(row[25], row[26])
                 appointments.append(Appointments(
-                    row[0], patient, doctor, row[3], row[4], row[5], str(row[6])))
+                    row[0], patient, doctor, row[3], row[4], location, str(row[6])))
         return appointments
 
     def get_appointments_by_status_patient(self, status, patient_id):
         appointments = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
-                'SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, p.id, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, p.AVATAR_PATH, mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT, mp.WEIGHT FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id WHERE app.status = :status AND app.patient_id = :patient_id',
+                'SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, p.id, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, p.AVATAR_PATH, mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT, mp.WEIGHT, mr.room_number, mr.description FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id INNER JOIN MEDICAL_ROOMS mr ON app.location = mr.room_number WHERE app.status = :status AND app.patient_id = :patient_id',
                 status=status, patient_id=patient_id)
             for row in results:
                 doctor = User(row[8], row[9], row[10], row[11],
@@ -106,15 +108,16 @@ class Database:
                               row[12], avatar_path=row[13], id=int(row[7]))
                 patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
                     row[23]), avatar_path=row[20], id=int(row[14]))
+                location = MedicalRoom(row[25], row[26])
                 appointments.append(Appointments(
-                    row[0], patient, doctor, row[3], row[4], row[5], str(row[6])))
+                    row[0], patient, doctor, row[3], row[4], location, str(row[6])))
         return appointments
 
     def get_appointment_by_id(self, id):
         appointment = None
         with self.__get_cursor() as cursor:
             results = cursor.execute(
-                'SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, p.id, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, p.AVATAR_PATH, mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT, mp.WEIGHT FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id WHERE app.id = :id',
+                'SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, p.id, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, p.AVATAR_PATH, mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT, mp.WEIGHT, mr.room_number, mr.description FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id  INNER JOIN MEDICAL_ROOMS mr ON app.location = mr.room_number WHERE app.id = :id',
                 id=id)
             row = results.fetchone()
             if row:
@@ -126,15 +129,16 @@ class Database:
                               row[12], avatar_path=row[13], id=int(row[7]))
                 patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
                     row[23]), avatar_path=row[20], id=int(row[14]))
+                location = MedicalRoom(row[25], row[26])
                 appointment = Appointments(
-                    row[0], patient, doctor, row[3], row[4], row[5], str(row[6]))
+                    row[0], patient, doctor, row[3], row[4], location, str(row[6]))
         return appointment
 
     def get_appointment_for_doctors(self, id):
         appointments = []
         with self.__get_cursor() as cursor:
             cursor.execute(
-                'SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, p.id, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, p.AVATAR_PATH, mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT, mp.WEIGHT FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id WHERE d.id = :doctor_id',
+                'SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, p.id, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, p.AVATAR_PATH, mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT, mp.WEIGHT, mr.room_number, mr.description FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id INNER JOIN MEDICAL_ROOMS mr ON app.location = mr.room_number WHERE d.id = :doctor_id',
                 doctor_id=id)
             row = cursor.fetchone()
             if row:
@@ -146,15 +150,16 @@ class Database:
                               row[12], avatar_path=row[13], id=int(row[7]))
                 patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
                     row[23]), avatar_path=row[20], id=int(row[14]))
+                location = MedicalRoom(row[25], row[26])
                 appointments.append(Appointments(
-                    row[0], patient, doctor, row[3], row[4], row[5], str(row[6])))
+                    row[0], patient, doctor, row[3], row[4], location, str(row[6])))
         return appointments
 
     def get_appointment_for_patients(self, id):
         appointments = []
         with self.__get_cursor() as cursor:
             cursor.execute(
-                'SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, p.id, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, p.AVATAR_PATH, mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT, mp.WEIGHT FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id WHERE p.id = :patient_id',
+                'SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, p.id, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, p.AVATAR_PATH, mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT, mp.WEIGHT, mr.room_number, mr.description FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id INNER JOIN MEDICAL_ROOMS mr ON app.location = mr.room_number WHERE p.id = :patient_id',
                 patient_id=id)
             row = cursor.fetchone()
             if row:
@@ -166,8 +171,9 @@ class Database:
                               row[12], avatar_path=row[13], id=int(row[7]))
                 patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
                     row[23]), avatar_path=row[20], id=int(row[14]))
+                location = MedicalRoom(row[25], row[26])
                 appointments.append(Appointments(
-                    row[0], patient, doctor, row[3], row[4], row[5], str(row[6])))
+                    row[0], patient, doctor, row[3], row[4], location, str(row[6])))
         return appointments
 
     def get_user_by_id(self, id):
@@ -483,16 +489,37 @@ class Database:
     def get_appointments(self):
         appointments = []
         with self.__get_cursor() as cursor:
-            results = cursor.execute('SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, p.id, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, p.AVATAR_PATH, mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT, mp.WEIGHT FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id')
+            results = cursor.execute('SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, p.id, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, p.AVATAR_PATH, mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT, mp.WEIGHT, mr.room_number, mr.description FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id INNER JOIN MEDICAL_ROOMs mr ON app.location = mr.room_number')
             for row in results:
                 doctor = User(row[8], row[9], row[10], row[11],
                               row[12], avatar_path=row[13], id=int(row[7]))
                 allergies = self.get_patient_allergies(int(row[14]))
                 patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
                     row[23]), avatar_path=row[20], id=int(row[14]), allergies=allergies)
+                location = MedicalRoom(row[25], row[26])
                 appointments.append(Appointments(
-                    row[0], patient, doctor, row[3], row[4], row[5], str(row[6])))
+                    row[0], patient, doctor, row[3], row[4],location ,str(row[6])))
         return appointments
+
+    def get_medical_rooms(self):
+        medical_rooms = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                'SELECT room_number, description FROM medical_rooms')
+            for row in results:
+                medical_room = MedicalRoom(row[0], row[1])
+                medical_rooms.append(medical_room)
+        return medical_rooms
+
+    def get_medical_room_by_room_number(self,room_number):
+        medical_room = None
+        with self.__get_cursor() as cursor:
+            cursor.execute(
+                'select room_number, description FROM medical_rooms where room_number=:room_number', room_number=room_number)
+            row = cursor.fetchone()
+            if row:
+                medical_room = MedicalRoom(row[0], row[1])
+        return medical_room
 
     def __get_cursor(self):
         for i in range(3):

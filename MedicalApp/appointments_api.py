@@ -15,7 +15,7 @@ def get_appointments():
     if request.args:
         id = request.args.get("id")
         if id:
-            appointment = get_db().get_appointment_id(id)
+            appointment = get_db().get_appointment_by_id(id)
             if appointment:
                 return jsonify(appointment.__dict__)
             else:
