@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Medical Rooms{% endblock title %}
+{% block nav %}
+    <li><a href="{{ url_for('medical_rooms.get_medical_rooms') }}">See all medical rooms</a></li>
+{% endblock nav %}
+{% block content %}
+<h2>Medical Rooms</h2>
+<ul>
+    <li>Room Number: {{ medical_room.room_number }}</li>
+    <li>Description: {{ medical_room.description }}</li>
+</ul>
+{% endblock content %}

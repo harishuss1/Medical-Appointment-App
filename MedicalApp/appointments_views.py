@@ -4,8 +4,10 @@ from oracledb import DatabaseError
 from MedicalApp.appointments import Appointments
 from .forms import AppointmentForm, AppointmentResponseForm
 from .db.dbmanager import get_db
+from MedicalApp.db import dbmanager
 
 bp = Blueprint('appointments', __name__, url_prefix='/appointments/')
+
 
 def patient_access(func):
     def wrapper(*args, **kwargs):
