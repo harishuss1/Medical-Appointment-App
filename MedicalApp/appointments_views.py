@@ -34,8 +34,12 @@ def view_appointments():
 @login_required
 @patient_access
 def book_appointment():
-    db = get_db()
-    appointments = db.get_appointments()
+    try:
+        db = get_db()
+        appointments = db.get_appointments()
+    except DatabaseError as e:
+        flash("something went wrong with the database")
+        return redirect('home.index')
     if appointments is None or len(appointments) == 0:
         abort(404)
     hide_patient = False
@@ -49,8 +53,12 @@ def book_appointment():
         form.set_doctors()
     form.set_rooms()
     if request.method == "POST" and form.validate_on_submit():
-        patient = get_db().get_patients_by_id(form.patient.data)
-        doctor = get_db().get_user_by_id(form.doctor.data)
+        try:
+            patient = get_db().get_patients_by_id(form.patient.data)
+            doctor = get_db().get_user_by_id(form.doctor.data)
+        except DatabaseError as e:
+            flash("something went wrong with the database")
+            return redirect('home.index')
         status = 0
         time = form.appointment_time.data
         if doctor.id == current_user.id:
@@ -73,8 +81,12 @@ def book_appointment():
 @login_required
 @patient_access
 def get_appointment(id):
-    db = get_db()
-    appointment = db.get_appointment_by_id(id)
+    try:
+        db = get_db()
+        appointment = db.get_appointment_by_id(id)
+    except DatabaseError as e:
+        flash("something went wrong with the database")
+        return redirect('home.index')
     if appointment is None:
         flash("Appointment cannot be found", 'error')
         return redirect(url_for('appointments.book_appointment'))
@@ -90,10 +102,14 @@ def confirmed_appointments(user_type):
         return redirect(url_for('home.index'))
     try:
         appointments = None
-        if user_type == 'doctor':
-            appointments = get_db().get_appointments_by_status_doctor(1, current_user.id)
-        if user_type == 'patient':
-            appointments = get_db().get_appointments_by_status_patient(1, current_user.id)
+        try:
+            if user_type == 'doctor':
+                appointments = get_db().get_appointments_by_status_doctor(1, current_user.id)
+            if user_type == 'patient':
+                appointments = get_db().get_appointments_by_status_patient(1, current_user.id)
+        except DatabaseError as e:
+            flash("something went wrong with the database")
+            return redirect('home.index')
         if appointments is None or len(appointments) == 0:
             flash("No confirmed appointments")
             return redirect(url_for('doctor.dashboard'))
@@ -112,10 +128,14 @@ def requested_appointments(user_type):
         return redirect(url_for('home.index'))
     try:
         appointments = None
-        if user_type == 'doctor':
-            appointments = get_db().get_appointments_by_status_doctor(0, current_user.id)
-        if user_type == 'patient':
-            appointments = get_db().get_appointments_by_status_patient(0, current_user.id)
+        try:
+            if user_type == 'doctor':
+                appointments = get_db().get_appointments_by_status_doctor(0, current_user.id)
+            if user_type == 'patient':
+                appointments = get_db().get_appointments_by_status_patient(0, current_user.id)
+        except DatabaseError as e:
+            flash("something went wrong with the database")
+            return redirect('home.index')
         if appointments is None or len(appointments) == 0:
             flash("No requested appointments")
             return redirect(url_for(f'{user_type}.dashboard'))
@@ -131,17 +151,27 @@ def requested_appointments(user_type):
 def update_appointment(id):
     form = AppointmentResponseForm()
     form.set_choices()
-    appointment = get_db().get_appointment_by_id(id)
-    if request.method == 'POST' and form.validate_on_submit():
-        status = form.select_confirmation.data
-        room = form.room.data
-        try:
-            get_db().update_appointment_status(id, status, room=room)
-            flash("Appointment has been successfully updated")
-            return redirect(url_for('doctor.requested_appointments'))
-        except DatabaseError:
-            flash("Something went wrong with the database")
-            return redirect(url_for('doctor.requested_appointments'))
+    try:
+        appointment = get_db().get_appointment_by_id(id)
+        if request.method == 'POST' and form.validate_on_submit():
+            status = form.select_confirmation.data
+            room = form.room.data
+            try:
+                get_db().update_appointment_status(id, status, room=room)
+                flash("Appointment has been successfully updated")
+                return redirect(url_for('doctor.requested_appointments'))
+            except DatabaseError:
+                flash("Something went wrong with the database")
+                return redirect(url_for('doctor.requested_appointments'))
+    except DatabaseError as e:
+        flash("something went wrong with the database")
+        return redirect('doctor.requested_appointments')
+    except TypeError as e:
+        flash("incorrect types")
+        return redirect('doctor.requested_appointments')
+    except ValueError as e: 
+        flash("Incorrect values were passed")
+        return redirect('doctor.requested_appointments')
 
     if appointment is None:
         abort(404, "This address does not exist")

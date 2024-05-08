@@ -43,22 +43,25 @@ def update_patient():
     allergies = get_db().get_all_allergies()
     form.allergies.choices = [(Allergy['id'], Allergy['name'])
                               for Allergy in allergies]
+    try:
+        if request.method == 'POST' and form.validate_on_submit():
+            dob = form.dob.data
+            blood_type = form.blood_type.data
+            height = form.height.data
+            weight = form.weight.data
+            selected_allergies = form.allergies.data  # Storing ids
 
-    if request.method == 'POST' and form.validate_on_submit():
-        dob = form.dob.data
-        blood_type = form.blood_type.data
-        height = form.height.data
-        weight = form.weight.data
-        selected_allergies = form.allergies.data  # Storing ids
+            get_db().update_patient_details(current_user.id, dob,
+                                            blood_type, height, weight, selected_allergies)
 
-        get_db().update_patient_details(current_user.id, dob,
-                                        blood_type, height, weight, selected_allergies)
+            patient_allergies = get_db().get_patient_allergies(current_user.id)
+            form.allergies.data = [Allergy.id for Allergy in patient_allergies]
 
-        patient_allergies = get_db().get_patient_allergies(current_user.id)
-        form.allergies.data = [Allergy.id for Allergy in patient_allergies]
-
-        flash('Your information has been updated.')
-        return redirect(url_for('patient.view_patient'))
+            flash('Your information has been updated.')
+            return redirect(url_for('patient.view_patient'))
+    except DatabaseError as e:
+        flash("something went wrong with the database")
+        return redirect('home.index')
 
     return render_template('update_patient.html', form=form)
 
@@ -66,16 +69,20 @@ def update_patient():
 @bp.route('/details/', methods=['GET'])
 @login_required
 def view_patient():
-    patient_details = get_db().get_patient_details(current_user.id)
+    try:
+        patient_details = get_db().get_patient_details(current_user.id)
 
-    if patient_details is None:
-        flash("No patient details found.")
-        return redirect(url_for('home.index'))
+        if patient_details is None:
+            flash("No patient details found.")
+            return redirect(url_for('home.index'))
 
-    patient = MedicalPatient(weight=patient_details.weight, email=patient_details.email, password=patient_details.password, first_name=patient_details.first_name, last_name=patient_details.last_name,
-                             access_level=patient_details.access_level, dob=patient_details.dob, blood_type=patient_details.blood_type, height=patient_details.height, avatar_path=patient_details.avatar_path, id=patient_details.id)
+        patient = MedicalPatient(weight=patient_details.weight, email=patient_details.email, password=patient_details.password, first_name=patient_details.first_name, last_name=patient_details.last_name,
+                                access_level=patient_details.access_level, dob=patient_details.dob, blood_type=patient_details.blood_type, height=patient_details.height, avatar_path=patient_details.avatar_path, id=patient_details.id)
 
-    patient.allergies = get_db().get_patient_allergies(patient.id)
+        patient.allergies = get_db().get_patient_allergies(patient.id)
+    except DatabaseError as e:
+        flash("something went wrong with the database")
+        return redirect('home.index')
 
     return render_template('patient_details.html', patient=patient)
 

@@ -27,7 +27,11 @@ def doctor_access(func):
 @login_required
 @doctor_access
 def note(note_id):
-    note = get_db().get_note_by_id(note_id)
+    try:
+        note = get_db().get_note_by_id(note_id)
+    except DatabaseError as e:
+        flash("something went wrong with the database")
+        return redirect('home.index')
     if note == None:
         flash("no note available")
         return redirect(url_for('note.notes', user_id=current_user.id))
