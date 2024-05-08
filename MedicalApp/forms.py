@@ -42,7 +42,7 @@ class LoginForm(FlaskForm):
 
 
 class AppointmentForm(FlaskForm):
-    patient = SelectField("Patient:", validators=[DataRequired()], choices=[], render_kw={})
+    patient = SelectField("Patient:", validators=[DataRequired()], choices=[])
     doctor = SelectField("Doctor:", validators=[DataRequired()], choices=[])
     appointment_time = DateField(
         "Appointment Time:", validators=[DataRequired()])

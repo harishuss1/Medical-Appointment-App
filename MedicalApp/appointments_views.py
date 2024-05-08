@@ -49,9 +49,7 @@ def book_appointment():
     form.set_doctors()
     if current_user.access_level != 'STAFF':
         form.patient.data = str(current_user.id)
-        form.process()
-        form.patient.render_kw = {'disabled' : ''} 
-        form.set_doctors()
+        #form.patient.render_kw = {'disabled' : ''} 
     form.set_rooms()
     if request.method == "POST" and form.validate_on_submit():
         try:

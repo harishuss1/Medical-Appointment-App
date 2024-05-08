@@ -8,6 +8,7 @@
     {% if current_user.access_level == 'STAFF' %}
     <li><a href="{{ url_for('note.notes', user_id=current_user.id) }}">See all notes</a></li>
     {% endif %}
+    <li><a href="{{ url_for('appointments.book_appointment') }}">Book an appointment</a></li>
 {% endblock nav %}
 {% endif %}
 {% block content %}

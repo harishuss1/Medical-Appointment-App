@@ -10,6 +10,7 @@
     {% else %}
         <li><a href="{{ url_for('patient.dashboard') }}">Dashboard</a></li>
     {% endif %}
+    <li><a href="{{ url_for('appointments.book_appointment') }}">Book an appointment</a></li>
     <li><a href="{{ url_for('patient.update_patient') }}">Update Details</a></li>
     <li><a href="{{ url_for('patient.view_patient') }}">View Details</a></li>
     <li><a href="{{ url_for('appointments.confirmed_appointments', user_type=user) }}">See all confirmed appointments</a></li>
