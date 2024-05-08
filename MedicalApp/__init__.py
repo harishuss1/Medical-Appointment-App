@@ -17,6 +17,11 @@ def create_app(test_config=None):
         ATTACHEMENTS=os.path.join(app.instance_path, "attachements")
     )
 
+    app.config['IMAGES'] = os.path.join(app.instance_path, "IMAGES")
+    
+    os.makedirs(app.instance_path, exist_ok=True)
+    os.makedirs(app.config['IMAGES'], exist_ok=True)
+
     os.makedirs(app.instance_path, exist_ok=True)
     os.makedirs(app.config['ATTACHEMENTS'], exist_ok=True)
     app.config['TESTING'] = False
@@ -48,6 +53,9 @@ def init_app(app):
 
     from .home_view import bp as home_bp
     app.register_blueprint(home_bp)
+    
+    from .patient_api import bp as patient_bp
+    app.register_blueprint(patient_bp)
 
     from .appointments_views import bp as appointments_bp
     app.register_blueprint(appointments_bp)
@@ -57,6 +65,12 @@ def init_app(app):
 
     from .patients_views import bp as patient_bp
     app.register_blueprint(patient_bp)
+    
+    from .user_views import bp as user_bp
+    app.register_blueprint(user_bp)
+
+    from .medical_rooms_view import bp as medical_rooms_bp
+    app.register_blueprint(medical_rooms_bp)
 
     app.teardown_appcontext(close_db)
 

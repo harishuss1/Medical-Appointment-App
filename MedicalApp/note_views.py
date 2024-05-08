@@ -15,42 +15,51 @@ from .note import Note
 
 bp = Blueprint('note', __name__, url_prefix="/notes/")
 
+def doctor_access(func):
+    def wrapper(*args, **kwargs):
+        if current_user.access_level != 'STAFF' and current_user.access_level != 'ADMIN':
+            return abort(401, "You do not have access to this page!")
+        return func(*args, **kwargs)
+    wrapper.__name__ = func.__name__
+    return wrapper
 
 @bp.route('/<int:note_id>/')
 @login_required
+@doctor_access
 def note(note_id):
-    note = get_db().get_note_by_id(note_id)
+    try:
+        note = get_db().get_note_by_id(note_id)
+    except DatabaseError as e:
+        flash("something went wrong with the database")
+        return redirect('home.index')
     if note == None:
         flash("no note available")
         return redirect(url_for('note.notes', user_id=current_user.id))
     return render_template('note.html', note=note)
 
-
 @bp.route('/note/<int:user_id>/')
 @login_required
+@doctor_access
 def notes(user_id):
-    if current_user.access_level != 'STAFF' and current_user.access_level != 'PATIENT':
-        return redirect(url_for('home.index'))
     notes = None
     try:
-        # <dd><a href="{{ url_for('note.notes', user_id=patient.id) }}">See notes.</a></dd> what to do about this...
-        # CHANGE TO RELATIVE PATH
         if current_user.access_level == 'STAFF':
             notes = get_db().get_notes_by_doctor_id(user_id)
         else:
             notes = get_db().get_notes_by_patient_id(user_id)
         if notes is None or len(notes) == 0:
             flash("No notes are currently written for this user")
+            return redirect(url_for('doctor.dashboard'))
     except DatabaseError as e:
         flash("Something went wrong with the database")
+        return redirect(url_for('doctor.dashboard'))
     return render_template('notes.html', notes=notes)
 
 
 @bp.route('/add/', methods=['GET', 'POST'])
 @login_required
+@doctor_access
 def add():
-    if current_user.access_level != 'STAFF':
-        return redirect('home.index')
     form = NoteForm()
     form.set_choices()
     if request.method == 'POST' and form.validate_on_submit():
@@ -78,9 +87,9 @@ def add():
 
 # source: https://stackoverflow.com/questions/27337013/how-to-send-zip-files-in-the-python-flask-framework
 
-
 @bp.route('/note/<int:note_id>/attachments/', methods=['GET', 'POST'])
 @login_required
+@doctor_access
 def get_attachments(note_id):
     attachments = get_db().get_attachements_by_note_id(note_id)
     buffer = io.BytesIO()
