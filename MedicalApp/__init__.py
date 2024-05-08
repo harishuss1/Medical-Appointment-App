@@ -60,6 +60,9 @@ def init_app(app):
 
     from .patients_views import bp as patient_bp
     app.register_blueprint(patient_bp)
+    
+    from .user_views import bp as user_bp
+    app.register_blueprint(user_bp)
 
     app.teardown_appcontext(close_db)
 

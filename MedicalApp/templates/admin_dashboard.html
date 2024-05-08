@@ -15,6 +15,9 @@ Admin Dashboard
             <li><a href="{{ url_for('admin.delete_user') }}">Delete User</a></li>
             <li><a href="{{ url_for('admin.block_user', user_email=user.email) }}">Block</a></li>
             <li><a href="{{ url_for('admin.change_user_role') }}">Change User Role</a></li>
+            {% if current_user.access_level == 'ADMIN' %}
+            <li><a href="{{ url_for('users.users_roles') }}">See all users</a></li>
+            {% endif %}
         </ul>
     </section>
 </div>

@@ -9,6 +9,7 @@ bp = Blueprint('medicalrooms', __name__, url_prefix='/medicalrooms/')
 
 
 @bp.route('')
+@login_required
 def get_medical_rooms():
     db = get_db()
     medicalrooms = db.get_medicalrooms()
@@ -17,6 +18,7 @@ def get_medical_rooms():
     return render_template('medical_rooms.html', medicalrooms=medicalrooms)
 
 @bp.route('/<string:room_number>/')
+@login_required
 def get_medical_room(room_number):
     db = get_db()
     medical_room = db.get_medical_room_by_room_number(room_number)

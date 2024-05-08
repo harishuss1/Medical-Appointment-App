@@ -1,3 +1,5 @@
+from datetime import date
+import datetime
 import oracledb
 import os
 from flask import g
@@ -37,6 +39,11 @@ class Database:
 
 
     def delete_user(self, user_email):
+        if (user_email is None):
+            raise ValueError("Parameters cannot be none")
+        if (not isinstance(user_email, str)):
+            raise TypeError("Parameters of incorrect types")
+        
         try:
             with self.__connection.cursor() as cursor:
                 cursor.execute(
@@ -50,6 +57,10 @@ class Database:
 
 
     def block_user(self, email):
+        if (user_email is None):
+            raise ValueError("Parameters cannot be none")
+        if (not isinstance(user_email, str)):
+            raise TypeError("Parameters of incorrect types")
         try:
             with self.__connection.cursor() as cursor:
                 cursor.execute(
@@ -63,6 +74,11 @@ class Database:
 
 
     def change_user_type(self, user_email, new_user_type):
+        if (user_email is None or new_user_type is None):
+            raise ValueError("Parameters cannot be none")
+        if (not isinstance(user_email, str) or not isinstance(new_user_type, str)):
+            raise TypeError("Parameters of incorrect types")
+        
         try:
             with self.__connection.cursor() as cursor:
                 cursor.execute(
@@ -78,6 +94,11 @@ class Database:
     # status 0 = pending, status 1 = confirmed, status -1 = cancel
 
     def get_appointments_by_status_doctor(self, status, doctor_id):
+        if (status is None or doctor_id is None):
+            raise ValueError("Parameters cannot be none")
+        if (not isinstance(status, int) or not isinstance(doctor_id, int)):
+            raise TypeError("Parameters of incorrect types")
+        
         appointments = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
@@ -109,6 +130,11 @@ class Database:
         return patients
     
     def get_patients_page_number(self, page, first_name, last_name):
+        if (page is None or first_name is None or last_name is None):
+            raise ValueError("Parameters cannot be none")
+        if (not isinstance(page, int) or not isinstance(first_name, str) or not isinstance(last_name, str)):
+            raise TypeError("Parameters of incorrect types")
+        
         patients = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
@@ -149,6 +175,11 @@ class Database:
         return doctors
 
     def get_appointments_by_status_patient(self, status, patient_id):
+        if (status is None or patient_id is None):
+            raise ValueError("Parameters cannot be none")
+        if (not isinstance(status, int) or not isinstance(patient_id, int)):
+            raise TypeError("Parameters of incorrect types")
+        
         appointments = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
@@ -164,6 +195,11 @@ class Database:
         return appointments
 
     def get_appointment_by_id(self, id):
+        if (id is None):
+            raise ValueError("Parameters cannot be none")
+        if (not isinstance(id, int)):
+            raise TypeError("Parameters of incorrect types")
+        
         appointment = None
         with self.__get_cursor() as cursor:
             results = cursor.execute(
@@ -180,6 +216,11 @@ class Database:
         return appointment
 
     def get_appointment_for_doctors(self, id):
+        if (id is None):
+            raise ValueError("Parameters cannot be none")
+        if (not isinstance(id, int)):
+            raise TypeError("Parameters of incorrect types")
+        
         appointments = []
         with self.__get_cursor() as cursor:
             cursor.execute(
@@ -197,6 +238,11 @@ class Database:
 
 
     def get_appointment_for_patients(self, id):
+        if (id is None):
+            raise ValueError("Parameters cannot be none")
+        if (not isinstance(id, int)):
+            raise TypeError("Parameters of incorrect types")
+        
         appointments = []
         with self.__get_cursor() as cursor:
             cursor.execute(
@@ -213,6 +259,11 @@ class Database:
         return appointments
 
     def get_user_by_id(self, id):
+        if (id is None ):
+            raise ValueError("Parameters cannot be none")
+        if (not isinstance(id, int)):
+            raise TypeError("Parameters of incorrect types")
+        
         patient = None
         with self.__get_cursor() as cursor:
             results = cursor.execute("SELECT email, password, first_name, last_name, user_type, avatar_path, id FROM medical_users WHERE id = :id",
@@ -222,8 +273,27 @@ class Database:
                 patient = User(
                     row[0], row[1], row[2], row[3], row[4], avatar_path=row[5], id=int(row[6]))
         return (patient)
+    
+    def get_users_and_roles(self):
+        users = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                """
+                SELECT email, password, first_name, last_name, 
+                user_type, avatar_path, id FROM medical_users
+                ORDER BY user_type, first_name ASC
+                """)
+            for row in results:
+                users.append(User(
+                    row[0], row[1], row[2], row[3], row[4], avatar_path=row[5], id=int(row[6])))
+        return (users)
 
     def update_appointment_status(self, id, status, room=None):
+        if (id is None or status is None):
+            raise ValueError("Parameters cannot be none")
+        if (not isinstance(status, int) or not isinstance(id, int)):
+            raise TypeError("Parameters of incorrect types")
+        
         with self.__get_cursor() as cursor:
             cursor.execute("UPDATE medical_appointments SET status = :status WHERE id = :id",
                            status=status, id=id)
@@ -232,6 +302,11 @@ class Database:
                            room=room, id=id)
 
     def get_patients_by_doctor(self, doctor_id):
+        if (doctor_id is None):
+            raise ValueError("Parameters cannot be none")
+        if ( not isinstance(doctor_id, int)):
+            raise TypeError("Parameters of incorrect types")
+        
         patients = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
@@ -243,6 +318,11 @@ class Database:
         return patients
 
     def get_patients_by_id(self, patient_id):
+        if (patient_id is None):
+            raise ValueError("Parameters cannot be none")
+        if (not isinstance(patient_id, int)):
+            raise TypeError("Parameters of incorrect types")
+        
         patient = None
         with self.__get_cursor() as cursor:
             results = cursor.execute("SELECT weight, email, password, first_name, last_name, user_type, dob, blood_type, height, avatar_path, id FROM medical_users u INNER JOIN medical_patients p USING(id) WHERE id = :id",
@@ -254,6 +334,11 @@ class Database:
         return patient
 
     def get_patient_appointments(self, patient_id):
+        if (patient_id is None):
+            raise ValueError("Parameters cannot be none")
+        if (not isinstance(patient_id, int)):
+            raise TypeError("Parameters of incorrect types")
+        
         appointments = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
@@ -268,6 +353,11 @@ class Database:
         return appointments
 
     def update_patient_details(self, patient_id, dob, blood_type, height, weight, allergies):
+        if (patient_id is None or dob is None or blood_type is None or height is None or weight is None or allergies is None):
+            raise ValueError("Parameters cannot be none")
+        if (not isinstance(patient_id, int) or not isinstance(height, int) or not isinstance(weight, int) or not isinstance(dob, datetime.date)):
+            raise TypeError("Parameters of incorrect types")
+        
         with self.__get_cursor() as cursor:
             cursor.execute(
                 """
@@ -310,6 +400,11 @@ class Database:
         return allergies
 
     def get_allergy_by_id(self, allergy_id):
+        if (allergy_id is None):
+            raise ValueError("Parameters cannot be none")
+        if (not isinstance(allergy_id, int)):
+            raise TypeError("Parameters of incorrect types")
+        
         with self.__get_cursor() as cursor:
             result = cursor.execute(
                 """
@@ -324,6 +419,11 @@ class Database:
                 return str(result[0]), str(result[1])
 
     def get_patient_allergies(self, patient_id):
+        if (patient_id is None):
+            raise ValueError("Parameters cannot be none")
+        if (not isinstance(patient_id, int)):
+            raise TypeError("Parameters of incorrect types")
+        
         allergies = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
@@ -340,6 +440,11 @@ class Database:
         return allergies
 
     def get_patient_details(self, patient_id):
+        if (patient_id is None):
+            raise ValueError("Parameters cannot be none")
+        if (not isinstance(patient_id, int)):
+            raise TypeError("Parameters of incorrect types")
+        
         patient = None
         with self.__get_cursor() as cursor:
             results = cursor.execute("SELECT weight, email, password, first_name, last_name, user_type, dob, blood_type, height, avatar_path, id FROM medical_users u INNER JOIN medical_patients p USING(id) WHERE id = :id",
@@ -351,6 +456,11 @@ class Database:
         return patient
 
     def get_notes_by_patient_id(self, patient_id):
+        if (patient_id is None):
+            raise ValueError("Parameters cannot be none")
+        if (not isinstance(patient_id, int)):
+            raise TypeError("Parameters of incorrect types")
+        
         notes = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
@@ -367,6 +477,11 @@ class Database:
         return notes
 
     def get_note_by_id(self, id):
+        if (id is None):
+            raise ValueError("Parameters cannot be none")
+        if (not isinstance(id, int)):
+            raise TypeError("Parameters of incorrect types")
+        
         note = None
         with self.__get_cursor() as cursor:
             results = cursor.execute(
@@ -392,6 +507,11 @@ class Database:
         return note
 
     def get_notes_by_doctor_id(self, doctor_id):
+        if (doctor_id is None):
+            raise ValueError("Parameters cannot be none")
+        if (not isinstance(doctor_id, int)):
+            raise TypeError("Parameters of incorrect types")
+        
         notes = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
@@ -416,6 +536,11 @@ class Database:
         return notes
 
     def get_attachements_by_note_id(self, id):
+        if (id is None):
+            raise ValueError("Parameters cannot be none")
+        if (not isinstance(id, int)):
+            raise TypeError("Parameters of incorrect types")
+        
         attachements = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
@@ -459,6 +584,11 @@ class Database:
                            user_type=user.access_level)
 
     def get_user_by_email(self, email):
+        if (email is None):
+            raise ValueError("Parameters cannot be none")
+        if (not isinstance(email, str)):
+            raise TypeError("Parameters of incorrect types")
+        
         user = None
         with self.__get_cursor() as cursor:
             cursor.execute(
@@ -531,6 +661,11 @@ class Database:
         return medical_rooms
 
     def get_medical_room_by_room_number(self,room_number):
+        if (room_number is None):
+            raise ValueError("Parameters cannot be none")
+        if (not isinstance(room_number, str)):
+            raise TypeError("Parameters of incorrect types")
+        
         medical_room = None
         with self.__get_cursor() as cursor:
             cursor.execute(
