@@ -15,5 +15,6 @@
     <h1>{% block title %}Doctor Dashboard{% endblock title %}</h1>
     <main>
         Welcome to your dashboard
+        <h3><a href="{{ url_for('note.add') }}">Add Note</a></h3>
     </main>
 {% endblock content %}

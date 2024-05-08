@@ -158,19 +158,19 @@ def update_appointment(id):
             try:
                 get_db().update_appointment_status(id, status, room=room)
                 flash("Appointment has been successfully updated")
-                return redirect(url_for('doctor.requested_appointments'))
+                return redirect(url_for('appointments.requested_appointments', user_type='doctor'))
             except DatabaseError:
                 flash("Something went wrong with the database")
-                return redirect(url_for('doctor.requested_appointments'))
+                return redirect(url_for('appointments.requested_appointments', user_type='doctor'))
     except DatabaseError as e:
         flash("something went wrong with the database")
-        return redirect('doctor.requested_appointments')
+        return redirect('appointments.requested_appointments', user_type='doctor')
     except TypeError as e:
         flash("incorrect types")
-        return redirect('doctor.requested_appointments')
+        return redirect('appointments.requested_appointments', user_type='doctor')
     except ValueError as e: 
         flash("Incorrect values were passed")
-        return redirect('doctor.requested_appointments')
+        return redirect('appointments.requested_appointments', user_type='doctor')
 
     if appointment is None:
         abort(404, "This address does not exist")
