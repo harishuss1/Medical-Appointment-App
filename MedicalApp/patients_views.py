@@ -44,6 +44,7 @@ def dashboard():
 @patient_access
 def update_patient():
     form = PatientDetailsForm()
+    form.prefill()
     try:
         allergies = get_db().get_all_allergies()
         form.allergies.choices = [(Allergy['id'], Allergy['name'])
