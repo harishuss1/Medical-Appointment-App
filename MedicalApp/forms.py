@@ -88,6 +88,9 @@ class NoteForm(FlaskForm):
             choices.append(
                 (patient.id, f"{patient.first_name} {patient.last_name}"))
         self.patient.choices = choices
+        
+class AddAttachementForm(FlaskForm):
+    attachement = MultipleFileField('Add an attachement')
 
 
 class BlockUserForm(FlaskForm):

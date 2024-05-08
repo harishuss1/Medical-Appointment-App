@@ -9,11 +9,12 @@ from .user import User
 from .db.dbmanager import get_db
 from oracledb import InternalError, DatabaseError
 from flask_login import current_user, login_user, logout_user, login_required
-from .forms import NoteForm
+from .forms import AddAttachementForm, NoteForm
 from .db.db import Database
 from .note import Note
 
 bp = Blueprint('note', __name__, url_prefix="/notes/")
+
 
 def doctor_access(func):
     def wrapper(*args, **kwargs):
@@ -23,19 +24,47 @@ def doctor_access(func):
     wrapper.__name__ = func.__name__
     return wrapper
 
-@bp.route('/<int:note_id>/')
+
+@bp.route('/<int:note_id>/', methods=['GET', 'POST'])
 @login_required
 @doctor_access
 def note(note_id):
+    form = AddAttachementForm()
+    note = None
     try:
         note = get_db().get_note_by_id(note_id)
     except DatabaseError as e:
         flash("something went wrong with the database")
-        return redirect('home.index')
+        return redirect(url_for('home.index'))
+
     if note == None:
         flash("no note available")
         return redirect(url_for('note.notes', user_id=current_user.id))
-    return render_template('note.html', note=note)
+
+    if request.method == 'POST' and form.validate_on_submit():
+        files = form.attachement.data
+        paths = []
+        for file in files:
+            filename = file.filename
+            folder = os.path.join(
+                current_app.config['ATTACHEMENTS'], str(note.patient.id))
+            if not os.path.exists(folder):
+                os.makedirs(folder)
+            path = os.path.join(folder, filename)
+            path = os.path.relpath(path, start=os.curdir)
+            paths.append(path)
+            file.save(path)
+        try:
+            get_db().update_note(note, paths)
+        except DatabaseError as e:
+            flash("Something went wrong with the database")
+            return redirect(url_for('home.index'))
+        except TypeError as e:
+            flash("Incorrect types sent")
+            return redirect(url_for('home.index'))
+            
+    return render_template('note.html', note=note, form=form)
+
 
 @bp.route('/note/<int:user_id>/')
 @login_required
@@ -84,11 +113,12 @@ def add():
             return redirect(url_for('note.notes', user_id=current_user.id))
         except DatabaseError as e:
             flash("something went wrong with the database")
-        except ValueError as e: 
+        except ValueError as e:
             flash("Incorrect values were passed")
     return render_template('add_note.html', form=form)
 
 # source: https://stackoverflow.com/questions/27337013/how-to-send-zip-files-in-the-python-flask-framework
+
 
 @bp.route('/note/<int:note_id>/attachments/', methods=['GET', 'POST'])
 @login_required
@@ -96,20 +126,26 @@ def add():
 def get_attachments(note_id):
     try:
         attachments = get_db().get_attachements_by_note_id(note_id)
-        
-        if attachments is None or len(attachments == 0):
+
+        if attachments is None or len(attachments) == 0:
             flash("this user has no attachements")
+
         buffer = io.BytesIO()
 
         # Create a ZipFile object with the BytesIO buffer
         with ZipFile(buffer, 'w') as zipf:
             for attachment in attachments:
                 # Add attachment to zip archive
-                zipf.write(attachment, os.path.basename(attachment))
+                try:
+                    zipf.write(attachment, os.path.basename(attachment))
+                except FileNotFoundError as e:
+                    continue
+                    #flash("Some files could not be located")
 
         buffer.seek(0)
 
         return send_file(buffer, as_attachment=True, download_name='attachements.zip', mimetype='application/zip')
-    
+
     except DatabaseError as e:
         flash("something went wrong with obtaining attachements")
+        return redirect(url_for('note.note', note_id=note_id))
