@@ -28,10 +28,8 @@
         {% for appointment in appointments %}
         {% if appointment.status == 0 %}
         <li>
-            <strong>Date:</strong> {{ appointment.date }}
-            <strong>Status:</strong> {{ appointment.status }}
-            <strong>Doctor:</strong> {{ appointment.doctor.name }}
-            <strong>Location:</strong> {{ appointment.location }}
+            <strong>Date:</strong> {{ appointment.appointment_time }}
+            <strong>Doctor:</strong> {{ appointment.doctor }}
             <strong>Description:</strong> {{ appointment.description }}
         </li>
         {% endif %}
@@ -44,9 +42,8 @@
         {% for appointment in appointments %}
         {% if appointment.status == 1 %}
         <li>
-            <strong>Date:</strong> {{ appointment.date }} <br>
-            <strong>Status:</strong> {{ appointment.status }} <br>
-            <strong>Doctor:</strong> {{ appointment.doctor.name }} <br>
+            <strong>Date:</strong> {{ appointment.appointment_time }} <br>
+            <strong>Doctor:</strong> {{ appointment.doctor }} <br>
             <strong>Location:</strong> {{ appointment.location }} <br>
             <strong>Description:</strong> {{ appointment.description }} <br>
         </li>

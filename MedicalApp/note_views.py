@@ -140,12 +140,11 @@ def get_attachments(note_id):
                     zipf.write(attachment, os.path.basename(attachment))
                 except FileNotFoundError as e:
                     continue
-                    #flash("Some files could not be located")
 
         buffer.seek(0)
 
         return send_file(buffer, as_attachment=True, download_name='attachements.zip', mimetype='application/zip')
-
+    
     except DatabaseError as e:
         flash("something went wrong with obtaining attachements")
         return redirect(url_for('note.note', note_id=note_id))

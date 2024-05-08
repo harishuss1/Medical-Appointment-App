@@ -20,11 +20,14 @@
 {% block content %}
 <h2>{% block title %}Appointment{% endblock title %}</h2>
 <ul>
-    <li>ID: {{ appointment.id }}</li>
+    {% set a_status = 'Pending' %}
+    {% if appointment.status == 1 %}
+    {% set a_status = 'Confirmed' %}
+    {% endif %}
     <li>Patient: {{ appointment.patient }}</li>
     <li>Doctor:Dr. {{ appointment.doctor }}</li>
     <li>Date: {{ appointment.appointment_time }}</li> 
-    <li>Status: {{ appointment.status }}</li>  
+    <li>Status: {{ status }}</li>  
     {% if appointment.status == 0 and current_user.access_level != 'PATIENT' and current_user.access_level != 'ADMIN_USER' %} 
     <li>Location: {{ appointment.location }}</li>  
     {% endif %}
