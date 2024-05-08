@@ -10,7 +10,7 @@ bp = Blueprint('medical_rooms', __name__, url_prefix='/medicalrooms/')
 @bp.route('')
 def get_medical_rooms():
     db = get_db()
-    medicalrooms = db.get_medicalrooms()
+    medicalrooms = db.get_medical_rooms()
     if medicalrooms is None or len(medicalrooms) == 0:
         abort(404)
     return render_template('medical_rooms.html', medicalrooms=medicalrooms)

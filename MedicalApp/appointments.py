@@ -1,5 +1,6 @@
 import datetime
 import json
+from MedicalApp.medical_room import MedicalRoom
 from MedicalApp.user import User, MedicalPatient
 
 
@@ -62,7 +63,7 @@ class Appointments:
             raise ValueError('Illegal value for status')
         self.status = status
 
-        if not isinstance(location, str):
+        if not isinstance(location, MedicalRoom):
             raise ValueError('Illegal type for location')
         self.location = location
 
