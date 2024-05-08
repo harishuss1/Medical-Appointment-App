@@ -6,7 +6,6 @@ from MedicalApp.allergy import Allergy
 from MedicalApp.forms import PatientDetailsForm
 from MedicalApp.user import MedicalPatient
 from .db.dbmanager import get_db
-# from .forms import PatientForm   will implement this later for updating
 
 bp = Blueprint('patient_api', __name__, url_prefix="/api/patients/")
 

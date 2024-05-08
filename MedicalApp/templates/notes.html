@@ -4,7 +4,9 @@
     <li><a href="{{ url_for('appointments.confirmed_appointments', user_type='doctor') }}">See all confirmed appointments</a></li>
     <li><a href="{{ url_for('appointments.requested_appointments', user_type='doctor') }}">See appointment requests</a></li>
     <li><a href="{{ url_for('doctor.patients') }}">See all patients</a></li>
+    {% if current_user.access_level == 'STAFF' %}
     <li><a href="{{ url_for('note.notes', user_id=current_user.id) }}">See all notes</a></li>
+    {% endif %}
 {% endblock nav %}
 {% endif %}
 {% block content %}

@@ -33,25 +33,22 @@ def note(note_id):
         return redirect(url_for('note.notes', user_id=current_user.id))
     return render_template('note.html', note=note)
 
-
 @bp.route('/note/<int:user_id>/')
 @login_required
 @doctor_access
 def notes(user_id):
-    if current_user.access_level != 'STAFF' and current_user.access_level != 'PATIENT':
-        return redirect(url_for('home.index'))
     notes = None
     try:
-        # <dd><a href="{{ url_for('note.notes', user_id=patient.id) }}">See notes.</a></dd> what to do about this...
-        # CHANGE TO RELATIVE PATH
         if current_user.access_level == 'STAFF':
             notes = get_db().get_notes_by_doctor_id(user_id)
         else:
             notes = get_db().get_notes_by_patient_id(user_id)
         if notes is None or len(notes) == 0:
             flash("No notes are currently written for this user")
+            return redirect(url_for('doctor.dashboard'))
     except DatabaseError as e:
         flash("Something went wrong with the database")
+        return redirect(url_for('doctor.dashboard'))
     return render_template('notes.html', notes=notes)
 
 
@@ -59,8 +56,6 @@ def notes(user_id):
 @login_required
 @doctor_access
 def add():
-    if current_user.access_level != 'STAFF':
-        return redirect('home.index')
     form = NoteForm()
     form.set_choices()
     if request.method == 'POST' and form.validate_on_submit():
@@ -87,7 +82,6 @@ def add():
     return render_template('add_note.html', form=form)
 
 # source: https://stackoverflow.com/questions/27337013/how-to-send-zip-files-in-the-python-flask-framework
-
 
 @bp.route('/note/<int:note_id>/attachments/', methods=['GET', 'POST'])
 @login_required
