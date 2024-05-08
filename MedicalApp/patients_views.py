@@ -30,8 +30,13 @@ def doctor_access(func):
 @login_required
 @patient_access
 def dashboard():
-
-    appointments = get_db().get_patient_appointments(current_user.id)
+    try:
+        appointments = get_db().get_patient_appointments(current_user.id)
+        if appointments is None or len(appointments) == 0:
+            flash("No appointments are currently under your name!")
+    except DatabaseError as e:
+        flash("Something went wrong with the database")
+        return redirect(url_for('home.index'))
     return render_template('patient_dashboard.html', appointments=appointments)
 
 @bp.route('/details/update/', methods=['GET', 'POST'])
@@ -39,11 +44,10 @@ def dashboard():
 @patient_access
 def update_patient():
     form = PatientDetailsForm()
-
-    allergies = get_db().get_all_allergies()
-    form.allergies.choices = [(Allergy['id'], Allergy['name'])
-                              for Allergy in allergies]
     try:
+        allergies = get_db().get_all_allergies()
+        form.allergies.choices = [(Allergy['id'], Allergy['name'])
+                              for Allergy in allergies]
         if request.method == 'POST' and form.validate_on_submit():
             dob = form.dob.data
             blood_type = form.blood_type.data
@@ -62,6 +66,9 @@ def update_patient():
     except DatabaseError as e:
         flash("something went wrong with the database")
         return redirect('home.index')
+    except ValueError as e: 
+        flash("Incorrect values were passed")
+        return redirect(url_for('home.index'))
 
     return render_template('update_patient.html', form=form)
 
@@ -81,8 +88,11 @@ def view_patient():
 
         patient.allergies = get_db().get_patient_allergies(patient.id)
     except DatabaseError as e:
-        flash("something went wrong with the database")
-        return redirect('home.index')
+        flash("Something went wrong with the database")
+        return redirect(url_for('home.index'))
+    except ValueError as e: 
+        flash("Incorrect values were passed")
+        return redirect(url_for('home.index'))
 
     return render_template('patient_details.html', patient=patient)
 

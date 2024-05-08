@@ -23,9 +23,13 @@ def get_medical_rooms():
 @bp.route('/<string:room_number>/')
 @login_required
 def get_medical_room(room_number):
-    db = get_db()
-    medical_room = db.get_medical_room_by_room_number(room_number)
-    if medical_room is None:
-        flash("Medical Room cannot be found", 'error')
-        return redirect(url_for('medical_rooms.get_medical_rooms'))
+    try:
+        db = get_db()
+        medical_room = db.get_medical_room_by_room_number(room_number)
+        if medical_room is None:
+            flash("Medical Room cannot be found", 'error')
+            return redirect(url_for('medical_rooms.get_medical_rooms'))
+    except DatabaseError as e:
+        flash("something went wrong with the database")
+        return redirect(url_for('home.index'))
     return render_template('specific_medical_room.html', medical_room=medical_room)

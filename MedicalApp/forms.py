@@ -42,11 +42,11 @@ class LoginForm(FlaskForm):
 
 
 class AppointmentForm(FlaskForm):
-    patient = SelectField("Patient:", validators=[DataRequired()], choices=[])
+    patient = SelectField("Patient:", choices=[])
     doctor = SelectField("Doctor:", validators=[DataRequired()], choices=[])
     appointment_time = DateField(
         "Appointment Time:", validators=[DataRequired()])
-    location = SelectField("Location:", validators=[DataRequired()])
+    location = SelectField("Location:")
     description = StringField("Description:", validators=[DataRequired()])
     
     def set_patients(self):
@@ -141,7 +141,6 @@ class PatientDetailsForm(FlaskForm):
     height = FloatField('Height (in cm)', validators=[DataRequired()])
     weight = FloatField('Weight (in kg)', validators=[DataRequired()])
     allergies = SelectMultipleField('Allergies', choices=[])
-
 
 class ChangePasswordForm(FlaskForm):
     current_password = PasswordField(

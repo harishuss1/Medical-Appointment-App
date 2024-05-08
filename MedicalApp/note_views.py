@@ -75,14 +75,17 @@ def add():
             path = os.path.relpath(path, start=os.curdir)
             paths.append(path)
             file.save(path)  # actually adds it to the directory
-
-        patient = get_db().get_patients_by_id(form.patient.data)
-        # form.date.data.strftime('%Y-%m-%d')
-        note = Note(patient, current_user,
-                    form.date.data, form.note.data, paths)
-
-        get_db().create_note(note)
-        return redirect(url_for('note.notes', user_id=current_user.id))
+        try:
+            patient = get_db().get_patients_by_id(form.patient.data)
+            # form.date.data.strftime('%Y-%m-%d')
+            note = Note(patient, current_user,
+                        form.date.data, form.note.data, paths)
+            get_db().create_note(note)
+            return redirect(url_for('note.notes', user_id=current_user.id))
+        except DatabaseError as e:
+            flash("something went wrong with the database")
+        except ValueError as e: 
+            flash("Incorrect values were passed")
     return render_template('add_note.html', form=form)
 
 # source: https://stackoverflow.com/questions/27337013/how-to-send-zip-files-in-the-python-flask-framework
@@ -91,15 +94,22 @@ def add():
 @login_required
 @doctor_access
 def get_attachments(note_id):
-    attachments = get_db().get_attachements_by_note_id(note_id)
-    buffer = io.BytesIO()
+    try:
+        attachments = get_db().get_attachements_by_note_id(note_id)
+        
+        if attachments is None or len(attachments == 0):
+            flash("this user has no attachements")
+        buffer = io.BytesIO()
 
-    # Create a ZipFile object with the BytesIO buffer
-    with ZipFile(buffer, 'w') as zipf:
-        for attachment in attachments:
-            # Add attachment to zip archive
-            zipf.write(attachment, os.path.basename(attachment))
+        # Create a ZipFile object with the BytesIO buffer
+        with ZipFile(buffer, 'w') as zipf:
+            for attachment in attachments:
+                # Add attachment to zip archive
+                zipf.write(attachment, os.path.basename(attachment))
 
-    buffer.seek(0)
+        buffer.seek(0)
 
-    return send_file(buffer, as_attachment=True, download_name='attachements.zip', mimetype='application/zip')
+        return send_file(buffer, as_attachment=True, download_name='attachements.zip', mimetype='application/zip')
+    
+    except DatabaseError as e:
+        flash("something went wrong with obtaining attachements")

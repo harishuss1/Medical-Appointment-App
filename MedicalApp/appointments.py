@@ -42,7 +42,7 @@ class Appointments:
             'description': self.description
         }
 
-    def __init__(self, patient, doctor, appointment_time, status, location, description, id=None):
+    def __init__(self, patient, doctor, appointment_time, status, location=None, description=None, id=None):
         if id != None and not isinstance(id, int):
             raise ValueError('Illegal type for patient id')
         self.id = id
@@ -63,11 +63,11 @@ class Appointments:
             raise ValueError('Illegal value for status')
         self.status = status
 
-        if not isinstance(location, MedicalRoom):
+        if location != None and not isinstance(location, MedicalRoom):
             raise ValueError('Illegal type for location')
         self.location = location
 
-        if not isinstance(description, str):
+        if description != None and not isinstance(description, str):
             raise ValueError('Illegal type for description')
         self.description = description
 
