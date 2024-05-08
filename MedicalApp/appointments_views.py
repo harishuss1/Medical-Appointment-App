@@ -44,13 +44,12 @@ def book_appointment():
         return redirect('home.index')
     if appointments is None or len(appointments) == 0:
         abort(404)
-    hide_patient = False
     form = AppointmentForm()
     form.set_patients()
     form.set_doctors()
     if current_user.access_level != 'STAFF':
-        hide_patient = True
         form.patient.data = str(current_user.id)
+        form.process()
         form.patient.render_kw = {'disabled' : ''} 
         form.set_doctors()
     form.set_rooms()
@@ -65,7 +64,7 @@ def book_appointment():
         time = form.appointment_time.data
         if doctor.id == current_user.id:
             status = 1
-        location = form.location.data
+        location = get_db().get_medical_room_by_room_number(form.location.data)
         description = form.description.data
         
         new_appointment = Appointments(
@@ -77,7 +76,7 @@ def book_appointment():
         return redirect(
             url_for('appointments.get_appointment', id=new_id))
 
-    return render_template('appointments.html', form=form, hide_patient=hide_patient)
+    return render_template('appointments.html', form=form)
 
 @bp.route('/<int:id>/')
 @login_required

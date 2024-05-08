@@ -12,7 +12,7 @@ bp = Blueprint('medical_rooms', __name__, url_prefix='/medicalrooms/')
 def get_medical_rooms():
     try:
         db = get_db()
-        medicalrooms = db.get_medicalrooms()
+        medicalrooms = db.get_medical_rooms()
     except DatabaseError as e:
         flash("something went wrong with the database")
         return redirect('home.index')

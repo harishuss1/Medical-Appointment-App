@@ -43,7 +43,7 @@ class Appointments:
         }
 
     def __init__(self, patient, doctor, appointment_time, status, location, description, id=None):
-        if id != None and not isinstance(id, int) and id > 0:
+        if id != None and not isinstance(id, int):
             raise ValueError('Illegal type for patient id')
         self.id = id
 

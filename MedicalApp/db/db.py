@@ -281,8 +281,6 @@ class Database:
     def get_user_by_id(self, id):
         if (id is None ):
             raise ValueError("Parameters cannot be none")
-        if (not isinstance(id, int)):
-            raise TypeError("Parameters of incorrect types")
         
         patient = None
         with self.__get_cursor() as cursor:
@@ -340,9 +338,6 @@ class Database:
     def get_patients_by_id(self, patient_id):
         if (patient_id is None):
             raise ValueError("Parameters cannot be none")
-        if (not isinstance(patient_id, int)):
-            raise TypeError("Parameters of incorrect types")
-        
         patient = None
         with self.__get_cursor() as cursor:
             results = cursor.execute("SELECT weight, email, password, first_name, last_name, user_type, dob, blood_type, height, avatar_path, id FROM medical_users u INNER JOIN medical_patients p USING(id) WHERE id = :id",
@@ -362,21 +357,20 @@ class Database:
         appointments = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
-                "SELECT id, patient_id, doctor_id, appointment_time, status, location, description FROM medical_appointments WHERE patient_id = :patient_id",
+                "SELECT ma.id, ma.patient_id, ma.doctor_id, ma.appointment_time, ma.status, ma.location, ma.description, mr.room_number, mr.description FROM medical_appointments ma INNER JOIN medical_rooms mr ON mr.room_number = ma.location WHERE patient_id = :patient_id",
                 patient_id=patient_id)
             for row in results:
                 patient = self.get_patients_by_id(int(row[1]))
                 doctor = self.get_user_by_id(int(row[2]))
+                location = MedicalRoom(row[5], row[8])
                 if patient is not None and doctor is not None:
                     appointments.append(Appointments(patient, doctor,
-                                                     row[3], int(row[4]), row[5], str(row[6]), id=row[0]))
+                                                     row[3], int(row[4]), location, str(row[6]), id=row[0]))
         return appointments
 
     def update_patient_details(self, patient_id, dob, blood_type, height, weight, allergies):
         if (patient_id is None or dob is None or blood_type is None or height is None or weight is None or allergies is None):
             raise ValueError("Parameters cannot be none")
-        if (not isinstance(patient_id, int) or not isinstance(height, int) or not isinstance(weight, int) or not isinstance(dob, datetime.date)):
-            raise TypeError("Parameters of incorrect types")
         
         with self.__get_cursor() as cursor:
             cursor.execute(
@@ -652,7 +646,7 @@ class Database:
                                doctor_id=appointment.doctor.id,
                                appointment_time=appointment.appointment_time,
                                status=appointment.status,
-                               location=appointment.location,
+                               location=appointment.location.room_number,
                                description=appointment.description,
                                id=id)
                 new_id = id.values[0][0]
@@ -690,7 +684,7 @@ class Database:
                     row[23]), avatar_path=row[20], id=int(row[14]), allergies=allergies)
                 location = MedicalRoom(row[25], row[26])
                 appointments.append(Appointments(
-                    row[0], patient, doctor, row[3], row[4], row[5], str(row[6])))
+                    patient, doctor, row[3], row[4], location, str(row[6]), id=row[0]))
         return appointments
 
     def get_medical_rooms(self):

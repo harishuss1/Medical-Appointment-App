@@ -38,15 +38,17 @@
         <ul>
             {% block nav %}
                 <li><a href="{{ url_for('home.index') }}">Home</a></li>
-                <li><a href="{{ url_for('patient.patient_dashboard') }}">Patient Dashboard</a></li>
-            {% if current_user.access_level != 'PATIENT' %}
-                <li><a href="{{ url_for('doctor.dashboard') }}">Doctor Dashboard</a></li>
+            {% if current_user.is_authenticated %}
+                    <li><a href="{{ url_for('patient.dashboard') }}">Patient Dashboard</a></li>
+                {% if current_user.access_level != 'PATIENT' %}
+                    <li><a href="{{ url_for('doctor.dashboard') }}">Doctor Dashboard</a></li>
+                {% endif %}
+                {% if current_user.access_level != 'PATIENT' and current_user.access_level != 'DOCTOR' %}
+                    <li><a href="{{ url_for('admin.admin_dashboard') }}">Admin Dashboard</a></li>
+                {% endif %}
+                    <li><a href="{{ url_for('appointments.book_appointment') }}">Book an appointment</a></li>
+                <li><a href="{{ url_for('medical_rooms.get_medical_rooms') }}">Medical Rooms</a></li>
             {% endif %}
-            {% if current_user.access_level != 'PATIENT' and current_user.access_level != 'DOCTOR' %}
-                <li><a href="{{ url_for('admin.admin_dashboard') }}">Admin Dashboard</a></li>
-            {% endif %}
-                <li><a href="{{ url_for('appointments.book_appointment') }}">Book an appointment</a></li>
-            <li><a href="{{ url_for('medical_rooms.get_medical_rooms') }}">Medical Rooms</a></li>
             {% endblock nav %}
         </ul>
     </nav>
