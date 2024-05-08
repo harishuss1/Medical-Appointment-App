@@ -35,7 +35,6 @@ class Database:
                                 print(e)
                         statement_parts = []
 
-
     def delete_user(self, user_email):
         try:
             with self.__connection.cursor() as cursor:
@@ -47,7 +46,6 @@ class Database:
         except Exception as e:
             print("Error deleting user:", e)
             raise
-
 
     def block_user(self, email):
         try:
@@ -61,7 +59,6 @@ class Database:
             print("Error blocking user:", e)
             raise
 
-
     def change_user_type(self, user_email, new_user_type):
         try:
             with self.__connection.cursor() as cursor:
@@ -73,7 +70,6 @@ class Database:
         except Exception as e:
             print("Error changing user type:", e)
             raise
-
 
     # status 0 = pending, status 1 = confirmed, status -1 = cancel
 
@@ -96,7 +92,6 @@ class Database:
                 appointments.append(Appointments(
                     row[0], patient, doctor, row[3], row[4], location, str(row[6])))
         return appointments
-
 
     def get_appointments_by_status_patient(self, status, patient_id):
         appointments = []
@@ -159,7 +154,6 @@ class Database:
                 appointments.append(Appointments(
                     row[0], patient, doctor, row[3], row[4], location, str(row[6])))
         return appointments
-
 
     def get_appointment_for_patients(self, id):
         appointments = []
@@ -425,6 +419,13 @@ class Database:
                            last_name=user.last_name,
                            user_type=user.access_level)
 
+    def update_user_password(self, user_id, new_password_hash):
+        with self.__get_cursor() as cursor:
+            cursor.execute(
+                "UPDATE medical_users SET password = :password WHERE id = :id",
+                password=new_password_hash, id=user_id
+            )
+
     def get_user_by_email(self, email):
         user = None
         with self.__get_cursor() as cursor:
@@ -435,6 +436,21 @@ class Database:
                 user = User(
                     row[0], row[1], row[2], row[3], row[4], avatar_path=row[5], id=int(row[6]))
         return user
+
+    def update_user_avatar(self, id, avatar_path):
+        with self.__get_cursor() as cursor:
+            cursor.execute(
+                'SELECT AVATAR_PATH FROM medical_users WHERE id = :id',
+                id=id)
+            result = cursor.fetchone()
+            if result is None:
+                cursor.execute(
+                    'INSERT INTO medical_users (id, AVATAR_PATH) VALUES (:id, :avatar_path)',
+                    id=id, avatar_path=avatar_path)
+            else:
+                cursor.execute(
+                    'UPDATE medical_users SET AVATAR_PATH = :avatar_path WHERE id = :id',
+                    id=id, avatar_path=avatar_path)
 
     def add_appointment(self, appointment):
         with self.__get_cursor() as cursor:
