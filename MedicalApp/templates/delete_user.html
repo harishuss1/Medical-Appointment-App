@@ -10,10 +10,8 @@ Delete User
 <form method="post">
     {{ form.hidden_tag() }}
 
-    <div>
-        {{ form.email.label }}
-        {{ form.email() }}
-    </div>
+    {{ form.email.label }}
+    {{ form.email() }}
 
     {{ form.submit() }}
 </form>

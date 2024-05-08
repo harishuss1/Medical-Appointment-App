@@ -9,17 +9,10 @@ Change User Role
 
 <form method="post">
     {{ form.hidden_tag() }}
-
-    <div>
         {{ form.email.label }}
         {{ form.email() }}
-    </div>
-
-    <div>
         {{ form.user_type.label }}
         {{ form.user_type() }}
-    </div>
-
     {{ form.submit() }}
 </form>
 
