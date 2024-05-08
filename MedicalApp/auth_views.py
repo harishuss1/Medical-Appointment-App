@@ -1,7 +1,7 @@
 import os
 from flask import Blueprint, current_app, flash, redirect, render_template, request, send_from_directory, url_for
 from flask_login import current_user, login_user, login_required, logout_user
-from oracledb import DatabaseError
+from oracledb import DatabaseError, IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
 from MedicalApp.db.dbmanager import get_db
 from MedicalApp.forms import AvatarForm, LoginForm, SignupForm, ChangePasswordForm
@@ -23,9 +23,12 @@ def signup():
                     form.first_name.data, form.last_name.data)
         try:
             get_db().create_user(user)
+        except IntegrityError as e:
+            flash("This email already exists")
+            return redirect('auth.signup')
         except DatabaseError as e:
-            flash("something went wrong with the database")
-            return redirect('home.index')
+            flash("Something went wrong with the database")
+            return redirect('auth.signup')
         return redirect(url_for('auth.login'))
     return render_template('signup.html', form=form)
 
