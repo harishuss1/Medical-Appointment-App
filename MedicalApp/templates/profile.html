@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Profile{% endblock title %}
+
+{% block content %}
+<h1>Profile</h1>
+
+<p>Email: {{ current_user.email }}</p>
+<p>First Name: {{ current_user.first_name }}</p>
+<p>Last Name: {{ current_user.last_name }}</p>
+<p>User Type: {{ current_user.access_level }}</p>
+
+<h2>Change Password</h2>
+<form method="post">
+    {{ form.hidden_tag() }}
+    <div>
+        {{ form.current_password.label }}<br>
+        {{ form.current_password() }}
+    </div>
+    <div>
+        {{ form.new_password.label }}<br>
+        {{ form.new_password() }}
+    </div>
+    <div>
+        {{ form.confirm_password.label }}<br>
+        {{ form.confirm_password() }}
+    </div>
+    <div>
+        {{ form.submit() }}
+    </div>
+</form>
+
+<div class="api-token-link">
+    <a href="{{ url_for('auth.user_api_token') }}">Generate API Token</a>
+</div>
+
+{% endblock content %}

@@ -418,6 +418,13 @@ class Database:
                            first_name=user.first_name,
                            last_name=user.last_name,
                            user_type=user.access_level)
+    
+    def update_user_password(self, user_id, new_password_hash):
+        with self.__get_cursor() as cursor:
+            cursor.execute(
+                "UPDATE medical_users SET password = :password WHERE id = :id",
+                password=new_password_hash, id=user_id
+            )
 
     def get_user_by_email(self, email):
         user = None

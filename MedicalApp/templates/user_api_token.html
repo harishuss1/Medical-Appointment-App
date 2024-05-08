@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}User API Token{% endblock title %}
+
+{% block content %}
+<h1>Your API Token</h1>
+<p>This is your generated API token. Keep it secure and do not share it with others:</p>
+<div class="api-token">
+    {{ api_token }}
+</div>
+<p><a href="{{ url_for('auth.profile') }}">Back to Profile</a></p>
+{% endblock content %}
