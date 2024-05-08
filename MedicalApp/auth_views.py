@@ -5,6 +5,8 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from MedicalApp.db.dbmanager import get_db
 from MedicalApp.forms import AvatarForm, LoginForm, SignupForm, ChangePasswordForm
 from MedicalApp.user import User
+
+import secrets
 from werkzeug.utils import secure_filename
 
 
@@ -103,3 +105,9 @@ def changepassword():
 @login_required
 def get_avatar(email, filename):
     return send_from_directory(os.path.join(current_app.config['IMAGES'], email), filename)
+
+@bp.route('/profile/userApiToken/', methods=['GET'])
+@login_required
+def user_api_token():
+    api_token = secrets.token_urlsafe(20)
+    return render_template('user_api_token.html', api_token=api_token)
