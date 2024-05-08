@@ -1,6 +1,7 @@
 import os
 from flask import Blueprint, current_app, flash, redirect, render_template, request, send_from_directory, url_for
 from flask_login import current_user, login_user, login_required, logout_user
+from oracledb import DatabaseError
 from werkzeug.security import check_password_hash, generate_password_hash
 from MedicalApp.db.dbmanager import get_db
 from MedicalApp.forms import AvatarForm, LoginForm, SignupForm, ChangePasswordForm
@@ -20,7 +21,11 @@ def signup():
         pwd_hash = generate_password_hash(form.password.data)
         user = User(form.email.data, pwd_hash,
                     form.first_name.data, form.last_name.data)
-        get_db().create_user(user)
+        try:
+            get_db().create_user(user)
+        except DatabaseError as e:
+            flash("something went wrong with the database")
+            return redirect('home.index')
         return redirect(url_for('auth.login'))
     return render_template('signup.html', form=form)
 
@@ -29,7 +34,11 @@ def signup():
 def login():
     form = LoginForm()
     if request.method == 'POST' and form.validate_on_submit():
-        user = get_db().get_user_by_email(form.email.data)
+        try:
+            user = get_db().get_user_by_email(form.email.data)
+        except DatabaseError as e:
+            flash("something went wrong with the database")
+            return redirect('home.index')
         if user is not None and check_password_hash(user.password, form.password.data):
             login_user(user, remember=False)
             if current_user.access_level == 'STAFF':

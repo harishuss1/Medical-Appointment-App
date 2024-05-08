@@ -1,3 +1,5 @@
+from datetime import date
+import datetime
 import oracledb
 import os
 from flask import g
@@ -36,6 +38,9 @@ class Database:
                         statement_parts = []
 
     def delete_user(self, user_email):
+        if (user_email is None):
+            raise ValueError("Parameters cannot be none")
+        
         try:
             with self.__connection.cursor() as cursor:
                 cursor.execute(
@@ -48,6 +53,8 @@ class Database:
             raise
 
     def block_user(self, email):
+        if (email is None):
+            raise ValueError("Parameters cannot be none")
         try:
             with self.__connection.cursor() as cursor:
                 cursor.execute(
@@ -60,6 +67,9 @@ class Database:
             raise
 
     def change_user_type(self, user_email, new_user_type):
+        if (user_email is None or new_user_type is None):
+            raise ValueError("Parameters cannot be none")
+        
         try:
             with self.__connection.cursor() as cursor:
                 cursor.execute(
@@ -74,6 +84,9 @@ class Database:
     # status 0 = pending, status 1 = confirmed, status -1 = cancel
 
     def get_appointments_by_status_doctor(self, status, doctor_id):
+        if (status is None or doctor_id is None):
+            raise ValueError("Parameters cannot be none")
+        
         appointments = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
@@ -90,10 +103,72 @@ class Database:
                     row[23]), avatar_path=row[20], id=int(row[14]))
                 location = MedicalRoom(row[25], row[26])
                 appointments.append(Appointments(
-                    row[0], patient, doctor, row[3], row[4], location, str(row[6])))
+                    patient, doctor, row[3], row[4], location, str(row[6]), id=row[0]))
         return appointments
 
+    def get_patients(self):
+        patients = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                """
+                SELECT 
+                mp.WEIGHT, p.id, p.AVATAR_PATH, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, 
+                mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT
+                FROM medical_users p INNER JOIN MEDICAL_PATIENTS mp 
+                ON(p.id = mp.id)
+                """)
+            for row in results:
+                patients.append(MedicalPatient(float(row[0]), row[3], row[4], row[5], row[6], row[7], row[8], row[9], float(
+                    row[10]), avatar_path=row[2], id=int(row[1])))
+        return patients
+    
+    def get_patients_page_number(self, page, first_name, last_name):
+        if (page is None or first_name is None or last_name is None):
+            raise ValueError("Parameters cannot be none")
+        
+        patients = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                f"""
+                SELECT 
+                mp.WEIGHT, p.id, p.AVATAR_PATH, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, 
+                mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT
+                FROM medical_users p INNER JOIN MEDICAL_PATIENTS mp 
+                ON(p.id = mp.id)
+                WHERE
+                { "first_name = :first_name" if first_name is not None and first_name != '' else "0 = 1"} OR
+                { "last_name = :last_name" if last_name is not None and last_name != '' else "0 = 1"}
+                OFFSET :offset ROWS
+                FETCH NEXT :count ROWS ONLY
+                """,
+                offset=((page - 1)*20),
+                count=20,
+                first_name=first_name,
+                last_name=last_name)
+            for row in results:
+                patients.append(MedicalPatient(float(row[0]), row[3], row[4], row[5], row[6], row[7], row[8], row[9], float(
+                    row[10]), avatar_path=row[2], id=int(row[1])))
+        return patients
+    
+    def get_doctors(self):
+        doctors = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                """
+                SELECT 
+                u.id, u.AVATAR_PATH, u.EMAIL, u.PASSWORD, u.FIRST_NAME, u.LAST_NAME, u.USER_TYPE
+                FROM medical_users u
+                WHERE u.user_type = 'STAFF'
+                """)
+            for row in results:
+                doctors.append(User(row[2], row[3], row[4], row[5], row[6], 
+                avatar_path=row[1], id=int(row[0])))
+        return doctors
+
     def get_appointments_by_status_patient(self, status, patient_id):
+        if (status is None or patient_id is None):
+            raise ValueError("Parameters cannot be none")
+        
         appointments = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
@@ -110,10 +185,13 @@ class Database:
                     row[23]), avatar_path=row[20], id=int(row[14]))
                 location = MedicalRoom(row[25], row[26])
                 appointments.append(Appointments(
-                    row[0], patient, doctor, row[3], row[4], location, str(row[6])))
+                    patient, doctor, row[3], row[4], location, str(row[6]), id=row[0]))
         return appointments
 
     def get_appointment_by_id(self, id):
+        if (id is None):
+            raise ValueError("Parameters cannot be none")
+        
         appointment = None
         with self.__get_cursor() as cursor:
             results = cursor.execute(
@@ -131,10 +209,13 @@ class Database:
                     row[23]), avatar_path=row[20], id=int(row[14]))
                 location = MedicalRoom(row[25], row[26])
                 appointment = Appointments(
-                    row[0], patient, doctor, row[3], row[4], location, str(row[6]))
+                    patient, doctor, row[3], row[4], location, str(row[6]), id=row[0])
         return appointment
 
     def get_appointment_for_doctors(self, id):
+        if (id is None):
+            raise ValueError("Parameters cannot be none")
+        
         appointments = []
         with self.__get_cursor() as cursor:
             cursor.execute(
@@ -152,10 +233,13 @@ class Database:
                     row[23]), avatar_path=row[20], id=int(row[14]))
                 location = MedicalRoom(row[25], row[26])
                 appointments.append(Appointments(
-                    row[0], patient, doctor, row[3], row[4], location, str(row[6])))
+                    patient, doctor, row[3], row[4], location, str(row[6]), id=row[0]))
         return appointments
 
     def get_appointment_for_patients(self, id):
+        if (id is None):
+            raise ValueError("Parameters cannot be none")
+        
         appointments = []
         with self.__get_cursor() as cursor:
             cursor.execute(
@@ -173,10 +257,13 @@ class Database:
                     row[23]), avatar_path=row[20], id=int(row[14]))
                 location = MedicalRoom(row[25], row[26])
                 appointments.append(Appointments(
-                    row[0], patient, doctor, row[3], row[4], location, str(row[6])))
+                    patient, doctor, row[3], row[4], location, str(row[6]), id=row[0]))
         return appointments
 
     def get_user_by_id(self, id):
+        if (id is None ):
+            raise ValueError("Parameters cannot be none")
+        
         patient = None
         with self.__get_cursor() as cursor:
             results = cursor.execute("SELECT email, password, first_name, last_name, user_type, avatar_path, id FROM medical_users WHERE id = :id",
@@ -186,13 +273,37 @@ class Database:
                 patient = User(
                     row[0], row[1], row[2], row[3], row[4], avatar_path=row[5], id=int(row[6]))
         return (patient)
+    
+    def get_users_and_roles(self):
+        users = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                """
+                SELECT email, password, first_name, last_name, 
+                user_type, avatar_path, id FROM medical_users
+                ORDER BY user_type, first_name ASC
+                """)
+            for row in results:
+                users.append(User(
+                    row[0], row[1], row[2], row[3], row[4], avatar_path=row[5], id=int(row[6])))
+        return (users)
 
-    def update_appointment_status(self, id, status):
+    def update_appointment_status(self, id, status, room=None):
+        if (id is None or status is None):
+            raise ValueError("Parameters cannot be none")
+
+        
         with self.__get_cursor() as cursor:
             cursor.execute("UPDATE medical_appointments SET status = :status WHERE id = :id",
                            status=status, id=id)
+            if room:
+                cursor.execute("UPDATE medical_appointments SET location = :room WHERE id = :id",
+                           room=room, id=id)
 
     def get_patients_by_doctor(self, doctor_id):
+        if (doctor_id is None):
+            raise ValueError("Parameters cannot be none")
+        
         patients = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
@@ -204,6 +315,8 @@ class Database:
         return patients
 
     def get_patients_by_id(self, patient_id):
+        if (patient_id is None):
+            raise ValueError("Parameters cannot be none")
         patient = None
         with self.__get_cursor() as cursor:
             results = cursor.execute("SELECT weight, email, password, first_name, last_name, user_type, dob, blood_type, height, avatar_path, id FROM medical_users u INNER JOIN medical_patients p USING(id) WHERE id = :id",
@@ -215,20 +328,27 @@ class Database:
         return patient
 
     def get_patient_appointments(self, patient_id):
+        if (patient_id is None):
+            raise ValueError("Parameters cannot be none")
+        
         appointments = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
-                "SELECT id, patient_id, doctor_id, appointment_time, status, location, description FROM medical_appointments WHERE patient_id = :patient_id",
+                "SELECT ma.id, ma.patient_id, ma.doctor_id, ma.appointment_time, ma.status, ma.location, ma.description, mr.room_number, mr.description FROM medical_appointments ma INNER JOIN medical_rooms mr ON mr.room_number = ma.location WHERE patient_id = :patient_id",
                 patient_id=patient_id)
             for row in results:
                 patient = self.get_patients_by_id(int(row[1]))
                 doctor = self.get_user_by_id(int(row[2]))
+                location = MedicalRoom(row[5], row[8])
                 if patient is not None and doctor is not None:
-                    appointments.append(Appointments(int(row[0]), patient, doctor,
-                                                     row[3], int(row[4]), row[5], str(row[6])))
+                    appointments.append(Appointments(patient, doctor,
+                                                     row[3], int(row[4]), location, str(row[6]), id=row[0]))
         return appointments
 
     def update_patient_details(self, patient_id, dob, blood_type, height, weight, allergies):
+        if (patient_id is None or dob is None or blood_type is None or height is None or weight is None or allergies is None):
+            raise ValueError("Parameters cannot be none")
+        
         with self.__get_cursor() as cursor:
             cursor.execute(
                 """
@@ -271,6 +391,9 @@ class Database:
         return allergies
 
     def get_allergy_by_id(self, allergy_id):
+        if (allergy_id is None):
+            raise ValueError("Parameters cannot be none")
+        
         with self.__get_cursor() as cursor:
             result = cursor.execute(
                 """
@@ -285,6 +408,9 @@ class Database:
                 return str(result[0]), str(result[1])
 
     def get_patient_allergies(self, patient_id):
+        if (patient_id is None):
+            raise ValueError("Parameters cannot be none")
+        
         allergies = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
@@ -301,6 +427,9 @@ class Database:
         return allergies
 
     def get_patient_details(self, patient_id):
+        if (patient_id is None):
+            raise ValueError("Parameters cannot be none")
+        
         patient = None
         with self.__get_cursor() as cursor:
             results = cursor.execute("SELECT weight, email, password, first_name, last_name, user_type, dob, blood_type, height, avatar_path, id FROM medical_users u INNER JOIN medical_patients p USING(id) WHERE id = :id",
@@ -312,6 +441,9 @@ class Database:
         return patient
 
     def get_notes_by_patient_id(self, patient_id):
+        if (patient_id is None):
+            raise ValueError("Parameters cannot be none")
+        
         notes = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
@@ -328,6 +460,9 @@ class Database:
         return notes
 
     def get_note_by_id(self, id):
+        if (id is None):
+            raise ValueError("Parameters cannot be none")
+        
         note = None
         with self.__get_cursor() as cursor:
             results = cursor.execute(
@@ -353,6 +488,9 @@ class Database:
         return note
 
     def get_notes_by_doctor_id(self, doctor_id):
+        if (doctor_id is None):
+            raise ValueError("Parameters cannot be none")
+        
         notes = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
@@ -377,6 +515,9 @@ class Database:
         return notes
 
     def get_attachements_by_note_id(self, id):
+        if (id is None):
+            raise ValueError("Parameters cannot be none")
+        
         attachements = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
@@ -427,6 +568,9 @@ class Database:
             )
 
     def get_user_by_email(self, email):
+        if (email is None):
+            raise ValueError("Parameters cannot be none")
+        
         user = None
         with self.__get_cursor() as cursor:
             cursor.execute(
@@ -457,14 +601,17 @@ class Database:
             if not isinstance(appointment, Appointments):
                 raise TypeError("expected Appointment object")
             with self.__get_cursor() as cursor:
-                cursor.execute('insert into medical_appointments (id, patient_id, doctor_id, appointment_time, status, location, description) values (:id, :patient_id, :doctor_id, :appointment_time, :status, :location, :description)',
-                               id=appointment.id,
-                               patient_id=appointment.patients.id,
-                               doctor_id=appointment.doctors.id,
+                id = cursor.var(oracledb.NUMBER)
+                cursor.execute('insert into medical_appointments (patient_id, doctor_id, appointment_time, status, location, description) values (:patient_id, :doctor_id, :appointment_time, :status, :location, :description) returning id into :id',
+                               patient_id=appointment.patient.id,
+                               doctor_id=appointment.doctor.id,
                                appointment_time=appointment.appointment_time,
                                status=appointment.status,
-                               location=appointment.location,
-                               description=appointment.description)
+                               location=appointment.location.room_number,
+                               description=appointment.description,
+                               id=id)
+                new_id = id.values[0][0]
+                return new_id
 
     def delete_appointment_by_id(self, id):
         with self.__get_cursor() as cursor:
@@ -482,9 +629,9 @@ class Database:
                 raise TypeError("expected type of Appointmentsr")
             with self.__get_cursor() as cursor:
                 cursor.execute(" UPDATE medical_appointments SET patient_id =: patient_id, doctor_id =: doctor_id, appointment_time =: appointment_time, status =: status, location =: location, description =: description WHERE id =:id",
-                               patient_id=appointment.patients.id, doctor_id=appointment.doctors.id, appointment_time=appointment.appointment_time, status=appointment.status, location=appointment.location, description=appointment.description, id=appointment.id)
+                               patient_id=appointment.patient.id, doctor_id=appointment.doctor.id, appointment_time=appointment.appointment_time, status=appointment.status, location=appointment.location, description=appointment.description, id=appointment.id)
                 cursor.execute(" UPDATE medical_appointments SET patient_id =: patient_id, doctor_id =: doctor_id, appointment_time =: appointment_time, status =: status, location =: location, description =: description WHERE id =:id",
-                               patient_id=appointment.patients.id, doctor_id=appointment.doctors.id, appointment_time=appointment.appointment_time, status=appointment.status, location=appointment.location, description=appointment.description, id=appointment.id)
+                               patient_id=appointment.patient.id, doctor_id=appointment.doctor.id, appointment_time=appointment.appointment_time, status=appointment.status, location=appointment.location, description=appointment.description, id=appointment.id)
 
     def get_appointments(self):
         appointments = []
@@ -498,7 +645,7 @@ class Database:
                     row[23]), avatar_path=row[20], id=int(row[14]), allergies=allergies)
                 location = MedicalRoom(row[25], row[26])
                 appointments.append(Appointments(
-                    row[0], patient, doctor, row[3], row[4],location ,str(row[6])))
+                    patient, doctor, row[3], row[4], location, str(row[6]), id=row[0]))
         return appointments
 
     def get_medical_rooms(self):
@@ -507,11 +654,14 @@ class Database:
             results = cursor.execute(
                 'SELECT room_number, description FROM medical_rooms')
             for row in results:
-                medical_room = MedicalRoom(row[0], row[1])
+                medical_room = MedicalRoom(row[0], str(row[1]))
                 medical_rooms.append(medical_room)
         return medical_rooms
 
     def get_medical_room_by_room_number(self,room_number):
+        if (room_number is None):
+            raise ValueError("Parameters cannot be none")
+        
         medical_room = None
         with self.__get_cursor() as cursor:
             cursor.execute(

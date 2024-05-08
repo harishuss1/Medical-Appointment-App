@@ -8,14 +8,20 @@ bp = Blueprint('medical_rooms', __name__, url_prefix='/medicalrooms/')
 
 
 @bp.route('')
+@login_required
 def get_medical_rooms():
-    db = get_db()
-    medicalrooms = db.get_medical_rooms()
+    try:
+        db = get_db()
+        medicalrooms = db.get_medical_rooms()
+    except DatabaseError as e:
+        flash("something went wrong with the database")
+        return redirect('home.index')
     if medicalrooms is None or len(medicalrooms) == 0:
         abort(404)
     return render_template('medical_rooms.html', medicalrooms=medicalrooms)
 
 @bp.route('/<string:room_number>/')
+@login_required
 def get_medical_room(room_number):
     db = get_db()
     medical_room = db.get_medical_room_by_room_number(room_number)

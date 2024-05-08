@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+from flask import Blueprint, abort, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user, login_user, logout_user
 from .db.dbmanager import get_db
 from .user import User
@@ -9,21 +9,34 @@ from werkzeug.security import generate_password_hash
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
+def admin_access(func):
+    def wrapper(*args, **kwargs):
+        if current_user.access_level != 'ADMIN' and current_user.access_level != 'ADMIN_USER':
+            return abort(401, "You do not have access to this page!")
+        return func(*args, **kwargs)
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+def highest_access(func):
+    def wrapper(*args, **kwargs):
+        if current_user.access_level != 'ADMIN':
+            return abort(401, "You do not have access to this page!")
+        return func(*args, **kwargs)
+    wrapper.__name__ = func.__name__
+    return wrapper
 
 @admin_bp.route('/')
 @login_required
+@admin_access
 def admin_dashboard():
-    if current_user.access_level not in ('ADMIN', 'ADMIN_USER'):
-        return redirect(url_for('home.index'))
     user = current_user if current_user.is_authenticated else None
     return render_template('admin_dashboard.html', user=user)
 
 
 @admin_bp.route('/add_user', methods=['GET', 'POST'])
 @login_required
+@admin_access
 def add_user():
-    if current_user.access_level not in ('ADMIN', 'ADMIN_USER'):
-        return redirect(url_for('home.index'))
     form = AddUserForm()
     if request.method == 'POST' and form.validate_on_submit():
         email = form.email.data
@@ -49,9 +62,8 @@ def add_user():
 
 @admin_bp.route('/delete_user', methods=['GET', 'POST'])
 @login_required
+@admin_access
 def delete_user():
-    if current_user.access_level not in ('ADMIN', 'ADMIN_USER'):
-        return redirect(url_for('home.index'))
     form = DeleteUserForm()
     if request.method == 'POST' and form.validate_on_submit():
         email = form.email.data
@@ -67,6 +79,7 @@ def delete_user():
 
 @admin_bp.route('/block_user', methods=['GET', 'POST'])
 @login_required
+@admin_access
 def block_user():
     if current_user.access_level not in ('ADMIN', 'ADMIN_USER'):
         return redirect(url_for('home.index'))
@@ -87,6 +100,7 @@ def block_user():
 # only ADMIN can do this one
 @admin_bp.route('/change_user_role', methods=['GET', 'POST'])
 @login_required
+@highest_access
 def change_user_role():
     if current_user.access_level != 'ADMIN':
         return redirect(url_for('home.index'))

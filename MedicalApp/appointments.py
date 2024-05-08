@@ -42,8 +42,8 @@ class Appointments:
             'description': self.description
         }
 
-    def __init__(self, id, patient, doctor, appointment_time, status, location, description):
-        if not isinstance(id, int) or id < 0:
+    def __init__(self, patient, doctor, appointment_time, status, location, description, id=None):
+        if id != None and not isinstance(id, int):
             raise ValueError('Illegal type for patient id')
         self.id = id
 
