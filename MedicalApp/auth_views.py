@@ -5,6 +5,8 @@ from MedicalApp.db.dbmanager import get_db
 from MedicalApp.forms import LoginForm, SignupForm, ChangePasswordForm
 from MedicalApp.user import User
 
+import secrets
+
 
 bp = Blueprint('auth', __name__, url_prefix='/auth/')
 
@@ -66,3 +68,9 @@ def profile():
         return redirect(url_for("auth.profile"))
 
     return render_template("profile.html", form=form, current_user=current_user)
+
+@bp.route('/profile/userApiToken/', methods=['GET'])
+@login_required
+def user_api_token():
+    api_token = secrets.token_urlsafe(20)
+    return render_template('user_api_token.html', api_token=api_token)
