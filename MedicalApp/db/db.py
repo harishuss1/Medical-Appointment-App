@@ -97,10 +97,6 @@ class Database:
                               row[12], avatar_path=row[13], id=int(row[7]))
                 patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
                     row[23]), avatar_path=row[20], id=int(row[14]))
-                doctor = User(row[8], row[9], row[10], row[11],
-                              row[12], avatar_path=row[13], id=int(row[7]))
-                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
-                    row[23]), avatar_path=row[20], id=int(row[14]))
                 location = MedicalRoom(row[25], row[26])
                 appointments.append(Appointments(
                     patient, doctor, row[3], row[4], location, str(row[6]), id=row[0]))
@@ -179,10 +175,6 @@ class Database:
                               row[12], avatar_path=row[13], id=int(row[7]))
                 patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
                     row[23]), avatar_path=row[20], id=int(row[14]))
-                doctor = User(row[8], row[9], row[10], row[11],
-                              row[12], avatar_path=row[13], id=int(row[7]))
-                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
-                    row[23]), avatar_path=row[20], id=int(row[14]))
                 location = MedicalRoom(row[25], row[26])
                 appointments.append(Appointments(
                     patient, doctor, row[3], row[4], location, str(row[6]), id=row[0]))
@@ -199,10 +191,6 @@ class Database:
                 id=id)
             row = results.fetchone()
             if row:
-                doctor = User(row[8], row[9], row[10], row[11],
-                              row[12], avatar_path=row[13], id=int(row[7]))
-                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
-                    row[23]), avatar_path=row[20], id=int(row[14]))
                 doctor = User(row[8], row[9], row[10], row[11],
                               row[12], avatar_path=row[13], id=int(row[7]))
                 patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
@@ -227,10 +215,6 @@ class Database:
                               row[12], avatar_path=row[13], id=int(row[7]))
                 patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
                     row[23]), avatar_path=row[20], id=int(row[14]))
-                doctor = User(row[8], row[9], row[10], row[11],
-                              row[12], avatar_path=row[13], id=int(row[7]))
-                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
-                    row[23]), avatar_path=row[20], id=int(row[14]))
                 location = MedicalRoom(row[25], row[26])
                 appointments.append(Appointments(
                     patient, doctor, row[3], row[4], location, str(row[6]), id=row[0]))
@@ -247,10 +231,6 @@ class Database:
                 patient_id=id)
             row = cursor.fetchone()
             if row:
-                doctor = User(row[8], row[9], row[10], row[11],
-                              row[12], avatar_path=row[13], id=int(row[7]))
-                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
-                    row[23]), avatar_path=row[20], id=int(row[14]))
                 doctor = User(row[8], row[9], row[10], row[11],
                               row[12], avatar_path=row[13], id=int(row[7]))
                 patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
@@ -620,8 +600,6 @@ class Database:
             with self.__get_cursor() as cursor:
                 cursor.execute(
                     "DELETE FROM medical_appointments WHERE id = :id", id=id)
-                cursor.execute(
-                    "DELETE FROM medical_appointments WHERE id = :id", id=id)
 
     def update_appointment(self, appointment):
         with self.__get_cursor() as cursor:
@@ -630,9 +608,7 @@ class Database:
             with self.__get_cursor() as cursor:
                 cursor.execute(" UPDATE medical_appointments SET patient_id =: patient_id, doctor_id =: doctor_id, appointment_time =: appointment_time, status =: status, location =: location, description =: description WHERE id =:id",
                                patient_id=appointment.patient.id, doctor_id=appointment.doctor.id, appointment_time=appointment.appointment_time, status=appointment.status, location=appointment.location, description=appointment.description, id=appointment.id)
-                cursor.execute(" UPDATE medical_appointments SET patient_id =: patient_id, doctor_id =: doctor_id, appointment_time =: appointment_time, status =: status, location =: location, description =: description WHERE id =:id",
-                               patient_id=appointment.patient.id, doctor_id=appointment.doctor.id, appointment_time=appointment.appointment_time, status=appointment.status, location=appointment.location, description=appointment.description, id=appointment.id)
-
+                
     def get_appointments(self):
         appointments = []
         with self.__get_cursor() as cursor:
