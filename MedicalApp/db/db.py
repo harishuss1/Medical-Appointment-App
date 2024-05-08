@@ -604,7 +604,7 @@ class Database:
     def update_appointment(self, appointment):
         with self.__get_cursor() as cursor:
             if not isinstance(appointment, Appointments):
-                raise TypeError("expected type of Appointmentsr")
+                raise TypeError("expected type of Appointments")
             with self.__get_cursor() as cursor:
                 cursor.execute(" UPDATE medical_appointments SET patient_id =: patient_id, doctor_id =: doctor_id, appointment_time =: appointment_time, status =: status, location =: location, description =: description WHERE id =:id",
                                patient_id=appointment.patient.id, doctor_id=appointment.doctor.id, appointment_time=appointment.appointment_time, status=appointment.status, location=appointment.location, description=appointment.description, id=appointment.id)
@@ -623,6 +623,35 @@ class Database:
                 appointments.append(Appointments(
                     patient, doctor, row[3], row[4], location, str(row[6]), id=row[0]))
         return appointments
+
+    def get_appointments_page_number(self, page, doctor_first_name, doctor_last_name, patient_first_name, patient_last_name):
+        if (page is None or doctor_first_name is None or doctor_last_name is None or patient_first_name is None or patient_last_name):
+            raise ValueError("Parameters cannot be none")
+        
+        patients = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute('SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, p.id, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, p.AVATAR_PATH, mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT, mp.WEIGHT, mr.room_number, mr.description FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id INNER JOIN MEDICAL_ROOMs mr ON app.location = mr.room_number')
+            results = cursor.execute(
+                f"""
+                SELECT 
+                mp.WEIGHT, p.id, p.AVATAR_PATH, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, 
+                mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT
+                FROM medical_users p INNER JOIN MEDICAL_PATIENTS mp 
+                ON(p.id = mp.id)
+                WHERE
+                { "first_name = :first_name" if first_name is not None and first_name != '' else "0 = 1"} OR
+                { "last_name = :last_name" if last_name is not None and last_name != '' else "0 = 1"}
+                OFFSET :offset ROWS
+                FETCH NEXT :count ROWS ONLY
+                """,
+                offset=((page - 1)*20),
+                count=20,
+                first_name=first_name,
+                last_name=last_name)
+            for row in results:
+                patients.append(MedicalPatient(float(row[0]), row[3], row[4], row[5], row[6], row[7], row[8], row[9], float(
+                    row[10]), avatar_path=row[2], id=int(row[1])))
+        return patients
 
     def get_medical_rooms(self):
         medical_rooms = []

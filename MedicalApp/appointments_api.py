@@ -1,4 +1,4 @@
-from flask import Blueprint, abort, jsonify, request
+from flask import Blueprint, Response, abort, jsonify, request
 from MedicalApp.db.dbmanager import get_db
 from MedicalApp.appointments import Appointments
 
@@ -8,7 +8,7 @@ bp = Blueprint('appointments_api', __name__, url_prefix='/api/appointments/')
 @bp.route('', methods=['GET', 'POST'])
 def get_appointments_api():
     if request.method == 'POST':
-        appointment = Appointments.from_json(data)
+        appointment = Appointments.from_json(request.json)
         get_db().add_appointment(appointment)
 
     if request.args:
@@ -49,6 +49,7 @@ def get_appointment_by_id_api(id):
                 if target_appointment.id != appointment.id:
                     abort(500)
                 get_db().update_appointment(appointment)
+                return Response(" ",status=200 ,mimetype='application/json') 
             except Exception:
                 abort(500)
         else:
@@ -56,5 +57,6 @@ def get_appointment_by_id_api(id):
     elif request.method == 'DELETE':
         try:
             get_db().delete_appointment_by_id(id)
+            return Response(" ",status=200 ,mimetype='application/json')
         except Exception:
             abort(500)
