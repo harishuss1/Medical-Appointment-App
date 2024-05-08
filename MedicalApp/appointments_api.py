@@ -6,7 +6,7 @@ bp = Blueprint('appointments_api', __name__, url_prefix='/api/appointments/')
 
 
 @bp.route('', methods=['GET', 'POST'])
-def get_appointments():
+def get_appointments_api():
     if request.method == 'POST':
         data = request.json
         appointment = Appointments.from_json(data)
@@ -26,3 +26,13 @@ def get_appointments():
     appointments = get_db().get_appointments()
     json_appointments = [x.__dict__ for x in appointments]
     return jsonify(json_appointments)
+
+
+@bp.route('', methods=['GET', 'PUT', 'DELETE'])
+def get_appointment_by_id_api(id):
+    if request.method == 'GET':
+        try:
+            appointment = get_db().get_appointment_by_id(id)
+            return jsonify(appointment.to_json())
+        except Exception:
+            abort(500)
