@@ -32,15 +32,34 @@ def get_allergies():
 
     else:
         try:
-            patients = get_db().get_patients()
+            allergies = get_db().get_allergies_page_number(1, None)
         except DatabaseError as e:
             abort(409)
 
-    if patients is None or len(patients) == 0:
+    if allergies is None or len(allergies) == 0:
         abort(404)
     data = {}
     data['results'] = []
-    for patient in patients:
-        data['results'].append(patient.to_json())
+    for allergy in allergies:
+        data['results'].append(allergy.to_json())
 
     return jsonify(data)
+
+
+@bp.route('/<int:allergy_id>', methods=['GET'])
+def get_allergy(allergy_id):
+    allergy = None
+    try:
+        allergy = get_db().get_allergy_by_id(allergy_id)
+        if allergy == None:
+            abort(404)
+
+        allergy_json = allergy.to_json()
+        return jsonify(allergy_json)
+
+    except DatabaseError as e:
+        abort(409)
+    except TypeError as e:
+            abort(400, "The data sent is of incorrect type")
+    except ValueError as e:
+        abort(400, "The data sent cannot be empty")

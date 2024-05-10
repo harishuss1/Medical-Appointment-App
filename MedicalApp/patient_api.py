@@ -6,6 +6,7 @@ from MedicalApp.allergy import Allergy
 from MedicalApp.forms import PatientDetailsForm
 from MedicalApp.user import MedicalPatient
 from .db.dbmanager import get_db
+import urllib.parse
 
 bp = Blueprint('patient_api', __name__, url_prefix="/api/patients/")
 
@@ -14,13 +15,13 @@ bp = Blueprint('patient_api', __name__, url_prefix="/api/patients/")
 def get_patients():
     patients = []
     if request.args:
-        page = int(request.args.get("page"))
-        first_name = str(request.args.get("first"))
-        last_name = str(request.args.get("last"))
-
-        if page is None or not isinstance(page, int):
+        page = int(request.args.get("page")) if request.args.get("page").isdigit() else abort(400, "The data sent is of incorrect type")
+        first_name = request.args.get("first")
+        last_name = request.args.get("last")
+    
+        if page is None:
             page = 1
-
+        
         if last_name is not None and not isinstance(last_name, str) or first_name is not None and not isinstance(first_name, str):
             abort("Query parameters incorrect")
         try:
@@ -34,20 +35,21 @@ def get_patients():
 
     else:
         try:
-            patients = get_db().get_patients()
+            patients = get_db().get_patients_page_number(1, None, None)
         except DatabaseError as e:
             abort(409)
 
     if patients is None or len(patients) == 0:
         abort(404)
+        
     data = {}
     data['results'] = []
     for patient in patients:
-        data['results'].append(patient.to_json())
+        data['results'].append(patient.to_json(request.url_root))
 
     return jsonify(data)
 
-@bp.route('/<int:patient_id>', methods=['GET'])
+@bp.route('/<int:patient_id>/', methods=['GET'])
 def get_patient(patient_id):
     patient = None
     try:
@@ -55,12 +57,12 @@ def get_patient(patient_id):
         if patient == None:
             abort(404)
 
-        patient_json = patient.to_json()
+        patient_json = patient.to_json(request.url_root)
         return jsonify(patient_json)
 
     except DatabaseError as e:
         abort(409)
     except TypeError as e:
-            abort(400, "The data sent is of incorrect type")
+        abort(400, "The data sent is of incorrect type")
     except ValueError as e:
         abort(400, "The data sent cannot be empty")

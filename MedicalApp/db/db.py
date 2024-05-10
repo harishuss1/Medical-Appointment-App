@@ -122,8 +122,31 @@ class Database:
                     row[10]), avatar_path=row[2], id=int(row[1])))
         return patients
     
+    def get_allergies_page_number(self, name, page):
+        if (page is None or name is None):
+            raise ValueError("Parameters cannot be none")
+        
+        allergies = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                f"""
+                SELECT 
+                a.id, a.name, a.description
+                FROM medical_allergies a
+                WHERE
+                { "name = :name" if name is not None and name != '' else "0 = 1"} OR
+                OFFSET :offset ROWS
+                FETCH NEXT :count ROWS ONLY
+                """,
+                offset=((page - 1)*20),
+                count=20,
+                name=name)
+            for row in results:
+                allergies.append(Allergy(int(row[0]), str(row[1]), str(row[2])))
+        return allergies
+    
     def get_patients_page_number(self, page, first_name, last_name):
-        if (page is None or first_name is None or last_name is None):
+        if (page is None):
             raise ValueError("Parameters cannot be none")
         
         patients = []
@@ -136,8 +159,8 @@ class Database:
                 FROM medical_users p INNER JOIN MEDICAL_PATIENTS mp 
                 ON(p.id = mp.id)
                 WHERE
-                { "first_name = :first_name" if first_name is not None and first_name != '' else "0 = 1"} OR
-                { "last_name = :last_name" if last_name is not None and last_name != '' else "0 = 1"}
+                { "first_name = :first_name" if first_name is not None and first_name != '' else ":first_name != :first_name"} OR
+                { "last_name = :last_name" if last_name is not None and last_name != '' else ":last_name != :last_name"}
                 OFFSET :offset ROWS
                 FETCH NEXT :count ROWS ONLY
                 """,
@@ -146,8 +169,9 @@ class Database:
                 first_name=first_name,
                 last_name=last_name)
             for row in results:
+                allergies = self.get_patient_allergies(int(row[1]))
                 patients.append(MedicalPatient(float(row[0]), row[3], row[4], row[5], row[6], row[7], row[8], row[9], float(
-                    row[10]), avatar_path=row[2], id=int(row[1])))
+                    row[10]), allergies=allergies, avatar_path=row[2], id=int(row[1])))
         return patients
     
     def get_doctors(self):
@@ -323,8 +347,9 @@ class Database:
                                      id=patient_id)
             row = results.fetchone()
             if row:
+                allergies = self.get_patient_allergies(int(row[10]))
                 patient = MedicalPatient(float(row[0]), row[1], row[2], row[3], row[4], str(
-                    row[5]), row[6], str(row[7]), float(row[8]), avatar_path=row[9], id=int(row[10]))
+                    row[5]), row[6], str(row[7]), float(row[8]), allergies=allergies, avatar_path=row[9], id=int(row[10]))
         return patient
 
     def get_patient_appointments(self, patient_id):
@@ -393,19 +418,19 @@ class Database:
     def get_allergy_by_id(self, allergy_id):
         if (allergy_id is None):
             raise ValueError("Parameters cannot be none")
-        
+        allergy = None
         with self.__get_cursor() as cursor:
             result = cursor.execute(
                 """
-                SELECT name, description
+                SELECT id, name, description
                 FROM medical_allergies
                 WHERE id = :allergy_id
                 """,
-                allergy_id=allergy_id).fetchone()
-            if result is None:
-                return None
-            else:
-                return str(result[0]), str(result[1])
+                allergy_id=allergy_id)
+            row = result.fetchone()
+            if row:
+                allergy = Allergy(int(row[0]), str(row[1]), str(row[2]))
+        return allergy
 
     def get_patient_allergies(self, patient_id):
         if (patient_id is None):
