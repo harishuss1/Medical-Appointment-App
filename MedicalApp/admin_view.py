@@ -1,5 +1,6 @@
 from flask import Blueprint, abort, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user, login_user, logout_user
+from oracledb import DatabaseError
 from .db.dbmanager import get_db
 from .user import User
 from .db.db import Database
@@ -29,11 +30,22 @@ def highest_access(func):
 @login_required
 @admin_access
 def admin_dashboard():
-    user = current_user if current_user.is_authenticated else None
-    return render_template('admin_dashboard.html', user=user)
+    try:
+        users = get_db().get_users_and_roles()
+        
+        if users is None or len(users) == 0:
+            flash("There are no users in the database")
+            return redirect(url_for('home.index'))
+        return render_template('admin_dashboard.html', users=users)
+    except DatabaseError as e:
+        flash('An error occured with the database')
+        return redirect(url_for('home.index'))
+    except ValueError as e: 
+        flash("Incorrect values were passed")
+        return redirect(url_for('home.index'))
 
 
-@admin_bp.route('/add_user', methods=['GET', 'POST'])
+@admin_bp.route('/add_user/', methods=['GET', 'POST'])
 @login_required
 @admin_access
 def add_user():
@@ -60,11 +72,12 @@ def add_user():
     return render_template('add_user.html', form=form)
 
 
-@admin_bp.route('/delete_user', methods=['GET', 'POST'])
+@admin_bp.route('/delete_user/<string:email>/', methods=['GET', 'POST'])
 @login_required
 @admin_access
-def delete_user():
+def delete_user(email):
     form = DeleteUserForm()
+    form.email.data = email
     if request.method == 'POST' and form.validate_on_submit():
         email = form.email.data
         db = get_db()
@@ -77,13 +90,14 @@ def delete_user():
     return render_template('delete_user.html', form=form)
 
 
-@admin_bp.route('/block_user', methods=['GET', 'POST'])
+@admin_bp.route('/block_user/<string:email>/', methods=['GET', 'POST'])
 @login_required
 @admin_access
-def block_user():
+def block_user(email):
     if current_user.access_level not in ('ADMIN', 'ADMIN_USER'):
         return redirect(url_for('home.index'))
     form = BlockUserForm()
+    form.email.data = email
     if request.method == 'POST' and form.validate_on_submit():
         email = form.email.data
         db = get_db()
@@ -98,13 +112,14 @@ def block_user():
 
 
 # only ADMIN can do this one
-@admin_bp.route('/change_user_role', methods=['GET', 'POST'])
+@admin_bp.route('/change_user_role/<string:email>/', methods=['GET', 'POST'])
 @login_required
 @highest_access
-def change_user_role():
+def change_user_role(email):
     if current_user.access_level != 'ADMIN':
         return redirect(url_for('home.index'))
     form = ChangeUserRoleForm()
+    form.email.data = email
     if request.method == 'POST' and form.validate_on_submit():
         email = form.email.data
         new_user_type = form.user_type.data

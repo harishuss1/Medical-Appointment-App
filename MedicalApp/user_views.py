@@ -26,8 +26,11 @@ def users_roles():
         
         if users is None or len(users) == 0:
             flash("There are no users in the database")
-            return redirect('home.index')
+            return redirect(url_for('home.index'))
     except DatabaseError as e:
         flash('An error occured with the database')
-        return redirect('home.index')
+        return redirect(url_for('home.index'))
+    except ValueError as e: 
+        flash("Incorrect values were passed")
+        return redirect(url_for('home.index'))
     return render_template('users.html', users=users)

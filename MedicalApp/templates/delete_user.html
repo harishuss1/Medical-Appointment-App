@@ -7,13 +7,11 @@ Delete User
 {% block content %}
 <h1>Delete User</h1>
 
-<form method="post" action="{{ url_for('admin.delete_user') }}">
+<form method="post">
     {{ form.hidden_tag() }}
 
-    <div>
-        {{ form.email.label }}
-        {{ form.email() }}
-    </div>
+    {{ form.email.label }}
+    {{ form.email() }}
 
     {{ form.submit() }}
 </form>

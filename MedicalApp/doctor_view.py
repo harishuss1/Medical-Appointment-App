@@ -56,3 +56,7 @@ def notes(patient_id):
     except DatabaseError as e:
         flash("Something went wrong with the database")
         return redirect(url_for('doctor.dashboard'))
+    except ValueError as e: 
+        flash("Incorrect values were passed")
+        return redirect(url_for('doctor.dashboard'))
+
