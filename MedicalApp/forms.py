@@ -175,3 +175,8 @@ class ChangePasswordForm(FlaskForm):
 class AvatarForm(FlaskForm):
     avatar = FileField('avatar')
     submit = SubmitField('Update')
+
+class AllergyForm(FlaskForm):
+    name = StringField('Allergy Name', validators=[DataRequired()])
+    description = StringField('Description', validators=[DataRequired()])
+    submit = SubmitField('Add Allergy')

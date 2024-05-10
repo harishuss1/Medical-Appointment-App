@@ -425,6 +425,18 @@ class Database:
                 allergies.append(
                     Allergy(int(row[0]), str(row[1]), str(row[2])))
         return allergies
+    
+    def add_allergy(self, name, description):
+        if (name is None or description is None):
+            raise ValueError("Parameters cannot be none")
+
+        with self.__get_cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO medical_allergies (name, description)
+                VALUES (:name, :description)
+                """,
+                name=name, description=description)
 
     def get_patient_details(self, patient_id):
         if (patient_id is None):

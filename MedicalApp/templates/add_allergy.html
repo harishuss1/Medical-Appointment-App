@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block nav %}
+    <li>
+        <li><a href="{{ url_for('doctor.dashboard') }}">Dashboard</a></li>
+    </li>
+    <li>
+        <a href="{{ url_for('appointments.confirmed_appointments', user_type='doctor') }}">See all confirmed appointments</a>
+    </li>
+    <li>
+        <a href="{{ url_for('appointments.requested_appointments', user_type='doctor') }}">See appointment requests</a>
+    </li>
+    <li>
+        <li><a href="{{ url_for('doctor.patients') }}">See all patients</a></li>
+    </li>
+    {% if current_user.access_level == 'STAFF' %}
+        <li>
+            <a href="{{ url_for('note.notes', user_id=current_user.id) }}">See all notes</a>
+        </li>
+    {% endif %}
+    <li>
+        <li><a href="{{ url_for('appointments.book_appointment') }}">Book an appointment</a></li>
+    </li>
+{% endblock nav %}
+{% block content %}
+    <h1>Add Allergy</h1>
+    <form method="post">
+        {{ form.csrf_token }}
+    
+            {{ form.name.label }}
+            {{ form.name(size=32) }}
+        
+            {{ form.description.label }}
+            {{ form.description(size=32) }}
+      {{ form.submit() }}
+    </form>
+{% endblock content %}
