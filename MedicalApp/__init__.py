@@ -75,6 +75,9 @@ def init_app(app):
     from .medical_rooms_view import bp as medical_rooms_bp
     app.register_blueprint(medical_rooms_bp)
 
+    from .medical_room_api import bp as room_bp
+    app.register_blueprint(room_bp)
+
     app.teardown_appcontext(close_db)
 
     app.cli.add_command(init_db_command)

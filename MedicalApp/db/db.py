@@ -154,7 +154,6 @@ class Database:
                 SELECT 
                 u.id, u.AVATAR_PATH, u.EMAIL, u.PASSWORD, u.FIRST_NAME, u.LAST_NAME, u.USER_TYPE
                 FROM medical_users u
-                WHERE u.user_type = 'STAFF' OR u.user_type = 'ADMIN'
                 """)
             for row in results:
                 doctors.append(User(row[2], row[3], row[4], row[5], row[6], 
@@ -528,16 +527,6 @@ class Database:
                 cursor.execute('insert into medical_note_attachments (note_id, attachment_path)  values (:note_id, :attachement_path)',
                                note_id=note_id,
                                attachement_path=str(path))
-                
-
-    def update_note(self, note, paths):
-        if not isinstance(note, Note):
-            raise TypeError("expected Note object")
-        with self.__get_cursor() as cursor:
-            for path in paths:
-                cursor.execute('insert into medical_note_attachments (note_id, attachment_path)  values (:note_id, :attachement_path)',
-                               note_id=note.id,
-                               attachement_path=str(path))
 
     def create_user(self, user):
         if not isinstance(user, User):
@@ -640,20 +629,26 @@ class Database:
         
         patients = []
         with self.__get_cursor() as cursor:
-            results = cursor.execute('SELECT app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, p.id, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, p.AVATAR_PATH, mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT, mp.WEIGHT, mr.room_number, mr.description FROM medical_appointments app INNER JOIN medical_users d ON app.doctor_id = d.id INNER JOIN medical_users p ON app.PATIENT_ID = p.ID INNER JOIN MEDICAL_PATIENTS mp ON mp.id = p.id INNER JOIN MEDICAL_ROOMs mr ON app.location = mr.room_number')
-            results = cursor.execute(
-                f"""
+            results = cursor.execute("""
                 SELECT 
-                mp.WEIGHT, p.id, p.AVATAR_PATH, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, 
-                mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT
-                FROM medical_users p INNER JOIN MEDICAL_PATIENTS mp 
-                ON(p.id = mp.id)
+                    app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, 
+                    d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, 
+                    p.id, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, p.AVATAR_PATH, 
+                    mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT, mp.WEIGHT, mr.room_number, mr.description 
+                FROM 
+                    medical_appointments app 
+                INNER JOIN 
+                    medical_users d ON app.doctor_id = d.id 
+                INNER JOIN 
+                    medical_users p ON app.PATIENT_ID = p.ID 
+                INNER JOIN 
+                    MEDICAL_PATIENTS mp ON mp.id = p.id 
+                INNER JOIN 
+                    MEDICAL_ROOMs mr ON app.location = mr.room_number
                 WHERE
                 { "first_name = :first_name" if first_name is not None and first_name != '' else "0 = 1"} OR
                 { "last_name = :last_name" if last_name is not None and last_name != '' else "0 = 1"}
-                OFFSET :offset ROWS
-                FETCH NEXT :count ROWS ONLY
-                """,
+            """,
                 offset=((page - 1)*20),
                 count=20,
                 first_name=first_name,
@@ -676,7 +671,6 @@ class Database:
     def get_medical_room_by_room_number(self,room_number):
         if (room_number is None):
             raise ValueError("Parameters cannot be none")
-        
         medical_room = None
         with self.__get_cursor() as cursor:
             cursor.execute(
@@ -685,6 +679,29 @@ class Database:
             if row:
                 medical_room = MedicalRoom(row[0], row[1])
         return medical_room
+    
+    def get_medical_room_page_number(self,page, room_number):
+        if (page is None or room_number is None):
+            raise ValueError("Parameters cannot be none")
+        
+        rooms = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                f"""
+                SELECT 
+                room_number, descriptiom
+                FROM medical_rooms 
+                WHERE
+                { "room_number = :room_number" if room_number is not None and room_number != '' else "0 = 1"} OR
+                OFFSET :offset ROWS
+                FETCH NEXT :count ROWS ONLY
+                """,
+                offset=((page - 1)*20),
+                count=20,
+                room_number=room_number)
+            for row in results:
+                rooms.append(MedicalPatient(float(row[0],row[1])))
+            return rooms 
 
     def __get_cursor(self):
         for i in range(3):
