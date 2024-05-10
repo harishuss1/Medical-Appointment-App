@@ -104,14 +104,14 @@ def confirmed_appointments(user_type):
             appointments = get_db().get_appointments_by_status_patient(1, current_user.id)
         if appointments is None or len(appointments) == 0:
             flash("No confirmed appointments")
-            return redirect(url_for('doctor.dashboard'))
+            return redirect(url_for(f'{user_type}.dashboard'))
         return render_template('confirmed_appointments.html', appointments=appointments)
     except DatabaseError as e:
         flash("Something went wrong with the database")
-        return redirect(url_for('doctor.dashboard'))
+        return redirect(url_for(f'{user_type}.dashboard'))
     except ValueError as e:
         flash("Parameter values are incorrect")
-        return redirect(url_for('doctor.dashboard'))
+        return redirect(url_for(f'{user_type}.dashboard'))
 
 
 @bp.route('/requests/<string:user_type>/')

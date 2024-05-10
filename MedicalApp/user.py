@@ -1,5 +1,6 @@
 import datetime
 import json
+from flask import url_for
 from flask_login import UserMixin
 from MedicalApp.allergy import Allergy
 
@@ -60,7 +61,9 @@ class MedicalPatient(User):
         data = {}
         data['id'] = str(self.id)
         data['avatar_path'] = str(self.avatar_path)
-        #data['allergies'] = url_for(allergy)
+        data["allergies"] = []
+        for allergy in self.allergies:
+            data['allergies'] = url_for()
         data['email'] = str(self.email)
         data['password'] = str(self.password)
         data['first_name'] = str(self.first_name)
