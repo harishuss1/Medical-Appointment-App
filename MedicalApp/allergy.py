@@ -9,6 +9,14 @@ class Allergy:
         self.id = id
         self.name = name
         self.description = description
+        
+    def to_json(self):
+        data = {}
+        data['id'] = self.id
+        data['name'] = self.name
+        data['description'] = self.description
+        
+        return(data)
 
     def __str__(self):
         return f"Name: {self.name}, Description: {self.description}"
