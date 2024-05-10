@@ -640,8 +640,6 @@ class Database:
             with self.__get_cursor() as cursor:
                 cursor.execute(" UPDATE medical_appointments SET patient_id =: patient_id, doctor_id =: doctor_id, appointment_time =: appointment_time, status =: status, location =: location, description =: description WHERE id =:id",
                                patient_id=appointment.patient.id, doctor_id=appointment.doctor.id, appointment_time=appointment.appointment_time, status=appointment.status, location=appointment.location, description=appointment.description, id=appointment.id)
-                cursor.execute(" UPDATE medical_appointments SET patient_id =: patient_id, doctor_id =: doctor_id, appointment_time =: appointment_time, status =: status, location =: location, description =: description WHERE id =:id",
-                               patient_id=appointment.patient.id, doctor_id=appointment.doctor.id, appointment_time=appointment.appointment_time, status=appointment.status, location=appointment.location, description=appointment.description, id=appointment.id)
 
     def get_appointments(self):
         appointments = []

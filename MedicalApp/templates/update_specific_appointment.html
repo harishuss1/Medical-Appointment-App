@@ -36,31 +36,18 @@
 {% block content %}
     <h2>
         {% block title %}
-            Appointment
+            Update Appointment
         {% endblock title %}
     </h2>
-    <ul>
-        {% set a_status = "Pending" %}
-        {% if appointment.status == 1 %}
-            {% set a_status = "Confirmed" %}
+    <form method="post">   
+        {{ form.csrf_token }}
+        {{ form.patient.label }} {{ form.patient() }}
+        {{ form.doctor.label }} {{ form.doctor() }}
+        {{ form.appointment_time.label }} {{ form.appointment_time() }}
+        {% if current_user.access_level != 'PATIENT' and current_user.access_level != 'ADMIN_USER' %}
+            {{ form.location.label }} {{ form.location() }}
         {% endif %}
-        <li>Patient: {{ appointment.patient }}</li>
-        <li>Doctor:Dr. {{ appointment.doctor }}</li>
-        <li>Date: {{ appointment.appointment_time }}</li>
-        <li>Status: {{ status }}</li>
-        {% if appointment.status == 0 and current_user.access_level != 'PATIENT' and current_user.access_level != 'ADMIN_USER' %}
-            <li>Location: {{ appointment.location }}</li>
-        {% endif %}
-        <li>Description: {{ appointment.description }}</li>
-    </ul>
-    {% if current_user.access_level == 'STAFF' %}
-        <form method="post" id="appointment-confirmation-form">
-            {{ form.csrf_token }}
-            {{ form.select_confirmation.label }} {{ form.select_confirmation() }}
-            {{ form.room.label }} {{ form.room() }}
-            <button type="submit">Confirm status</button>
-        </form>
-    {% else %}
-    
-    {% endif %}
+        {{ form.description.label }} {{ form.description() }}
+        <input type="submit" />
+    </form>
 {% endblock content %}
