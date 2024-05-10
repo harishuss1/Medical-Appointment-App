@@ -46,3 +46,21 @@ def get_patients():
         data['results'].append(patient.to_json())
 
     return jsonify(data)
+
+@bp.route('/<int:patient_id>', methods=['GET'])
+def get_patient(patient_id):
+    patient = None
+    try:
+        patient = get_db().get_patients_by_id(patient_id)
+        if patient == None:
+            abort(404)
+
+        patient_json = patient.to_json()
+        return jsonify(patient_json)
+
+    except DatabaseError as e:
+        abort(409)
+    except TypeError as e:
+            abort(400, "The data sent is of incorrect type")
+    except ValueError as e:
+        abort(400, "The data sent cannot be empty")

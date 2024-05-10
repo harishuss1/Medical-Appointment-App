@@ -36,43 +36,40 @@ def view_appointments():
 @login_required
 @patient_access
 def book_appointment():
-    try:
-        db = get_db()
-        appointments = db.get_appointments()
-    except DatabaseError as e:
-        flash("something went wrong with the database")
-        return redirect('home.index')
-    if appointments is None or len(appointments) == 0:
-        abort(404)
     form = AppointmentForm()
     form.set_patients()
     form.set_doctors()
-    if current_user.access_level != 'STAFF':
-        form.patient.data = str(current_user.id)
-        #form.patient.render_kw = {'disabled' : ''} 
     form.set_rooms()
+    if current_user.access_level == 'PATIENT' or current_user.access_level == 'ADMIN_USER':
+        if get_db().get_patients_by_id(current_user.id) is None:
+            flash("Please update your patient details before booking an appointment")
+            return redirect(url_for('patient.update_patient'))
+        form.patient.data = str(current_user.id)
+        form.patient.render_kw = {'disabled' : ''} 
+        form.location.data = '101'
+        form.location.render_kw = {'disabled' : ''}
     if request.method == "POST" and form.validate_on_submit():
         try:
             patient = get_db().get_patients_by_id(form.patient.data)
             doctor = get_db().get_user_by_id(form.doctor.data)
+            status = 0
+            time = form.appointment_time.data
+            if doctor.id == current_user.id:
+                status = 1
+            location = get_db().get_medical_room_by_room_number(form.location.data)
+            description = form.description.data
+            
+            new_appointment = Appointments(
+                patient, doctor, time, status, location, description)
+
+            new_id = get_db().add_appointment(new_appointment)
+            flash("Appointement added to the List of Appointments")
+
+            return redirect(
+                url_for('appointments.get_appointment', id=new_id))
         except DatabaseError as e:
             flash("something went wrong with the database")
             return redirect('home.index')
-        status = 0
-        time = form.appointment_time.data
-        if doctor.id == current_user.id:
-            status = 1
-        location = get_db().get_medical_room_by_room_number(form.location.data)
-        description = form.description.data
-        
-        new_appointment = Appointments(
-            patient, doctor, time, status, location, description)
-
-        new_id = db.add_appointment(new_appointment)
-        flash("Appointement added to the List of Appointments")
-
-        return redirect(
-            url_for('appointments.get_appointment', id=new_id))
 
     return render_template('appointments.html', form=form)
 
@@ -101,20 +98,19 @@ def confirmed_appointments(user_type):
         return redirect(url_for('home.index'))
     try:
         appointments = None
-        try:
-            if user_type == 'doctor':
-                appointments = get_db().get_appointments_by_status_doctor(1, current_user.id)
-            if user_type == 'patient':
-                appointments = get_db().get_appointments_by_status_patient(1, current_user.id)
-        except DatabaseError as e:
-            flash("something went wrong with the database")
-            return redirect('home.index')
+        if user_type == 'doctor':
+            appointments = get_db().get_appointments_by_status_doctor(1, current_user.id)
+        if user_type == 'patient':
+            appointments = get_db().get_appointments_by_status_patient(1, current_user.id)
         if appointments is None or len(appointments) == 0:
             flash("No confirmed appointments")
             return redirect(url_for('doctor.dashboard'))
         return render_template('confirmed_appointments.html', appointments=appointments)
     except DatabaseError as e:
         flash("Something went wrong with the database")
+        return redirect(url_for('doctor.dashboard'))
+    except ValueError as e:
+        flash("Parameter values are incorrect")
         return redirect(url_for('doctor.dashboard'))
 
 
@@ -127,20 +123,19 @@ def requested_appointments(user_type):
         return redirect(url_for('home.index'))
     try:
         appointments = None
-        try:
-            if user_type == 'doctor':
-                appointments = get_db().get_appointments_by_status_doctor(0, current_user.id)
-            if user_type == 'patient':
-                appointments = get_db().get_appointments_by_status_patient(0, current_user.id)
-        except DatabaseError as e:
-            flash("something went wrong with the database")
-            return redirect('home.index')
+        if user_type == 'doctor':
+            appointments = get_db().get_appointments_by_status_doctor(0, current_user.id)
+        if user_type == 'patient':
+            appointments = get_db().get_appointments_by_status_patient(0, current_user.id)
         if appointments is None or len(appointments) == 0:
             flash("No requested appointments")
             return redirect(url_for(f'{user_type}.dashboard'))
         return render_template('requested_appointments.html', appointments=appointments)
     except DatabaseError as e:
         flash("Something went wrong with the database")
+        return redirect(url_for(f'{user_type}.dashboard'))
+    except ValueError as e:
+        flash("Parameter values are incorrect")
         return redirect(url_for(f'{user_type}.dashboard'))
 
 # CHANGE!!!
@@ -155,22 +150,18 @@ def update_appointment(id):
         if request.method == 'POST' and form.validate_on_submit():
             status = form.select_confirmation.data
             room = form.room.data
-            try:
-                get_db().update_appointment_status(id, status, room=room)
-                flash("Appointment has been successfully updated")
-                return redirect(url_for('appointments.requested_appointments', user_type='doctor'))
-            except DatabaseError:
-                flash("Something went wrong with the database")
-                return redirect(url_for('appointments.requested_appointments', user_type='doctor'))
+            get_db().update_appointment_status(id, status, room=room)
+            flash("Appointment has been successfully updated")
+            return redirect(url_for('appointments.requested_appointments', user_type='doctor'))
     except DatabaseError as e:
         flash("something went wrong with the database")
-        return redirect('appointments.requested_appointments', user_type='doctor')
+        return redirect(url_for('appointments.requested_appointments', user_type='doctor'))
     except TypeError as e:
-        flash("incorrect types")
-        return redirect('appointments.requested_appointments', user_type='doctor')
+        flash("Incorrect types")
+        return redirect(url_for('appointments.requested_appointments', user_type='doctor'))
     except ValueError as e: 
         flash("Incorrect values were passed")
-        return redirect('appointments.requested_appointments', user_type='doctor')
+        return redirect(url_for('appointments.requested_appointments', user_type='doctor'))
 
     if appointment is None:
         abort(404, "This address does not exist")

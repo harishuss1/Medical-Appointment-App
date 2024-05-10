@@ -56,6 +56,9 @@ def init_app(app):
     
     from .patient_api import bp as patient_bp
     app.register_blueprint(patient_bp)
+    
+    from .allergy_api import bp as allergy_bp
+    app.register_blueprint(allergy_bp)
 
     from .appointments_views import bp as appointments_bp
     app.register_blueprint(appointments_bp)

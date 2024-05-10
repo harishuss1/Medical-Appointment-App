@@ -8,7 +8,9 @@
     {{ form.patient.label }} {{ form.patient() }}
     {{ form.doctor.label }} {{ form.doctor() }}
     {{ form.appointment_time.label }} {{ form.appointment_time() }}
-    {{ form.location.label }} {{ form.location() }}
+    {% if current_user.access_level != 'PATIENT' and current_user.access_level != 'ADMIN_USER' %}
+        {{ form.location.label }} {{ form.location() }}
+    {% endif %}
     {{ form.description.label }} {{ form.description() }}
     <input type="submit" />
 </form>
