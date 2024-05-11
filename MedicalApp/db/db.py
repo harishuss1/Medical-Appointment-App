@@ -164,7 +164,54 @@ class Database:
                 doctors.append(User(row[2], row[3], row[4], row[5], row[6], 
                 avatar_path=row[1], id=int(row[0])))
         return doctors
+    
+    def get_doctors_page_number(self, page, first_name, last_name):
+        if (page is None):
+            raise ValueError("Parameters cannot be none")
+        
+        doctors = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                f"""
+                SELECT 
+                u.id, u.AVATAR_PATH, u.EMAIL, u.PASSWORD, u.FIRST_NAME, u.LAST_NAME, u.USER_TYPE
+                FROM medical_users u
+                WHERE
+                u.USER_TYPE = 'DOCTOR' AND
+                ({ "first_name = :first_name" if first_name is not None and first_name != '' else ":first_name != :first_name"} OR
+                { "last_name = :last_name" if last_name is not None and last_name != '' else ":last_name != :last_name"})
+                OFFSET :offset ROWS
+                FETCH NEXT :count ROWS ONLY
+                """,
+                offset=((page - 1)*20),
+                count=20,
+                first_name=first_name,
+                last_name=last_name)
+            for row in results:
+                doctors.append(User(row[2], row[3], row[4], row[5], row[6], avatar_path=row[1], id=int(row[0])))
+        return doctors
 
+    def get_doctors_by_id(self, id):
+        if (id is None):
+            raise ValueError("ID cannot be none")
+        
+        doctor = None
+        with self.__get_cursor() as cursor:
+            result = cursor.execute(
+                f"""
+                SELECT 
+                u.id, u.AVATAR_PATH, u.EMAIL, u.PASSWORD, u.FIRST_NAME, u.LAST_NAME, u.USER_TYPE
+                FROM medical_users u
+                WHERE
+                u.USER_TYPE = 'DOCTOR' AND
+                u.id = :id
+                """,
+                id=id)
+            row = result.fetchone()
+            if row is not None:
+                doctor = User(row[2], row[3], row[4], row[5], row[6], avatar_path=row[1], id=int(row[0]))
+        return doctor
+    
     def get_appointments_by_status_patient(self, status, patient_id):
         if (status is None or patient_id is None):
             raise ValueError("Parameters cannot be none")
