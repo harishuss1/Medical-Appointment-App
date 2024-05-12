@@ -36,6 +36,12 @@ class FakeDB:
             raise TypeError("Invalid appointment type")
         self.appointments.append(appointment)
         
+    def get_all_allergies(self):
+        return self.allergies
+    
+    def get_patients(self):
+        return self.patients
+        
     def get_patient_allergies(self, patient_id):
         if (patient_id is None):
             raise ValueError("Parameters cannot be none")
