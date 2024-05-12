@@ -649,12 +649,17 @@ class Database:
         return appointments
 
     def get_appointments_page_number(self, page, doctor_first_name, doctor_last_name, patient_first_name, patient_last_name):
-        if (page is None or doctor_first_name is None or doctor_last_name is None or patient_first_name is None or patient_last_name):
-            raise ValueError("Parameters cannot be none")
+        if (page is None or 
+            doctor_first_name is None or doctor_first_name == '' or 
+            doctor_last_name is None or doctor_last_name == '' or 
+            patient_first_name is None or patient_first_name == '' or 
+            patient_last_name is None or patient_last_name == ''):
+            raise ValueError("Parameters cannot be None or empty")
         
-        patients = []
+        appointments = []
         with self.__get_cursor() as cursor:
-            results = cursor.execute("""
+            results = cursor.execute(
+                f"""
                 SELECT 
                     app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, 
                     d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, 
@@ -671,17 +676,28 @@ class Database:
                 INNER JOIN 
                     MEDICAL_ROOMs mr ON app.location = mr.room_number
                 WHERE
-                { "first_name = :first_name" if first_name is not None and first_name != '' else "0 = 1"} OR
-                { "last_name = :last_name" if last_name is not None and last_name != '' else "0 = 1"}
+                    { "d.FIRST_NAME = :doctor_first_name" if doctor_first_name is not None and doctor_first_name != '' else ":d.FIRST_NAME != :doctor_first_name"} OR
+                    { "d.LAST_NAME = :doctor_last_name" if doctor_last_name is not None and doctor_last_name != '' else ":d.LAST_NAME != :doctor_last_name"}
+                    { "p.FIRST_NAME = :patient_first_name" if patient_first_name is not None and patient_first_name != '' else ":p.FIRST_NAME != :patient_first_name"} OR
+                    { "p.LAST_NAME = :patient_last_name" if patient_last_name is not None and patient_last_name != '' else ":p.LAST_NAME != :patient_last_name"}    
             """,
-                offset=((page - 1)*20),
+                offset=((page - 1) * 20),
                 count=20,
-                first_name=first_name,
-                last_name=last_name)
+                doctor_first_name=doctor_first_name,
+                doctor_last_name=doctor_last_name,
+                patient_first_name=patient_first_name,
+                patient_last_name=patient_last_name)
             for row in results:
-                patients.append(MedicalPatient(float(row[0]), row[3], row[4], row[5], row[6], row[7], row[8], row[9], float(
-                    row[10]), avatar_path=row[2], id=int(row[1])))
-        return patients
+                doctor = User(row[8], row[9], row[10], row[11],
+                            row[12], avatar_path=row[13], id=int(row[7]))
+                allergies = self.get_patient_allergies(int(row[14]))
+                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
+                    row[23]), avatar_path=row[20], id=int(row[14]), allergies=allergies)
+                location = MedicalRoom(row[25], row[26])
+                appointments.append(Appointments(
+                    patient, doctor, row[3], row[4], location, str(row[6]), id=row[0]))
+        return appointments
+
 
     def get_medical_rooms(self):
         medical_rooms = []

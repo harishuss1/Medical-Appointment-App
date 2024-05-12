@@ -1,4 +1,5 @@
 from flask import Blueprint, Response, abort, jsonify, request
+from flask_login import current_user
 from MedicalApp.db.dbmanager import get_db
 from MedicalApp.appointments import Appointments
 
@@ -32,7 +33,7 @@ def get_appointments_api():
     return jsonify(json_appointments)
 
 
-@bp.route('', methods=['GET', 'PUT', 'DELETE'])
+@bp.route('/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 def get_appointment_by_id_api(id):
     if request.method == 'GET':
         try:
@@ -40,23 +41,37 @@ def get_appointment_by_id_api(id):
             return jsonify(appointment.to_json())
         except Exception:
             abort(500)
+    
     elif request.method == 'PUT':
         appointment_json = request.json
         if appointment_json:
-            appointment_json = Appointments.from_json(appointment_json)
+            appointment = Appointments.from_json(appointment_json)
             try:
                 target_appointment = get_db().get_appointment_by_id(appointment.id)
                 if target_appointment.id != appointment.id:
                     abort(500)
-                get_db().update_appointment(appointment)
-                return Response(" ",status=200 ,mimetype='application/json') 
+                
+                # Check if the current user is a patient or a doctor
+                if current_user.access_level == 'PATIENT':
+                    # Patient can only update appointment_time and description
+                    target_appointment.appointment_time = appointment.appointment_time
+                    target_appointment.description = appointment.description
+                elif current_user.access_level == 'STAFF':
+                    # Doctor can only update status and location
+                    target_appointment.status = appointment.status
+                    target_appointment.location = appointment.location
+                
+                get_db().update_appointment(target_appointment)
+                return jsonify(message="Appointment updated successfully"), 200
             except Exception:
                 abort(500)
         else:
             abort(400)
+    
     elif request.method == 'DELETE':
         try:
             get_db().delete_appointment_by_id(id)
-            return Response(" ",status=200 ,mimetype='application/json')
+            return jsonify(message="Appointment deleted successfully"), 200
         except Exception:
             abort(500)
+
