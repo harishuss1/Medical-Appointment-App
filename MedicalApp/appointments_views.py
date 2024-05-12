@@ -64,9 +64,7 @@ def book_appointment():
 
             new_id = get_db().add_appointment(new_appointment)
             flash("Appointement added to the List of Appointments")
-
-            return redirect(
-                url_for('appointments.get_appointment', id=new_id))
+            
         except DatabaseError as e:
             flash("something went wrong with the database")
             return redirect('home.index')
@@ -77,6 +75,8 @@ def book_appointment():
 @login_required
 @patient_access
 def get_appointment(id):
+    form = AppointmentResponseForm()
+    form.set_choices()
     try:
         db = get_db()
         appointment = db.get_appointment_by_id(id)
@@ -86,7 +86,7 @@ def get_appointment(id):
     if appointment is None:
         flash("Appointment cannot be found", 'error')
         return redirect(url_for('appointments.book_appointment'))
-    return render_template('specific_appointment.html', appointment=appointment)
+    return render_template('specific_appointment.html', appointment=appointment, form=form)
 
 
 @bp.route('/confirmed/<string:user_type>/')
