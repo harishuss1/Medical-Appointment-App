@@ -159,8 +159,8 @@ class Database:
                 OFFSET :offset ROWS
                 FETCH NEXT :count ROWS ONLY
                 """,
-                offset=((page - 1)*20),
-                count=20,
+                offset=((page - 1)*10),
+                count=10,
                 name=str(name)) #str of None is an empty string! therefore :name != '' will always be true
             for row in results:
                 allergies.append(Allergy(int(row[0]), str(row[1]), str(row[2])))
@@ -192,8 +192,8 @@ class Database:
                 OFFSET :offset ROWS
                 FETCH NEXT :count ROWS ONLY
                 """,
-                offset=((page - 1)*20),
-                count=20,
+                offset=((page - 1)*10),
+                count=10,
                 first_name=str(first_name),
                 last_name=str(last_name))
             for row in results:

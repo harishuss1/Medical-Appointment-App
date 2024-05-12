@@ -14,6 +14,7 @@ bp = Blueprint('patient_api', __name__, url_prefix="/api/patients")
 @bp.route('', methods=['GET'])
 def get_patients():
     patients = []
+    page = None
     if request.args:
         page = request.args.get("page")
         if page is None:
@@ -38,7 +39,8 @@ def get_patients():
 
     else:
         try:
-            patients = get_db().get_patients_page_number(1, None, None)
+            page = 1
+            patients = get_db().get_patients_page_number(page, None, None)
         except DatabaseError as e:
             abort(make_response(jsonify(id="409", description=['Something went wrong with our database']), 409))
 
@@ -46,6 +48,10 @@ def get_patients():
         abort(make_response(jsonify(id="404", description="No patients currently available in the database"), 404))
         
     data = {}
+    count = len(get_db().get_patients())
+    data['count'] = count
+    data['previous'] = urllib.parse.urljoin(request.url_root, url_for('patient_api.get_patients', page=(page-1))) if page > 1 else ""
+    data['next'] = urllib.parse.urljoin(request.url_root, url_for('patient_api.get_patients', page=(page+1))) if count%10 !=0 and len(patients) >= 10 else ""
     data['results'] = []
     for patient in patients:
         data['results'].append(patient.to_json(request.url_root))
