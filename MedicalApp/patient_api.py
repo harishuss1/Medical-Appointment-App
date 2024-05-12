@@ -66,7 +66,11 @@ def get_patient(patient_id):
             json_data = request.json
             allergy_ids = []
             for allergy in json_data['allergies']:
-                allergy_id = int(allergy) if allergy.isdigit() else abort(make_response(jsonify(id="400", description=f"The allergy id {allergy_id} is of incorrect type."), 400))
+                allergy_id = None
+                try:
+                    allergy_id = int(allergy)
+                except:
+                    abort(make_response(jsonify(id="400", description=f"The allergy id {allergy_id} is of incorrect type."), 400))
                 allergy = get_db().get_allergy_by_id(allergy_id)
                 if allergy is None:
                     abort(make_response(jsonify(id="404", description=f"The allergy id {allergy_id} does not exist."), 404))
