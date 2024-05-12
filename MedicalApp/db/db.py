@@ -40,6 +40,8 @@ class Database:
     def delete_user(self, user_email):
         if (user_email is None):
             raise ValueError("Parameters cannot be none")
+        if (not isinstance(user_email, str)):
+            raise TypeError("Parameters of incorrect type")
         
         try:
             with self.__connection.cursor() as cursor:
@@ -55,6 +57,9 @@ class Database:
     def block_user(self, email):
         if (email is None):
             raise ValueError("Parameters cannot be none")
+        if (not isinstance(email, str)):
+            raise TypeError("Parameters of incorrect type")
+        
         try:
             with self.__connection.cursor() as cursor:
                 cursor.execute(
@@ -69,6 +74,8 @@ class Database:
     def change_user_type(self, user_email, new_user_type):
         if (user_email is None or new_user_type is None):
             raise ValueError("Parameters cannot be none")
+        if (not isinstance(user_email, str) or not isinstance(new_user_type, str)):
+            raise TypeError("Parameters of incorrect type")
         
         try:
             with self.__connection.cursor() as cursor:
@@ -369,6 +376,18 @@ class Database:
                     appointments.append(Appointments(patient, doctor,
                                                      row[3], int(row[4]), location, str(row[6]), id=row[0]))
         return appointments
+    
+    def update_allergies(self, patient_id, allergy_ids):
+        if (patient_id is None or allergy_ids is None):
+            raise ValueError("Parameters cannot be none")
+        with self.__get_cursor() as cursor:
+            for allergy_id in allergy_ids:
+                cursor.execute(
+                    """
+                    INSERT INTO medical_patient_allergies (patient_id, allergy_id)
+                    VALUES (:patient_id, :allergy_id)
+                    """,
+                    patient_id=patient_id, allergy_id=allergy_id)
 
     def update_patient_details(self, patient_id, dob, blood_type, height, weight, allergies):
         if (patient_id is None or dob is None or blood_type is None or height is None or weight is None or allergies is None):
