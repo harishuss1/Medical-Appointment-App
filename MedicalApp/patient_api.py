@@ -25,7 +25,6 @@ def get_patients():
         first_name = request.args.get("first")
         last_name = request.args.get("last")
 
-        
         if last_name is not None and not isinstance(last_name, str) or first_name is not None and not isinstance(first_name, str):
             abort(make_response(jsonify(id="400", description="The the first or last names are of incorrect type"), 400))
         try:
