@@ -93,7 +93,14 @@ class Database:
     def get_appointments_by_status_doctor(self, status, doctor_id):
         if (status is None or doctor_id is None):
             raise ValueError("Parameters cannot be none")
+        try:
+            status = int(status)
+            doctor_id = int(doctor_id)
+        except:
+            raise TypeError("Parameters of incorrect type")
         
+        status = int(status)
+        doctor_id = int(doctor_id)
         appointments = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
@@ -129,9 +136,16 @@ class Database:
                     row[10]), avatar_path=row[2], id=int(row[1])))
         return patients
     
-    def get_allergies_page_number(self, name, page):
-        if (page is None or name is None):
+    def get_allergies_page_number(self, name, page): #TEST!
+        if (page is None):
             raise ValueError("Parameters cannot be none")
+        try:
+            page = int(page)
+        except:
+            raise TypeError("Parameters of incorrect type")
+        
+        if (name is not None and not isinstance(name, str)):
+            raise TypeError("Parameters of incorrect type")
         
         allergies = []
         with self.__get_cursor() as cursor:
@@ -152,9 +166,16 @@ class Database:
                 allergies.append(Allergy(int(row[0]), str(row[1]), str(row[2])))
         return allergies
     
-    def get_patients_page_number(self, page, first_name, last_name):
+    def get_patients_page_number(self, page, first_name, last_name): #TEST!
         if (page is None):
             raise ValueError("Parameters cannot be none")
+        if (first_name is not None and not isinstance(first_name, str) or last_name is not None and not isinstance(last_name, str)):
+            raise TypeError("Parameters of incorrect type")
+        
+        try:
+            page = int(page)
+        except:
+            raise TypeError("Parameters of incorrect type")
         
         patients = []
         with self.__get_cursor() as cursor:
@@ -196,9 +217,17 @@ class Database:
                 avatar_path=row[1], id=int(row[0])))
         return doctors
 
-    def get_appointments_by_status_patient(self, status, patient_id):
+    def get_appointments_by_status_patient(self, status, patient_id): #TEST!
         if (status is None or patient_id is None):
             raise ValueError("Parameters cannot be none")
+        try:
+            status = int(status)
+            patient_id = int(patient_id)
+        except:
+            raise TypeError("Parameters of incorrect type")
+        
+        status = int(status)
+        patient_id = int(patient_id)
         
         appointments = []
         with self.__get_cursor() as cursor:
@@ -223,6 +252,11 @@ class Database:
         if (id is None):
             raise ValueError("Parameters cannot be none")
         
+        try:
+            id = int(id)
+        except:
+            raise TypeError("Parameters of incorrect type")
+        
         appointment = None
         with self.__get_cursor() as cursor:
             results = cursor.execute(
@@ -246,6 +280,10 @@ class Database:
     def get_appointment_for_doctors(self, id):
         if (id is None):
             raise ValueError("Parameters cannot be none")
+        try:
+            id = int(id)
+        except:
+            raise TypeError("Parameters of incorrect type")
         
         appointments = []
         with self.__get_cursor() as cursor:
@@ -258,10 +296,6 @@ class Database:
                               row[12], avatar_path=row[13], id=int(row[7]))
                 patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
                     row[23]), avatar_path=row[20], id=int(row[14]))
-                doctor = User(row[8], row[9], row[10], row[11],
-                              row[12], avatar_path=row[13], id=int(row[7]))
-                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
-                    row[23]), avatar_path=row[20], id=int(row[14]))
                 location = MedicalRoom(row[25], row[26])
                 appointments.append(Appointments(
                     patient, doctor, row[3], row[4], location, str(row[6]), id=row[0]))
@@ -270,6 +304,10 @@ class Database:
     def get_appointment_for_patients(self, id):
         if (id is None):
             raise ValueError("Parameters cannot be none")
+        try:
+            id = int(id)
+        except:
+            raise TypeError("Parameters of incorrect type")
         
         appointments = []
         with self.__get_cursor() as cursor:
