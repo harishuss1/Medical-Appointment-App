@@ -187,15 +187,15 @@ class Database:
                 FROM medical_users p INNER JOIN MEDICAL_PATIENTS mp 
                 ON(p.id = mp.id)
                 WHERE
-                { "first_name = :first_name" if first_name is not None and first_name != '' else ":first_name != :first_name"} OR
-                { "last_name = :last_name" if last_name is not None and last_name != '' else ":last_name != :last_name"}
+                { "first_name = :first_name" if first_name is not None and first_name != '' else ":first_name != first_name"} OR
+                { "last_name = :last_name" if last_name is not None and last_name != '' else ":last_name != last_name"}
                 OFFSET :offset ROWS
                 FETCH NEXT :count ROWS ONLY
                 """,
                 offset=((page - 1)*20),
                 count=20,
-                first_name=first_name,
-                last_name=last_name)
+                first_name=str(first_name),
+                last_name=str(last_name))
             for row in results:
                 allergies = self.get_patient_allergies(int(row[1]))
                 patients.append(MedicalPatient(float(row[0]), row[3], row[4], row[5], row[6], row[7], row[8], row[9], float(

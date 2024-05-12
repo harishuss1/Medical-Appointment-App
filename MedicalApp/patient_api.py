@@ -15,12 +15,16 @@ bp = Blueprint('patient_api', __name__, url_prefix="/api/patients")
 def get_patients():
     patients = []
     if request.args:
-        page = int(request.args.get("page")) if request.args.get("page").isdigit() else abort(make_response(jsonify(id="400", description="The page number is of incorrect type"), 400))
-        first_name = request.args.get("first")
-        last_name = request.args.get("last")
-    
+        page = request.args.get("page")
         if page is None:
             page = 1
+        try:
+            page = int(page) 
+        except:
+            abort(make_response(jsonify(id="400", description="The page number is of incorrect type"), 400))
+        first_name = request.args.get("first")
+        last_name = request.args.get("last")
+
         
         if last_name is not None and not isinstance(last_name, str) or first_name is not None and not isinstance(first_name, str):
             abort(make_response(jsonify(id="400", description="The the first or last names are of incorrect type"), 400))
@@ -37,7 +41,7 @@ def get_patients():
         try:
             patients = get_db().get_patients_page_number(1, None, None)
         except DatabaseError as e:
-            abort(409)
+            abort(make_response(jsonify(id="409", description=['Something went wrong with our database']), 409))
 
     if patients is None or len(patients) == 0:
         abort(make_response(jsonify(id="404", description="No patients currently available in the database"), 404))
