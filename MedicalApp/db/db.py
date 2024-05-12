@@ -136,7 +136,7 @@ class Database:
                     row[10]), avatar_path=row[2], id=int(row[1])))
         return patients
     
-    def get_allergies_page_number(self, name, page): #TEST!
+    def get_allergies_page_number(self, page, name): #TEST!
         if (page is None):
             raise ValueError("Parameters cannot be none")
         try:
@@ -155,13 +155,13 @@ class Database:
                 a.id, a.name, a.description
                 FROM medical_allergies a
                 WHERE
-                { "name = :name" if name is not None and name != '' else "0 = 1"} OR
+                { "name = :name" if name is not None and name != '' else ":name != name"}
                 OFFSET :offset ROWS
                 FETCH NEXT :count ROWS ONLY
                 """,
                 offset=((page - 1)*20),
                 count=20,
-                name=name)
+                name=str(name)) #str of None is an empty string! therefore :name != '' will always be true
             for row in results:
                 allergies.append(Allergy(int(row[0]), str(row[1]), str(row[2])))
         return allergies

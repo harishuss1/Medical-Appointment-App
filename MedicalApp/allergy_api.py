@@ -15,11 +15,15 @@ def get_allergies():
     allergies = []
     try:
         if request.args:
-            page = int(request.args.get("page")) if request.args.get("page").isdigit() else abort(make_response(jsonify(id="400", description="The page number is of incorrect type"), 400))
-            name = str(request.args.get("name"))
-
-            if page is None or not isinstance(page, int):
+            page = request.args.get("page")
+            if page is None:
                 page = 1
+            try:
+                page = int(page) 
+            except:
+                abort(make_response(jsonify(id="400", description="The page number is of incorrect type"), 400))
+            
+            name = str(request.args.get("name"))
 
             if name is not None and not isinstance(name, str):
                 abort(make_response(
