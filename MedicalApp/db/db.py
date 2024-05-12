@@ -724,6 +724,13 @@ class Database:
                            user_type=user.access_level)
 
     def update_user_password(self, user_id, new_password_hash):
+        if (user_id is None or new_password_hash is None):
+            raise ValueError("Parameters cannot be empty")
+        try:
+            user_id = int(user_id)
+        except:
+            raise TypeError("Parameters of incorrect type")
+        
         with self.__get_cursor() as cursor:
             cursor.execute(
                 "UPDATE medical_users SET password = :password WHERE id = :id",
@@ -731,7 +738,7 @@ class Database:
             )
 
     def get_user_by_email(self, email):
-        if (not isinstance(email)):
+        if (not isinstance(email, str)):
             raise ValueError("Parameters cannot be none")
         
         user = None
@@ -745,6 +752,12 @@ class Database:
         return user
 
     def update_user_avatar(self, id, avatar_path):
+        if (id is None or (avatar_path is not None and not isinstance(avatar_path, str))):
+            raise ValueError("Parameters cannot be none")
+        try:
+            id = int(id)
+        except:
+            raise TypeError("Parameters of incorrect type")
         with self.__get_cursor() as cursor:
             cursor.execute(
                 'SELECT AVATAR_PATH FROM medical_users WHERE id = :id',
