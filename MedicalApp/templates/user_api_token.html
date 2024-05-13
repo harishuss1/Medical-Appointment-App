@@ -12,7 +12,7 @@
     {% endfor %}
 </ul>
 
-<form method="POST" action="{{ url_for('auth.generate_api_tokens') }}">
+<form method="post" action="{{ url_for('auth.generate_api_tokens') }}">
     <button type="submit">Generate New Tokens</button>
 </form>
 
