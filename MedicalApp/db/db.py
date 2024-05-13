@@ -670,6 +670,26 @@ class Database:
             if row:
                 medical_room = MedicalRoom(row[0], row[1])
         return medical_room
+    
+    def store_api_token(self, user_id, token):
+        with self.__get_cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO medical_api_tokens (user_id, token) VALUES (:user_id, :token)",
+                user_id=user_id,
+                token=token
+            )
+
+    def get_user_api_tokens(self, user_id):
+        tokens = []
+        with self.__get_cursor() as cursor:
+            cursor.execute(
+                "SELECT token FROM medical_api_tokens WHERE user_id = :user_id",
+                user_id=user_id
+            )
+            results = cursor.fetchall()
+            for row in results:
+                tokens.append(row[0])
+        return tokens
 
     def __get_cursor(self):
         for i in range(3):

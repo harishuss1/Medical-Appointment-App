@@ -1,12 +1,20 @@
 {% extends "base.html" %}
 
-{% block title %}User API Token{% endblock title %}
+{% block title %}User API Tokens{% endblock title %}
 
 {% block content %}
-<h1>Your API Token</h1>
-<p>This is your generated API token. Keep it secure and do not share it with others:</p>
-<div class="api-token">
-    {{ api_token }}
-</div>
+<h1>Your API Tokens</h1>
+<p>This is your list of API tokens. Keep them secure and do not share them with others:</p>
+
+<ul>
+    {% for token in api_tokens %}
+    <li>{{ token }}</li>
+    {% endfor %}
+</ul>
+
+<form method="POST" action="{{ url_for('auth.generate_api_tokens') }}">
+    <button type="submit">Generate New Tokens</button>
+</form>
+
 <p><a href="{{ url_for('auth.profile') }}">Back to Profile</a></p>
 {% endblock content %}

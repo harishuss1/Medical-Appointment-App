@@ -164,7 +164,8 @@ input[type="text"], input[type="password"], input[type="email"] {
     position: relative;
     margin: 0 auto;
     padding: 20px;
-    height: 70%;
+    height: 100%;
+    width: 100%;
     text-align: center;
 }
 

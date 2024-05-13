@@ -11,4 +11,5 @@ Users and Roles
     <dd>Email: {{ user.email }}</dd>
     <dd>Role: {{ user.access_level }}</dd>
 {% endfor %}
+<p><a href="{{ url_for('admin.admin_dashboard') }}">Back to Admin Dashboard</a></p>
 {% endblock content %}
