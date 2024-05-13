@@ -2,6 +2,7 @@ from datetime import date
 import datetime
 import oracledb
 import os
+import secrets
 from flask import g
 
 from MedicalApp.allergy import Allergy
@@ -551,14 +552,26 @@ class Database:
 
     def create_user(self, user):
         if not isinstance(user, User):
-            raise TypeError("expected User object")
+            raise TypeError("Expected User object")
+
+        api_token = secrets.token_urlsafe(20)
+
         with self.__get_cursor() as cursor:
-            cursor.execute('insert into medical_users (email, password, first_name,last_name,user_type)  values (:email, :password, :first_name, :last_name, :user_type)',
-                           email=user.email,
-                           password=user.password,
-                           first_name=user.first_name,
-                           last_name=user.last_name,
-                           user_type=user.access_level)
+            cursor.execute('INSERT INTO medical_users (email, password, first_name, last_name, user_type)  VALUES (:email, :password, :first_name, :last_name, :user_type)',
+                        email=user.email,
+                        password=user.password,
+                        first_name=user.first_name,
+                        last_name=user.last_name,
+                        user_type=user.access_level)
+
+            cursor.execute('SELECT id FROM medical_users WHERE email = :email', {'email': user.email})
+            user_id = cursor.fetchone()[0]
+
+            cursor.execute('INSERT INTO medical_api_tokens (user_id, token) VALUES (:user_id, :api_token)',
+                        {'user_id': user_id, 'api_token': api_token})
+
+        self.__connection.commit()
+
 
     def update_user_password(self, user_id, new_password_hash):
         with self.__get_cursor() as cursor:
