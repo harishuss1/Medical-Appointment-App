@@ -63,6 +63,9 @@ def init_app(app):
     from .appointments_views import bp as appointments_bp
     app.register_blueprint(appointments_bp)
 
+    from .appointments_api import bp as appointments_api_bp
+    app.register_blueprint(appointments_api_bp)
+
     from .note_views import bp as notes_bp
     app.register_blueprint(notes_bp)
 
