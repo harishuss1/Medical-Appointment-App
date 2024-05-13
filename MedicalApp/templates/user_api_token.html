@@ -11,7 +11,7 @@
     <div class="api-token">
         <span>{{ token }}</span>
         <form method="post" action="{{ url_for('auth.remove_api_token', token=token) }}">
-            <button type="submit">Remove</button>
+            <button type="submit" class="remove-button">Remove</button>
         </form>
     </div>
     {% endfor %}
@@ -21,13 +21,13 @@
     <form method="post" action="{{ url_for('auth.generate_api_tokens') }}">
         <label for="num_tokens">Number of Tokens to Generate:</label>
         <input type="number" id="num_tokens" name="num_tokens" min="1" required>
-        <button type="submit">Generate API Tokens</button>
+        <button type="submit" class="generate-button">Generate API Tokens</button>
     </form>
 </div>
 
 <div class="remove-all-tokens">
     <form method="post" action="{{ url_for('auth.remove_all_api_tokens') }}">
-        <button type="submit">Remove All API Tokens</button>
+        <button type="submit" class="remove-button">Remove All API Tokens</button>
     </form>
 </div>
 
