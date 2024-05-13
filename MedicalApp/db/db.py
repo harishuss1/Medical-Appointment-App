@@ -690,6 +690,11 @@ class Database:
             for row in results:
                 tokens.append(row[0])
         return tokens
+    
+    def delete_api_token(self, user_id, token):
+        with self.__get_cursor() as cursor:
+            cursor.execute("DELETE FROM medical_api_tokens WHERE user_id = :user_id AND token = :token", user_id=user_id, token=token)
+            self.__connection.commit()
 
     def __get_cursor(self):
         for i in range(3):

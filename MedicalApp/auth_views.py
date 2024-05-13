@@ -123,16 +123,16 @@ def get_avatar(email, filename):
 @login_required
 def generate_api_tokens():
     user_id = current_user.id
+    num_tokens = int(request.form.get('num_tokens'))  # Get the number of tokens from the form data
     db = get_db()
-    # for future changes, this could be changed to generate multiple api tokens
-    num_tokens = 1 
-
+    
     for _ in range(num_tokens):
         token = secrets.token_urlsafe(20)
         db.store_api_token(user_id, token)
     
     flash(f"{num_tokens} new API tokens have been generated and stored.", "success")
     return redirect(url_for('auth.user_api_token'))
+
 
 @bp.route('/profile/userApiToken', methods=['GET'])
 @login_required
@@ -141,3 +141,21 @@ def user_api_token():
     user_id = current_user.id
     api_tokens = db.get_user_api_tokens(user_id)
     return render_template('user_api_token.html', api_tokens=api_tokens)
+
+@bp.route('/profile/remove_api_token/<token>', methods=['POST'])
+@login_required
+def remove_api_token(token):
+    db = get_db()
+    try:
+        db.delete_api_token(current_user.id, token)
+        flash("API token removed successfully.", "success")
+    except Exception as e:
+        flash("Error removing API token.", "error")
+    return redirect(url_for('auth.user_api_token'))
+
+
+# WHAT NEEDS TO BE DONE
+
+# 1. Create a single api token when account is created 
+# 2. Make a table for api tokens list
+# 4. Should add a counter type to increment how much the user wants to create...
