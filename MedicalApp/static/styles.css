@@ -195,3 +195,49 @@ input[type="text"], input[type="password"], input[type="email"] {
     text-shadow: 0px 0px 10px #00c2cb, 0px 0px 20px #fff;
 }
 
+.api-token-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 20px;
+}
+
+.api-token {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: #f2f2f2;
+  border-radius: 5px;
+  width: 350px;
+}
+
+.api-token span {
+  flex: 1;
+  margin-right: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.generate-token,
+.remove-all-tokens {
+  margin-top: 20px;
+}
+
+.remove-button {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.remove-button:hover {
+  background-color: #d32f2f;
+}
+
+
+

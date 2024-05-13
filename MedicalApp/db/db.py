@@ -695,6 +695,11 @@ class Database:
         with self.__get_cursor() as cursor:
             cursor.execute("DELETE FROM medical_api_tokens WHERE user_id = :user_id AND token = :token", user_id=user_id, token=token)
             self.__connection.commit()
+    
+    def delete_all_api_tokens(self, user_id):
+        with self.__get_cursor() as cursor:
+            cursor.execute("DELETE FROM medical_api_tokens WHERE user_id = :user_id", {'user_id': user_id})
+            self.__connection.commit()
 
     def __get_cursor(self):
         for i in range(3):

@@ -153,9 +153,14 @@ def remove_api_token(token):
         flash("Error removing API token.", "error")
     return redirect(url_for('auth.user_api_token'))
 
-
-# WHAT NEEDS TO BE DONE
-
-# 1. Create a single api token when account is created 
-# 2. Make a table for api tokens list
-# 4. Should add a counter type to increment how much the user wants to create...
+@bp.route('/profile/remove_all_api_tokens', methods=['POST'])
+@login_required
+def remove_all_api_tokens():
+    try:
+        db = get_db()
+        db.delete_all_api_tokens(current_user.id)
+        flash("All API tokens have been removed.", "success")
+    except Exception as e:
+        flash("An error occurred while removing API tokens.", "error")
+        print("Error removing API tokens:", e)
+    return redirect(url_for('auth.user_api_token'))
