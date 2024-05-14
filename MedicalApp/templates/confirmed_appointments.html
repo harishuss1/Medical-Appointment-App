@@ -1,14 +1,24 @@
 {% extends "base.html" %}
-{% if current_user.access_level == 'STAFF' %}
+
 {% block nav %}
-    <li><a href="{{ url_for('appointments.confirmed_appointments') }}">See all confirmed appointments</a></li>
-    <li><a href="{{ url_for('appointments.requested_appointments') }}">See appointment requests</a></li>
-    <li><a href="{{ url_for('doctor.patients') }}">See all patients</a></li>
-    <li><a href="{{ url_for('note.notes', user_id=current_user.id) }}">See all notes</a></li>
+    {% set user = "patient" %}
+    {% if current_user.access_level == 'STAFF' %}
+        {% set user = "doctor" %}
+        <li><a href="{{ url_for('doctor.dashboard') }}">Dashboard</a></li>
+        <li><a href="{{ url_for('doctor.patients') }}">See all patients</a></li>
+        <li><a href="{{ url_for('note.notes', user_id=current_user.id) }}">See all notes</a></li>
+    {% else %}
+        <li><a href="{{ url_for('patient.dashboard') }}">Dashboard</a></li>
+    {% endif %}
+    <li><a href="{{ url_for('appointments.book_appointment') }}">Book an appointment</a></li>
+    <li><a href="{{ url_for('patient.update_patient') }}">Update Details</a></li>
+    <li><a href="{{ url_for('patient.view_patient') }}">View Details</a></li>
+    <li><a href="{{ url_for('appointments.confirmed_appointments', user_type=user) }}">See all confirmed appointments</a></li>
+    <li><a href="{{ url_for('appointments.requested_appointments', user_type=user) }}">See appointment requests</a></li>
 {% endblock nav %}
-{% endif %}
+
 {% block content %}
-<h1>{% block title %}Doctor Appointments{% endblock title %}</h1>
+<h1>{% block title %}Confirmed Appointments{% endblock title %}</h1>
     <dl id="doctor-appointments">
         {% for appointment in appointments %}
             <dt>Appointment with {{ appointment.patient.first_name }} {{ appointment.patient.last_name }}.</dt>

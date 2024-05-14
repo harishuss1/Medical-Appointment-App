@@ -1,28 +1,35 @@
 {% extends "base.html" %}
-{% if current_user.access_level == 'PATIENT' %}
+
 {% block nav %}
-        <li><a href="{{ url_for('patient.patient_dashboard') }}">Dashboard</a></li>
-        <li><a href="{{ url_for('patient.view_appointments') }}">View Appointments</a></li>
-        <li><a href="{{ url_for('patient.update_patient') }}">Update Details</a></li>
-        <li><a href="{{ url_for('patient.view_patient') }}">View Details</a></li>
+    {% set user = "patient" %}
+    {% if current_user.access_level == 'STAFF' %}
+        {% set user = "doctor" %}
+        <li><a href="{{ url_for('doctor.dashboard') }}">Dashboard</a></li>
+        <li><a href="{{ url_for('doctor.patients') }}">See all patients</a></li>
+        <li><a href="{{ url_for('note.notes', user_id=current_user.id) }}">See all notes</a></li>
+    {% else %}
+        <li><a href="{{ url_for('patient.dashboard') }}">Dashboard</a></li>
+    {% endif %}
+    <li><a href="{{ url_for('appointments.book_appointment') }}">Book an appointment</a></li>
+    <li><a href="{{ url_for('patient.update_patient') }}">Update Details</a></li>
+    <li><a href="{{ url_for('patient.view_patient') }}">View Details</a></li>
+    <li><a href="{{ url_for('appointments.confirmed_appointments', user_type=user) }}">See all confirmed appointments</a></li>
+    <li><a href="{{ url_for('appointments.requested_appointments', user_type=user) }}">See appointment requests</a></li>
 {% endblock nav %}
-{% endif %}
+
 {% block content %}
 <h2>Patient Dashboard</h2>
 <div>
     <h3>Welcome, {{ current_user.first_name }}!</h3>
-    <!-- Add Book appointments -->
 </div>
 <div>
     <h4>Pending Appointments:</h4>
     <ul>
         {% for appointment in appointments %}
-        {% if appointment.status == 'pending' %}
+        {% if appointment.status == 0 %}
         <li>
-            <strong>Date:</strong> {{ appointment.date }}
-            <strong>Status:</strong> {{ appointment.status }}
-            <strong>Doctor:</strong> {{ appointment.doctor.name }}
-            <strong>Location:</strong> {{ appointment.location }}
+            <strong>Date:</strong> {{ appointment.appointment_time }}
+            <strong>Doctor:</strong> {{ appointment.doctor }}
             <strong>Description:</strong> {{ appointment.description }}
         </li>
         {% endif %}
@@ -33,11 +40,10 @@
     <h4>Accepted Appointments:</h4>
     <ul>
         {% for appointment in appointments %}
-        {% if appointment.status == 'accepted' %}
+        {% if appointment.status == 1 %}
         <li>
-            <strong>Date:</strong> {{ appointment.date }} <br>
-            <strong>Status:</strong> {{ appointment.status }} <br>
-            <strong>Doctor:</strong> {{ appointment.doctor.name }} <br>
+            <strong>Date:</strong> {{ appointment.appointment_time }} <br>
+            <strong>Doctor:</strong> {{ appointment.doctor }} <br>
             <strong>Location:</strong> {{ appointment.location }} <br>
             <strong>Description:</strong> {{ appointment.description }} <br>
         </li>

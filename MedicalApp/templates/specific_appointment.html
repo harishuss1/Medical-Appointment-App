@@ -1,22 +1,47 @@
 {% extends "base.html" %}
-{% block title %}Appointments{% endblock body %}
-{% if current_user.access_level == 'STAFF' %}
+
 {% block nav %}
-    <li><a href="{{ url_for('appointments.confirmed_appointments') }}">See all confirmed appointments</a></li>
-    <li><a href="{{ url_for('appointments.requested_appointments') }}">See appointment requests</a></li>
-    <li><a href="{{ url_for('doctor.patients') }}">See all patients</a></li>
-    <li><a href="{{ url_for('note.notes', user_id=current_user.id) }}">See all notes</a></li>
+    {% set user = "patient" %}
+    {% if current_user.access_level == 'STAFF' %}
+        {% set user = "doctor" %}
+        <li><a href="{{ url_for('doctor.dashboard') }}">Dashboard</a></li>
+        <li><a href="{{ url_for('doctor.patients') }}">See all patients</a></li>
+        <li><a href="{{ url_for('note.notes', user_id=current_user.id) }}">See all notes</a></li>
+    {% else %}
+        <li><a href="{{ url_for('patient.dashboard') }}">Dashboard</a></li>
+    {% endif %}
+    <li><a href="{{ url_for('appointments.book_appointment') }}">Book an appointment</a></li>
+    <li><a href="{{ url_for('patient.update_patient') }}">Update Details</a></li>
+    <li><a href="{{ url_for('patient.view_patient') }}">View Details</a></li>
+    <li><a href="{{ url_for('appointments.confirmed_appointments', user_type=user) }}">See all confirmed appointments</a></li>
+    <li><a href="{{ url_for('appointments.requested_appointments', user_type=user) }}">See appointment requests</a></li>
 {% endblock nav %}
-{% endif %}
+
 {% block content %}
-<h2>Appointments</h2>
+<h2>{% block title %}Appointment{% endblock title %}</h2>
 <ul>
-    <li>ID: {{ appointment.id }}</li>
-    <li>Patient ID: {{ appointment.patient_id }}</li>
-    <li>Doctor ID: {{ appointment.doctor_id }}</li>
-    <li>Province: {{ appointment.appointment_time }}</li> 
-    <li>Status: {{ appointment.status }}</li>   
+    {% set a_status = 'Pending' %}
+    {% if appointment.status == 1 %}
+    {% set a_status = 'Confirmed' %}
+    {% endif %}
+    <li>Patient: {{ appointment.patient }}</li>
+    <li>Doctor:Dr. {{ appointment.doctor }}</li>
+    <li>Date: {{ appointment.appointment_time }}</li> 
+    <li>Status: {{ status }}</li>  
+    {% if appointment.status == 0 and current_user.access_level != 'PATIENT' and current_user.access_level != 'ADMIN_USER' %} 
     <li>Location: {{ appointment.location }}</li>  
+    {% endif %}
     <li>Description: {{ appointment.description }}</li>  
 </ul>
-{% endblock body %}
+
+{% if current_user.access_level == 'STAFF' %}
+    <form method="post" id="appointment-confirmation-form">
+        {{ form.csrf_token }}
+        {{ form.select_confirmation.label }} {{ form.select_confirmation() }}
+        {{ form.room.label }} {{ form.room() }}
+        <button type="submit">Confirm status</button>
+    </form>
+{% else %}
+    <!-- update appointment here -->
+{% endif %}
+{% endblock content %}

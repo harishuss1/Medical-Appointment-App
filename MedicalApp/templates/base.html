@@ -15,6 +15,7 @@
         <nav id="navbar">
             <ul>
                 <li id="user-icon">
+
                     {% if current_user.is_authenticated and current_user.avatar_path %}
                         <img src="{{ url_for('auth.get_avatar', email=current_user.email, filename=current_user.avatar_path.replace('\\', '/').split('/')[-1]) }}" alt="User Avatar" class="avatar" onclick="toggleDropdown()" width="60" height="60">
                     {% else %}
@@ -37,26 +38,37 @@
     <nav id="navbar">
         <ul>
             {% block nav %}
-            <li><a href="{{ url_for('home.index') }}">Home</a></li>
-            <li><a href="{{ url_for('appointments.get_appointments') }}">Appointments</a></li>
-            <li><a href="{{ url_for('doctor.dashboard') }}">Doctor Dashboard</a></li>
-            <li><a href="{{ url_for('admin.admin_dashboard') }}">Admin Dashboard</a></li>
-            <li><a href="{{ url_for('medical_rooms.get_medical_rooms') }}">Medical Rooms</a></li>
+                <li><a href="{{ url_for('home.index') }}">Home</a></li>
+            {% if current_user.is_authenticated %}
+                    <li><a href="{{ url_for('patient.dashboard') }}">Patient Dashboard</a></li>
+                {% if current_user.access_level != 'PATIENT' %}
+                    <li><a href="{{ url_for('doctor.dashboard') }}">Doctor Dashboard</a></li>
+                {% endif %}
+                {% if current_user.access_level != 'PATIENT' and current_user.access_level != 'DOCTOR' %}
+                    <li><a href="{{ url_for('admin.admin_dashboard') }}">Admin Dashboard</a></li>
+                {% endif %}
+                {% if current_user.access_level == 'ADMIN' %}
+                    <li><a href="{{ url_for('admin.add_user') }}">Add New User</a></li>
+                {% endif %}
+                    <li><a href="{{ url_for('appointments.book_appointment') }}">Book an appointment</a></li>
+                    <li><a href="{{ url_for('medical_rooms.get_medical_rooms') }}">Medical Rooms</a></li>
+            {% endif %}
             {% endblock nav %}
         </ul>
     </nav>
-    {% block content %}{% endblock content %}
+    <main>
+        {% block content %}{% endblock content %}
 
-    {% with messages = get_flashed_messages(with_categories=True) %}
-    {% if messages %}
-    <div class="flash-messages">
-        {% for category, message in messages %}
-        <div class="alert alert-{{ category }}">{{ message }}</div>
-        {% endfor %}
-    </div>
-    {% endif %}
-    {% endwith %}
-
+        {% with messages = get_flashed_messages(with_categories=True) %}
+        {% if messages %}
+        <div class="flash-messages">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+    </main>
     <footer class="footer">
        <br><strong>Copyright © 2024</strong>
     </footer>

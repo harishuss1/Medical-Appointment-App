@@ -53,18 +53,33 @@ def init_app(app):
 
     from .home_view import bp as home_bp
     app.register_blueprint(home_bp)
+    
+    from .patient_api import bp as patient_bp
+    app.register_blueprint(patient_bp)
+    
+    from .allergy_api import bp as allergy_bp
+    app.register_blueprint(allergy_bp)
 
     from .appointments_views import bp as appointments_bp
     app.register_blueprint(appointments_bp)
+
+    from .appointments_api import bp as appointments_api_bp
+    app.register_blueprint(appointments_api_bp)
 
     from .note_views import bp as notes_bp
     app.register_blueprint(notes_bp)
 
     from .patients_views import bp as patient_bp
     app.register_blueprint(patient_bp)
+    
+    from .user_views import bp as user_bp
+    app.register_blueprint(user_bp)
 
     from .medical_rooms_view import bp as medical_rooms_bp
     app.register_blueprint(medical_rooms_bp)
+
+    from .medical_room_api import bp as room_bp
+    app.register_blueprint(room_bp)
 
     app.teardown_appcontext(close_db)
 
