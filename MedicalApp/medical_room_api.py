@@ -1,5 +1,5 @@
 import json
-from flask import Blueprint, jsonify, request, render_template, redirect, url_for, flash, abort
+from flask import Blueprint, jsonify, make_response, request, render_template, redirect, url_for, flash, abort
 from flask_login import login_required, current_user
 from oracledb import DatabaseError
 from MedicalApp.allergy import Allergy
@@ -9,16 +9,18 @@ from .db.dbmanager import get_db
 
 bp = Blueprint('medical_rooms_api', __name__, url_prefix="/api/medical_rooms/")
 
-# supports first= last= and page=. page defaults to 1 if none is specified
 @bp.route('/', methods=['GET'])
 def get_medical_rooms():
     medical_rooms = []
     if request.args:
-        page = int(request.args.get("page"))
-        room_number = str(request.args.get("room"))
-
-        if page is None or not isinstance(page, int):
+        page = request.args.get("page")
+        if page is None:
             page = 1
+        try:
+            page = int(page) 
+        except:
+            abort(make_response(jsonify(id="400", description="The page number is of incorrect type"), 400))
+        room_number = str(request.args.get("room"))
 
         if room_number is not None and not isinstance(room_number, str):
             abort("Query parameters incorrect")
@@ -35,7 +37,7 @@ def get_medical_rooms():
         try:
             medical_rooms = get_db().get_medical_rooms()
         except DatabaseError as e:
-            abort(409)
+            abort(make_response(jsonify(id="409", description=['Something went wrong with our database']), 409))
 
     if medical_rooms is None or len(medical_rooms) == 0:
         abort(404)

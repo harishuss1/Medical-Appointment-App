@@ -721,28 +721,29 @@ class Database:
                 medical_room = MedicalRoom(row[0], row[1])
         return medical_room
     
-    def get_medical_room_page_number(self,page, room_number):
-        if (page is None or room_number is None):
-            raise ValueError("Parameters cannot be none")
-        
+    def get_medical_room_page_number(self, page, room_number):
+        if page is None:
+            raise ValueError("Page parameter cannot be none")
+
         rooms = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
                 f"""
                 SELECT 
-                room_number, descriptiom
+                room_number, description
                 FROM medical_rooms 
                 WHERE
-                { "room_number = :room_number" if room_number is not None and room_number != '' else "0 = 1"} OR
+                { "room_number = :room_number" if room_number is not None and room_number != '' else "room_number != :room_number"} 
                 OFFSET :offset ROWS
                 FETCH NEXT :count ROWS ONLY
                 """,
                 offset=((page - 1)*20),
                 count=20,
-                room_number=room_number)
+                room_number=str(room_number))
             for row in results:
-                rooms.append(MedicalPatient(float(row[0],row[1])))
-            return rooms 
+                rooms.append(MedicalPatient(float(row[0]), row[1]))
+        return rooms
+
 
     def __get_cursor(self):
         for i in range(3):
