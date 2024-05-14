@@ -1,12 +1,16 @@
+from datetime import datetime
 from flask_login import current_user
 from flask_wtf import FlaskForm
-from wtforms import DateField, FloatField, MultipleFileField, SelectField, SelectMultipleField, FileField, StringField, IntegerField, EmailField, DateField, PasswordField, TextAreaField, SubmitField, RadioField, SelectField
+from wtforms import DateField, FloatField, MultipleFileField, SelectField, SelectMultipleField, FileField, StringField, IntegerField, EmailField, DateField, PasswordField, TextAreaField, SubmitField, RadioField, SelectField, ValidationError
 from wtforms.validators import DataRequired, Email, Length, EqualTo
 from flask_wtf.file import FileField, FileRequired
 
 
 from .db.dbmanager import get_db
 
+def check_date(self, field):
+        if len(field.data) > datetime.today():
+            raise ValidationError("You cannot book an appointment before today's date")
 
 class AppointmentResponseForm(FlaskForm):
     select_confirmation = RadioField('Acceptance:', choices=[(
@@ -40,14 +44,16 @@ class LoginForm(FlaskForm):
     email = EmailField('email')
     password = PasswordField('password')
 
-
 class AppointmentForm(FlaskForm):
-    patient = SelectField("Patient:", validators=[DataRequired()], choices=[])
+    patient = SelectField("Patient:", choices=[])
     doctor = SelectField("Doctor:", validators=[DataRequired()], choices=[])
     appointment_time = DateField(
-        "Appointment Time:", validators=[DataRequired()])
-    location = SelectField("Location:", validators=[DataRequired()])
+        "Appointment Time:", validators=[DataRequired()], render_kw={
+                                          'min': datetime.today()
+                                          })
+    location = SelectField("Location:")
     description = StringField("Description:", validators=[DataRequired()])
+
     
     def set_patients(self):
         patients = get_db().get_patients()
@@ -88,12 +94,13 @@ class NoteForm(FlaskForm):
             choices.append(
                 (patient.id, f"{patient.first_name} {patient.last_name}"))
         self.patient.choices = choices
-
+        
+class AddAttachementForm(FlaskForm):
+    attachement = MultipleFileField('Add an attachement')
 
 class BlockUserForm(FlaskForm):
     email = EmailField('User Email', validators=[DataRequired(), Email()])
     submit = SubmitField('Block User')
-
 
 class AddUserForm(FlaskForm):
     email = EmailField('Email', validators=[DataRequired(), Email()])
@@ -135,13 +142,25 @@ class ChangeUserRoleForm(FlaskForm):
 
 
 class PatientDetailsForm(FlaskForm):
-    dob = DateField('Date of Birth', validators=[DataRequired()])
+    dob = DateField('Date of Birth', validators=[DataRequired()], render_kw={
+                                          'max': datetime.today()
+                                          })
     blood_type = SelectField('Blood Type', choices=[('A+', 'A+'), ('A-', 'A-'), ('B+', 'B+'), (
         'B-', 'B-'), ('AB+', 'AB+'), ('AB-', 'AB-'), ('O+', 'O+'), ('O-', 'O-')], validators=[DataRequired()])
-    height = FloatField('Height (in cm)', validators=[DataRequired()])
-    weight = FloatField('Weight (in kg)', validators=[DataRequired()])
-    allergies = SelectMultipleField('Allergies', choices=[])
-
+    height = FloatField('Height (in cm)', validators=[DataRequired()], render_kw={
+                                          'min': 0
+                                          })
+    weight = FloatField('Weight (in kg)', validators=[DataRequired()], render_kw={
+                                          'min': 0
+                                          })
+    allergies = SelectMultipleField('Please enter all your allergies:', choices=[])
+    
+    def prefill(self):
+        patient = get_db().get_patients_by_id(current_user.id)
+        self.dob.data = patient.dob
+        self.blood_type.data = patient.blood_type
+        self.height.data = patient.height
+        self.weight.data = patient.weight
 
 class ChangePasswordForm(FlaskForm):
     current_password = PasswordField(

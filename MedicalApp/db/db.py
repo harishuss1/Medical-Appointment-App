@@ -159,7 +159,7 @@ class Database:
                 SELECT 
                 u.id, u.AVATAR_PATH, u.EMAIL, u.PASSWORD, u.FIRST_NAME, u.LAST_NAME, u.USER_TYPE
                 FROM medical_users u
-                WHERE u.user_type = 'STAFF'
+                WHERE u.user_type = 'STAFF' OR u.user_type = 'ADMIN'
                 """)
             for row in results:
                 doctors.append(User(row[2], row[3], row[4], row[5], row[6], 
@@ -548,6 +548,16 @@ class Database:
             for path in note.attachement_path:
                 cursor.execute('insert into medical_note_attachments (note_id, attachment_path)  values (:note_id, :attachement_path)',
                                note_id=note_id,
+                               attachement_path=str(path))
+                
+
+    def update_note(self, note, paths):
+        if not isinstance(note, Note):
+            raise TypeError("expected Note object")
+        with self.__get_cursor() as cursor:
+            for path in paths:
+                cursor.execute('insert into medical_note_attachments (note_id, attachment_path)  values (:note_id, :attachement_path)',
+                               note_id=note.id,
                                attachement_path=str(path))
 
     def create_user(self, user):
