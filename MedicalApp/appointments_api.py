@@ -54,6 +54,10 @@ def get_appointment_by_id_api(id):
                 # Check if the current user is a patient or a doctor
                 if current_user.access_level == 'PATIENT':
                     # Patient can only update appointment_time and description
+                    if hasattr(appointment.doctor, 'first_name'):
+                        target_appointment.doctor.first_name = appointment.doctor.first_name
+                    if hasattr(appointment.doctor, 'last_name'):
+                        target_appointment.doctor.last_name = appointment.doctor.last_name
                     target_appointment.appointment_time = appointment.appointment_time
                     target_appointment.description = appointment.description
                 elif current_user.access_level == 'STAFF':
