@@ -95,7 +95,6 @@ body, html {
     color: white;
     padding: 1em;
     bottom: 0;
-    width: 100%;
     height: 5%;
 }
 
@@ -161,9 +160,11 @@ input[type="text"], input[type="password"], input[type="email"] {
 
 .container {
     position: relative;
-    margin: 0 auto;
     padding: 20px;
-    height: 70%;
+    margin-left: 0;
+    margin-right: 0;
+    height: 100%;
+    width: auto;
     text-align: center;
 }
 
@@ -192,6 +193,68 @@ input[type="text"], input[type="password"], input[type="email"] {
     height: 100%;
     text-shadow: 0px 0px 10px #00c2cb, 0px 0px 20px #fff;
 }
+
+/* User Api Token Css */
+
+.api-token-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 20px;
+  overflow: scroll;
+  height: 400px;
+}
+
+.api-token {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: #f2f2f2;
+  border-radius: 5px;
+  width: 400px;
+}
+
+.api-token span {
+  flex: 1;
+  margin-right: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.generate-token,
+.remove-all-tokens {
+  margin-top: 20px;
+}
+
+.remove-button {
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.generate-button {
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+.remove-button:hover {
+  background-color: #d32f2f;
+}
+
+.generate-button:hover {
+    background-color: palegreen;
+  }
+
+
 
 main 
 {
