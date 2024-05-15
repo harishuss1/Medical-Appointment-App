@@ -2,6 +2,7 @@ from datetime import date
 import datetime
 import oracledb
 import os
+import secrets
 from flask import g
 
 from MedicalApp.allergy import Allergy
@@ -714,14 +715,26 @@ class Database:
 
     def create_user(self, user):
         if not isinstance(user, User):
-            raise TypeError("expected User object")
+            raise TypeError("Expected User object")
+
+        api_token = secrets.token_urlsafe(20)
+
         with self.__get_cursor() as cursor:
-            cursor.execute('insert into medical_users (email, password, first_name,last_name,user_type)  values (:email, :password, :first_name, :last_name, :user_type)',
-                           email=user.email,
-                           password=user.password,
-                           first_name=user.first_name,
-                           last_name=user.last_name,
-                           user_type=user.access_level)
+            cursor.execute('INSERT INTO medical_users (email, password, first_name, last_name, user_type)  VALUES (:email, :password, :first_name, :last_name, :user_type)',
+                        email=user.email,
+                        password=user.password,
+                        first_name=user.first_name,
+                        last_name=user.last_name,
+                        user_type=user.access_level)
+
+            cursor.execute('SELECT id FROM medical_users WHERE email = :email', {'email': user.email})
+            user_id = cursor.fetchone()[0]
+
+            cursor.execute('INSERT INTO medical_api_tokens (user_id, token) VALUES (:user_id, :api_token)',
+                        {'user_id': user_id, 'api_token': api_token})
+
+        self.__connection.commit()
+
 
     def update_user_password(self, user_id, new_password_hash):
         if (user_id is None or new_password_hash is None):
@@ -851,6 +864,36 @@ class Database:
             if row:
                 medical_room = MedicalRoom(row[0], row[1])
         return medical_room
+    
+    def store_api_token(self, user_id, token):
+        with self.__get_cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO medical_api_tokens (user_id, token) VALUES (:user_id, :token)",
+                user_id=user_id,
+                token=token
+            )
+
+    def get_user_api_tokens(self, user_id):
+        tokens = []
+        with self.__get_cursor() as cursor:
+            cursor.execute(
+                "SELECT token FROM medical_api_tokens WHERE user_id = :user_id",
+                user_id=user_id
+            )
+            results = cursor.fetchall()
+            for row in results:
+                tokens.append(row[0])
+        return tokens
+    
+    def delete_api_token(self, user_id, token):
+        with self.__get_cursor() as cursor:
+            cursor.execute("DELETE FROM medical_api_tokens WHERE user_id = :user_id AND token = :token", user_id=user_id, token=token)
+            self.__connection.commit()
+    
+    def delete_all_api_tokens(self, user_id):
+        with self.__get_cursor() as cursor:
+            cursor.execute("DELETE FROM medical_api_tokens WHERE user_id = :user_id", {'user_id': user_id})
+            self.__connection.commit()
 
     def __get_cursor(self):
         for i in range(3):
