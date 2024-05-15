@@ -27,38 +27,12 @@ class Appointments:
         description = data['description']
 
         return Appointments(data['id'], patient, doctor, appointment_time, status, location, description)
-    
-    def from_json(data):
-        if not isinstance(data, dict):
-            raise TypeError("Data must be a dictionary")
-
-        patient_data = data['patient']
-        doctor_data = data['doctor']
-
-        if not isinstance(patient_data, dict):
-            raise ValueError("Patient data must be a dictionary")
-
-        if not isinstance(doctor_data, dict):
-            raise ValueError("Doctor data must be a dictionary")
-
-        patient = MedicalPatient.from_json(patient_data)
-        doctor = User.from_json(doctor_data)
-
-        appointment_time = str(data['appointment_time'])
-        status = data['status']
-        location = data['location']
-        description = data['description']
-
-        return Appointments(data['id'], patient, doctor, appointment_time, status, location, description)
 
     def to_json(self):
             data = {}
             data['id']= str(self.id),
-            #waiting on patient tojson
             data['patient']= self.patient.to_json(),
-            #waiting on doctor tojson
-            #'doctor': self.doctor.to_json(),
-            #cast the appointment time to a string and represented it by Year-Month-Day
+            data['doctor']: self.doctor.to_json(),
             data['appointment_time']= str(self.appointment_time),
             data['status']= str(self.status),
             data['location']= str(self.location.to_json()),
