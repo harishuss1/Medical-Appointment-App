@@ -80,7 +80,9 @@ class NoteForm(FlaskForm):
 
     patient = SelectField('Patient', validators=[DataRequired()], choices=[])
     note = TextAreaField('Note', validators=[DataRequired()])
-    date = DateField('Date', validators=[DataRequired()])
+    date = DateField('Date', validators=[DataRequired()], render_kw={
+                                          'min' : datetime.utcnow().strftime("%Y-%m-%d")
+                                          })
     attachement = MultipleFileField('Attachement')
 
     def set_choices(self):

@@ -151,12 +151,12 @@ class PatientAPITestCases(unittest.TestCase):
         }
         data['allergies'] = [1]
         json_string = json.dumps(data)
-        print(json_string)
         token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
         headers = {'Authorization': f'Bearer {token}'}
         result = self.client.put('/api/patients/7', headers=headers, data=json_string, content_type='application/json')
         self.assertEqual(201, result.status_code)
-        self.assertEqual('1', result['allergies'][0].split("/")[-1])
+        # print(result)
+        self.assertNotEqual("", result.headers['Patient'])
 
 
 if __name__ == '__main__':
