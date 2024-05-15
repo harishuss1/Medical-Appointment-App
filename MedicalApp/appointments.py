@@ -31,8 +31,8 @@ class Appointments:
     def to_json(self):
             data = {}
             data['id']= str(self.id),
-            data['patient']= self.patient.to_json(),
-            data['doctor']: self.doctor.to_json(),
+            data['patient']= str(self.patient.to_json()),
+            #data['doctor']: str(self.doctor.to_json()),
             data['appointment_time']= str(self.appointment_time),
             data['status']= str(self.status),
             data['location']= str(self.location.to_json()),
