@@ -25,3 +25,40 @@ class Note:
         self.note_date = note_date
         self.note = note
         self.attachement_path = attachement_path
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'patient': self.patient.serialize(),
+            'note_taker': self.note_taker.serialize(),
+            'note_date': self.note_date.strftime('%Y-%m-%d'),
+            'note': self.note,
+            'attachement_path': self.attachement_path
+        }
+
+    @staticmethod
+    def from_json(data):
+        # Validate required fields
+        required_fields = ['patient_id', 'note_taker_id', 'note_date', 'note']
+        for field in required_fields:
+            if field not in data:
+                raise ValueError(f"Missing required field: {field}")
+
+        # Extract data
+        patient = MedicalPatient(data['patient_id'])
+        note_taker = User(data['note_taker_id'])
+        note_date = datetime.datetime.strptime(data['note_date'], '%Y-%m-%d').date()
+        note = data['note']
+        attachement_path = data.get('attachement_path', [])
+
+        return Note(patient, note_taker, note_date, note, attachement_path)
+
+
+    def update_from_json(self, data):
+        # Update note attributes from JSON data
+        if 'note_date' in data:
+            self.note_date = datetime.datetime.strptime(data['note_date'], '%Y-%m-%d').date()
+        if 'note' in data:
+            self.note = data['note']
+        if 'attachement_path' in data:
+            self.attachement_path = data.get('attachement_path', [])
