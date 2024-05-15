@@ -44,7 +44,6 @@ def dashboard():
 @patient_access
 def update_patient():
     form = PatientDetailsForm()
-    form.prefill()
     try:
         allergies = get_db().get_all_allergies()
         form.allergies.choices = [(Allergy['id'], Allergy['name'])
@@ -70,7 +69,7 @@ def update_patient():
     except ValueError as e: 
         flash("Incorrect values were passed")
         return redirect(url_for('home.index'))
-
+    form.prefill()
     return render_template('update_patient.html', form=form)
 
 
