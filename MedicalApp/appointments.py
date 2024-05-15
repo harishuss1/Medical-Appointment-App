@@ -55,10 +55,9 @@ class Appointments:
             data = {}
             data['id']= str(self.id),
             #waiting on patient tojson
-            data['patient']= self.patient.to_json(),
+            data['patient']= str(self.patient.to_json()),
             #waiting on doctor tojson
             #'doctor': self.doctor.to_json(),
-            #cast the appointment time to a string and represented it by Year-Month-Day
             data['appointment_time']= str(self.appointment_time),
             data['status']= str(self.status),
             data['location']= str(self.location.to_json()),

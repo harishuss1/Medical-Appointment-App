@@ -1,4 +1,4 @@
-from flask import Blueprint, Response, abort, jsonify, request
+from flask import Blueprint, Response, abort, jsonify, make_response, request
 from flask_login import current_user
 from MedicalApp.db.dbmanager import get_db
 from MedicalApp.appointments import Appointments
@@ -51,17 +51,21 @@ def get_appointment_by_id_api(id):
                 if target_appointment.id != appointment.id:
                     abort(500)
                 
-                # Check if the current user is a patient or a doctor
                 if current_user.access_level == 'PATIENT':
-                    # Patient can only update appointment_time and description
-                    if hasattr(appointment.doctor, 'first_name'):
-                        target_appointment.doctor.first_name = appointment.doctor.first_name
-                    if hasattr(appointment.doctor, 'last_name'):
-                        target_appointment.doctor.last_name = appointment.doctor.last_name
+                    doctor_id = appointment_json.get('doctor.id')
+
+                    if doctor_id is None:
+                        abort(make_response(jsonify(message="Doctor ID is required for update"), 400))
+
+                    doctor = get_db().get_doctor_by_id(doctor_id)
+
+                    if doctor is None:
+                        abort(make_response(jsonify(message=f"Doctor with ID {doctor_id} not found"), 404))
+                    
+                    target_appointment.doctor = doctor
                     target_appointment.appointment_time = appointment.appointment_time
                     target_appointment.description = appointment.description
                 elif current_user.access_level == 'STAFF':
-                    # Doctor can only update status and location
                     target_appointment.status = appointment.status
                     target_appointment.location = appointment.location
                 

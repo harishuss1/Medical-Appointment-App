@@ -649,12 +649,8 @@ class Database:
         return appointments
 
     def get_appointments_page_number(self, page, doctor_first_name, doctor_last_name, patient_first_name, patient_last_name):
-        if (page is None or 
-            doctor_first_name is None or doctor_first_name == '' or 
-            doctor_last_name is None or doctor_last_name == '' or 
-            patient_first_name is None or patient_first_name == '' or 
-            patient_last_name is None or patient_last_name == ''):
-            raise ValueError("Parameters cannot be None or empty")
+        if page is None: 
+            raise ValueError("Page parameter cannot be None or empty")
         
         appointments = []
         with self.__get_cursor() as cursor:
@@ -683,10 +679,10 @@ class Database:
             """,
                 offset=((page - 1) * 20),
                 count=20,
-                doctor_first_name=doctor_first_name,
-                doctor_last_name=doctor_last_name,
-                patient_first_name=patient_first_name,
-                patient_last_name=patient_last_name)
+                doctor_first_name=str(doctor_first_name),
+                doctor_last_name=str(doctor_last_name),
+                patient_first_name=str(patient_first_name),
+                patient_last_name=str(patient_last_name))
             for row in results:
                 doctor = User(row[8], row[9], row[10], row[11],
                             row[12], avatar_path=row[13], id=int(row[7]))
