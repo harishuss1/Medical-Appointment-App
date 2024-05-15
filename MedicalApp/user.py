@@ -35,7 +35,7 @@ class User(UserMixin):
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
 
-    def to_json(self):
+    def to_json(self,prepended_url=None):
         data = {}
         data['id'] = str(self.id)
         data['email'] = str(self.email)

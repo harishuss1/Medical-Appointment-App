@@ -220,6 +220,13 @@ class Database:
     def get_doctors_page_number(self, page, first_name, last_name):
         if (page is None):
             raise ValueError("Parameters cannot be none")
+        if (first_name is not None and not isinstance(first_name, str) or last_name is not None and not isinstance(last_name, str)):
+            raise TypeError("Parameters of incorrect type")
+        
+        try:
+            page = int(page)
+        except:
+            raise TypeError("Parameters of incorrect type")
         
         doctors = []
         with self.__get_cursor() as cursor:
@@ -229,21 +236,21 @@ class Database:
                 u.id, u.AVATAR_PATH, u.EMAIL, u.PASSWORD, u.FIRST_NAME, u.LAST_NAME, u.USER_TYPE
                 FROM medical_users u
                 WHERE
-                u.USER_TYPE = 'DOCTOR' AND
-                ({ "first_name = :first_name" if first_name is not None and first_name != '' else ":first_name != :first_name"} OR
-                { "last_name = :last_name" if last_name is not None and last_name != '' else ":last_name != :last_name"})
+                u.USER_TYPE = 'STAFF' AND
+                (:first_name IS NULL OR first_name = :first_name) AND
+                (:last_name IS NULL OR last_name = :last_name)
                 OFFSET :offset ROWS
                 FETCH NEXT :count ROWS ONLY
                 """,
                 offset=((page - 1)*20),
                 count=20,
-                first_name=first_name,
-                last_name=last_name)
+                first_name=str(first_name) if first_name else None,
+                last_name=str(last_name) if last_name else None)
             for row in results:
                 doctors.append(User(row[2], row[3], row[4], row[5], row[6], avatar_path=row[1], id=int(row[0])))
         return doctors
 
-    def get_doctors_by_id(self, id):
+    def get_doctor_by_id(self, id):
         if (id is None):
             raise ValueError("ID cannot be none")
         
@@ -255,7 +262,7 @@ class Database:
                 u.id, u.AVATAR_PATH, u.EMAIL, u.PASSWORD, u.FIRST_NAME, u.LAST_NAME, u.USER_TYPE
                 FROM medical_users u
                 WHERE
-                u.USER_TYPE = 'DOCTOR' AND
+                u.USER_TYPE = 'STAFF' AND
                 u.id = :id
                 """,
                 id=id)
