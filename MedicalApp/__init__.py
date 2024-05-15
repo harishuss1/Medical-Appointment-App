@@ -40,6 +40,16 @@ def init_app(app):
     def load_user(user_id):
         user = get_db().get_user_by_id(user_id)
         return user
+    
+    #API logic:
+    @login_manager.request_loader
+    def request_loader(request): #special obj flask gives that represents everything in the request
+        api_key = request.headers.get('Authorization')
+        user = None
+        if api_key:
+            api_key = api_key.split(' ')[1]
+            user = get_db().get_user_by_token(api_key)
+        return user
 
     # REGISTER BLUEPRINTS HERE
     from .admin_view import admin_bp

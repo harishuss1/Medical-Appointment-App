@@ -348,6 +348,24 @@ class Database:
                     row[0], row[1], row[2], row[3], row[4], avatar_path=row[5], id=int(row[6]))
         return (patient)
     
+    def get_user_by_token(self, token):
+        if (not isinstance(token, str)):
+            raise TypeError("Parameters of incorrect type")
+        user = None
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                """SELECT email, password, first_name, 
+                last_name, user_type, avatar_path, id
+                FROM medical_users INNER JOIN medical_api_tokens
+                ON id = user_id
+                WHERE token = :token""",
+                                     token=token)
+            row = results.fetchone()
+            if row:
+                user = User(
+                    row[0], row[1], row[2], row[3], row[4], avatar_path=row[5], id=int(row[6]))
+        return (user)
+    
     def get_users_and_roles(self):
         users = []
         with self.__get_cursor() as cursor:

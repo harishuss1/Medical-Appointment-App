@@ -10,8 +10,27 @@ import urllib.parse
 
 bp = Blueprint('patient_api', __name__, url_prefix="/api/patients")
 
+def patient_access(func):
+    def wrapper(*args, **kwargs):
+        if current_user.access_level != 'PATIENT' and current_user.access_level != 'STAFF' and current_user.access_level != 'ADMIN' and current_user.access_level != 'ADMIN_USER':
+            return abort(401, "You do not have access to this page!")
+        return func(*args, **kwargs)
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+def login_required(func):
+    def wrapper(*args, **kwargs):
+        if not current_user.is_authenticated:
+            return abort(401, "You do not have access to this page!")
+        return func(*args, **kwargs)
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+
 # supports first= last= and page=. page defaults to 1 if none is specified
 @bp.route('', methods=['GET'])
+@login_required
+@patient_access
 def get_patients():
     patients = []
     page = None
@@ -60,6 +79,8 @@ def get_patients():
 
 #{ allergies: [] } -> list of allergy ids : return 201 when successful
 @bp.route('/<int:patient_id>', methods=['GET', 'PUT'])
+@login_required
+@patient_access
 def get_patient(patient_id):
     patient = None
     try:
