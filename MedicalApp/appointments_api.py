@@ -2,11 +2,18 @@ import datetime
 from flask import Blueprint, Response, abort, jsonify, make_response, request
 from flask_login import current_user
 from oracledb import DatabaseError, IntegrityError
-from MedicalApp.db.dbmanager import get_db
+from .db.dbmanager import get_db
 from MedicalApp.appointments import Appointments
 
 bp = Blueprint('appointments_api', __name__, url_prefix='/api/appointments/')
 
+def login_required(func):
+    def wrapper(*args, **kwargs):
+        if not current_user.is_authenticated:
+            return abort(401, "You do not have access to this page!")
+        return func(*args, **kwargs)
+    wrapper.__name__ = func.__name__
+    return wrapper
 
 @bp.route('', methods=['GET', 'POST'])
 def get_appointments_api():
@@ -48,6 +55,7 @@ def get_appointments_api():
 
 
 @bp.route('/<int:id>', methods=['GET', 'PUT', 'DELETE'])
+@login_required
 def get_appointment_by_id_api(id):
     appointment = get_db().get_appointment_by_id(id)
     if request.method == 'GET':
@@ -105,13 +113,16 @@ def get_appointment_by_id_api(id):
                         except:
                             abort(make_response(jsonify(id="400", description='Invalid status has been provided'), 400))
                     if 'location' in appointment_json:
-                        appointment.location = appointment_json['location']
+                        location = get_db().get_medical_room_by_room_number(appointment_json['location'])
+                        if location is None:
+                            abort(make_response(jsonify(id="404", description='The room you have provided do not exist'), 404))
+                        appointment.location = location
                 get_db().update_appointment(appointment)
                 return jsonify(message="Appointment updated successfully"), 200
             except IntegrityError as e:
                 abort(make_response(jsonify(id="400", description='The allergie(s) you have provided do not exist'), 400))
-            except DatabaseError as e:
-                abort(make_response(jsonify(id="409", description='Something went wrong with our database'), 409))
+            # except DatabaseError as e:
+            #     abort(make_response(jsonify(id="409", description='Something went wrong with our database'), 409))
             except TypeError as e:
                 abort(make_response(jsonify(id="400", description="The data sent is of incorrect type"), 400))
             except ValueError as e:

@@ -6,7 +6,6 @@ import unittest
 from flask import jsonify
 from flask_login import current_user, login_user
 from MedicalApp import create_app
-from MedicalApp.db.dbmanager import get_db
 from MedicalApp.user import MedicalPatient
 
 

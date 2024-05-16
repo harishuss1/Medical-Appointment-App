@@ -3,7 +3,7 @@ from flask import Blueprint, current_app, flash, redirect, render_template, requ
 from flask_login import current_user, login_user, login_required, logout_user
 from oracledb import DatabaseError, IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
-from MedicalApp.db.dbmanager import get_db
+from .db.dbmanager import get_db
 from MedicalApp.forms import AvatarForm, LoginForm, SignupForm, ChangePasswordForm
 from MedicalApp.user import User
 

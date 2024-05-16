@@ -1,15 +1,10 @@
-import datetime
-
-import oracledb
-from MedicalApp.appointments_views import update_appointment
-from MedicalApp.medical_room import MedicalRoom
-import datetime
-from MedicalApp.allergy import Allergy
-from MedicalApp.medical_room import MedicalRoom
-from ..user import User, MedicalPatient
-from oracledb import IntegrityError
+import datetime 
+import oracledb 
+from MedicalApp.allergy import Allergy 
+from MedicalApp.medical_room import MedicalRoom 
+from ..user import User, MedicalPatient 
+from oracledb import IntegrityError 
 from ..appointments import Appointments
-
 
 class FakeDB:
 
