@@ -100,7 +100,7 @@ def get_appointments_api():
         else:
             abort(400)
 
-    appointments = get_db().get_appointments_page_number(page, doctor_first_name, doctor_last_name, patient_first_name, patient_last_name)
+    appointments = get_db().get_appointments() #.get_appointments_page_number(page, doctor_first_name, doctor_last_name, patient_first_name, patient_last_name)
     
     data = {}
     data['results'] = []
