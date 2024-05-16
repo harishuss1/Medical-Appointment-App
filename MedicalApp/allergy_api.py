@@ -1,46 +1,105 @@
 import json
-from flask import Blueprint, jsonify, request, render_template, redirect, url_for, flash, abort
+from flask import Blueprint, jsonify, make_response, request, render_template, redirect, url_for, flash, abort
 from flask_login import login_required, current_user
 from oracledb import DatabaseError
 from MedicalApp.allergy import Allergy
 from MedicalApp.forms import PatientDetailsForm
 from MedicalApp.user import MedicalPatient
 from .db.dbmanager import get_db
+import urllib.parse
 
-bp = Blueprint('allergy_api', __name__, url_prefix="/api/allergies/")
+bp = Blueprint('allergy_api', __name__, url_prefix="/api/allergies")
 
-@bp.route('/', methods=['GET'])
+def login_required(func):
+    def wrapper(*args, **kwargs):
+        if not current_user.is_authenticated:
+            return abort(401, "You do not have access to this page!")
+        return func(*args, **kwargs)
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+def patient_access(func):
+    def wrapper(*args, **kwargs):
+        if current_user.access_level != 'PATIENT' and current_user.access_level != 'STAFF' and current_user.access_level != 'ADMIN' and current_user.access_level != 'ADMIN_USER':
+            return abort(403, "You do not have access to this page!")
+        return func(*args, **kwargs)
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+
+@bp.route('', methods=['GET'])
+@login_required
+@patient_access
 def get_allergies():
     allergies = []
-    if request.args:
-        page = int(request.args.get("page"))
-        name = str(request.args.get("name"))
+    page = None
+    try:
+        if request.args:
+            page = request.args.get("page")
+            if page is None:
+                page = 1
+            try:
+                page = int(page) 
+            except:
+                abort(make_response(jsonify(id="400", description="The page number is of incorrect type"), 400))
+            
+            name = request.args.get("name")
 
-        if page is None or not isinstance(page, int):
-            page = 1
-
-        if name is not None and not isinstance(name, str):
-            abort("Query parameters incorrect")
-        try:
+            if name is not None and not isinstance(name, str):
+                abort(make_response(
+                jsonify(id="400", description=f"The allergy name is of incorrect type."), 400))
+            
             allergies = get_db().get_allergies_page_number(page, name)
-        except DatabaseError as e:
-            abort(409)
-        except TypeError as e:
-            abort(400, "The data sent is of incorrect type")
-        except ValueError as e:
-            abort(400, "The data sent cannot be empty")
 
-    else:
-        try:
-            patients = get_db().get_patients()
-        except DatabaseError as e:
-            abort(409)
+        else:
+            page = 1
+            allergies = get_db().get_allergies_page_number(page, None)
 
-    if patients is None or len(patients) == 0:
-        abort(404)
+    except DatabaseError as e:
+        abort(make_response(
+            jsonify(id="409", description="Something went wrong with our database"), 409))
+    except TypeError as e:
+        abort(make_response(
+            jsonify(id="400", description="The data sent is of incorrect type"), 400))
+    except ValueError as e:
+        abort(make_response(
+            jsonify(id="400", description="The data sent cannot be empty"), 400))
+
+    if allergies is None or len(allergies) == 0:
+        abort(make_response(jsonify(
+            id="404", description=f"There are currently no allergies in the database"), 404))
+
     data = {}
+    count = len(get_db().get_all_allergies())
+    data['count'] = count
+    data['previous'] = urllib.parse.urljoin(request.url_root, url_for('allergy_api.get_allergies', page=(page-1))) if page > 1 else ""
+    data['next'] = urllib.parse.urljoin(request.url_root, url_for('allergy_api.get_allergies', page=(page+1))) if count%10 !=0 and len(allergies) >= 10 else ""
     data['results'] = []
-    for patient in patients:
-        data['results'].append(patient.to_json())
+    for allergy in allergies:
+        data['results'].append(allergy.to_json())
 
     return jsonify(data)
+
+@bp.route('/<int:allergy_id>', methods=['GET'])
+@login_required
+@patient_access
+def get_allergy(allergy_id):
+    allergy = None
+    try:
+        allergy = get_db().get_allergy_by_id(allergy_id)
+        if allergy == None:
+            abort(make_response(
+                jsonify(id="404", description=f"The allergy id {allergy_id}"), 404))
+
+        allergy_json = allergy.to_json()
+        return jsonify(allergy_json)
+
+    except DatabaseError as e:
+        abort(make_response(
+            jsonify(id="409", description="Something went wrong with our database"), 409))
+    except TypeError as e:
+        abort(make_response(
+            jsonify(id="400", description="The data sent is of incorrect type"), 400))
+    except ValueError as e:
+        abort(make_response(
+            jsonify(id="400", description="The data sent cannot be empty"), 400))

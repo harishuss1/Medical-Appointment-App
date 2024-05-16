@@ -4,9 +4,9 @@ from flask_wtf import FlaskForm
 from wtforms import DateField, FloatField, MultipleFileField, SelectField, SelectMultipleField, FileField, StringField, IntegerField, EmailField, DateField, PasswordField, TextAreaField, SubmitField, RadioField, SelectField, ValidationError
 from wtforms.validators import DataRequired, Email, Length, EqualTo
 from flask_wtf.file import FileField, FileRequired
-
-
 from .db.dbmanager import get_db
+
+
 
 def check_date(self, field):
         if len(field.data) > datetime.today():
@@ -84,7 +84,9 @@ class NoteForm(FlaskForm):
 
     patient = SelectField('Patient', validators=[DataRequired()], choices=[])
     note = TextAreaField('Note', validators=[DataRequired()])
-    date = DateField('Date', validators=[DataRequired()])
+    date = DateField('Date', validators=[DataRequired()], render_kw={
+                                          'min' : datetime.utcnow().strftime("%Y-%m-%d")
+                                          })
     attachement = MultipleFileField('Attachement')
 
     def set_choices(self):
