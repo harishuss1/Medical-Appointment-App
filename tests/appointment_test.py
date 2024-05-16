@@ -17,9 +17,8 @@ class AppointmentsTestCases(unittest.TestCase):
     def tearDown(self):
         self.ctx.pop()
 
-
     def test_create_appointment_successful(self):
-        patient = MedicalPatient("test1", "test1", "PATIENT", datetime.date(2001, 1, 1), "O", 170.0, 70.0)
+        patient = MedicalPatient(70.0, "patient@example.com", "test1", "Patient", datetime.date(2001, 1, 1), "A+", 170.0, access_level="PATIENT")
         doctor = User("doctor@doctor.com", "password", "Dr. Smith", "Smith", "STAFF")
         room = MedicalRoom("101", "Room 101")
         appointment_time = datetime.datetime.now()
@@ -32,6 +31,7 @@ class AppointmentsTestCases(unittest.TestCase):
         self.assertEqual("Regular checkup", appointment.description)
         self.assertEqual(1, appointment.id)
 
+
     def test_create_appointment_bad_patient(self):
         with self.assertRaises(ValueError):
             doctor = User("doctor@doctor.com", "password", "Dr. Smith", "Smith", "STAFF")
@@ -41,21 +41,21 @@ class AppointmentsTestCases(unittest.TestCase):
 
     def test_create_appointment_bad_doctor(self):
         with self.assertRaises(ValueError):
-            patient = MedicalPatient("test1", "test1", "PATIENT", datetime.date(2001, 1, 1), "O", 170.0, 70.0)
+            patient = MedicalPatient(70.0, "patient@example.com", "test1", "Patient", "PATIENT", datetime.date(2001, 1, 1), "A+", 170.0, 170.0)
             room = MedicalRoom("101", "Room 101")
             appointment_time = datetime.datetime.now()
             Appointments(patient, "doctor", appointment_time, 0, room, "Regular checkup", 1)
 
     def test_create_appointment_bad_appointment_time(self):
         with self.assertRaises(ValueError):
-            patient = MedicalPatient("test1", "test1", "PATIENT", datetime.date(2001, 1, 1), "O", 170.0, 70.0)
+            patient = MedicalPatient(70.0, "patient@example.com", "test1", "Patient", "PATIENT", datetime.date(2001, 1, 1), "A+", 170.0, 170.0)
             doctor = User("doctor@doctor.com", "password", "Dr. Smith", "Smith", "STAFF")
             room = MedicalRoom("101", "Room 101")
             Appointments(patient, doctor, "invalid_date", 0, room, "Regular checkup", 1)
 
     def test_create_appointment_bad_status(self):
         with self.assertRaises(ValueError):
-            patient = MedicalPatient("test1", "test1", "PATIENT", datetime.date(2001, 1, 1), "O", 170.0, 70.0)
+            patient = MedicalPatient(70.0, "patient@example.com", "test1", "Patient", "PATIENT", datetime.date(2001, 1, 1), "A+", 170.0, 170.0)
             doctor = User("doctor@doctor.com", "password", "Dr. Smith", "Smith", "STAFF")
             room = MedicalRoom("101", "Room 101")
             appointment_time = datetime.datetime.now()
@@ -63,14 +63,14 @@ class AppointmentsTestCases(unittest.TestCase):
 
     def test_create_appointment_bad_location(self):
         with self.assertRaises(ValueError):
-            patient = MedicalPatient("test1", "test1", "PATIENT", datetime.date(2001, 1, 1), "O", 170.0, 70.0)
+            patient = MedicalPatient(70.0, "patient@example.com", "test1", "Patient", "PATIENT", datetime.date(2001, 1, 1), "A+", 170.0, 170.0)
             doctor = User("doctor@doctor.com", "password", "Dr. Smith", "Smith", "STAFF")
             appointment_time = datetime.datetime.now()
             Appointments(patient, doctor, appointment_time, 0, "Room 101", "Regular checkup", 1)
 
     def test_create_appointment_bad_description(self):
         with self.assertRaises(ValueError):
-            patient = MedicalPatient("test1", "test1", "PATIENT", datetime.date(2001, 1, 1), "O", 170.0, 70.0)
+            patient = MedicalPatient(70.0, "patient@example.com", "test1", "Patient", "PATIENT", datetime.date(2001, 1, 1), "A+", 170.0, 170.0)
             doctor = User("doctor@doctor.com", "password", "Dr. Smith", "Smith", "STAFF")
             room = MedicalRoom("101", "Room 101")
             appointment_time = datetime.datetime.now()
@@ -78,12 +78,11 @@ class AppointmentsTestCases(unittest.TestCase):
 
     def test_create_appointment_bad_id(self):
         with self.assertRaises(ValueError):
-            patient = MedicalPatient("test1", "test1", "PATIENT", datetime.date(2001, 1, 1), "O", 170.0, 70.0)
+            patient = MedicalPatient(70.0, "patient@example.com", "test1", "Patient", "PATIENT", datetime.date(2001, 1, 1), "A+", 170.0, 170.0)
             doctor = User("doctor@doctor.com", "password", "Dr. Smith", "Smith", "STAFF")
             room = MedicalRoom("101", "Room 101")
             appointment_time = datetime.datetime.now()
             Appointments(patient, doctor, appointment_time, 0, room, "Regular checkup", "1")
-
 
 if __name__ == '__main__':
     unittest.main()
