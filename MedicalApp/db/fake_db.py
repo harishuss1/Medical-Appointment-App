@@ -37,6 +37,17 @@ class FakeDB:
             MedicalRoom("104", "Test4"),
             MedicalRoom("105", "Test5"),
         ]
+        
+    def add_medical_room(self, room_number, description):
+        if (room_number is None or description is None):
+            raise ValueError("Parameters cannot be none")
+        if room_number is not None and not isinstance(room_number, str) or description is not None and not isinstance(description, str) :
+            raise TypeError("Parameters of incorrect type")
+        for room in self.rooms:
+            if room_number == room.room_number:
+                raise IntegrityError()
+
+        self.rooms.append(MedicalRoom(room_number, description))
 
     def get_user_by_token(self, token):
         if (not isinstance(token, str)):

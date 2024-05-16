@@ -1,7 +1,7 @@
 import json
 from flask import Blueprint, jsonify, make_response, request, render_template, redirect, url_for, flash, abort
 from flask_login import login_required, current_user
-from oracledb import DatabaseError
+from oracledb import DatabaseError, IntegrityError
 from MedicalApp.allergy import Allergy
 from MedicalApp.forms import PatientDetailsForm
 from MedicalApp.user import MedicalPatient
@@ -9,7 +9,7 @@ from .db.dbmanager import get_db
 
 bp = Blueprint('medical_rooms_api', __name__, url_prefix="/api/medical_rooms/")
 
-@bp.route('/', methods=['GET'])
+@bp.route('/', methods=['GET', 'POST'])
 def get_medical_rooms():
     medical_rooms = []
     if request.args:
@@ -32,7 +32,25 @@ def get_medical_rooms():
             abort(400, "The data sent is of incorrect type")
         except ValueError as e:
             abort(400, "The data sent cannot be empty")
-
+            
+    elif request.method == 'POST':
+        json_data = request.json
+        try:
+            room_number = json_data['room_number']
+            description = json_data['description']
+        except:
+                abort(make_response(jsonify(id="400", description=f"No roomonnumber or description parameter found."), 400))
+        try:
+            get_db().add_medical_room(room_number, description)
+        except IntegrityError as e:
+            abort(make_response(jsonify(id="409", description='The room you have provided already exists'), 400))
+        except DatabaseError as e:
+            abort(make_response(jsonify(id="409", description='Something went wrong with our database'), 409))
+        except TypeError as e:
+            abort(make_response(jsonify(id="400", description="The data sent is of incorrect type"), 400))
+        except ValueError as e:
+            abort(make_response(jsonify(id="400", description="The data sent cannot be empty"), 400))
+        
     else:
         try:
             medical_rooms = get_db().get_medical_rooms()

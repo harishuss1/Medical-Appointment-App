@@ -440,6 +440,16 @@ class Database:
                                                      row[3], int(row[4]), location, str(row[6]), id=row[0]))
         return appointments
     
+    def add_medical_room(self, room_number, description):
+        if (room_number is None or description is None):
+            raise ValueError("Parameters cannot be none")
+        if room_number is not None and not isinstance(room_number, str) or description is not None and not isinstance(description, str) :
+            raise TypeError("Parameters of incorrect type")
+        
+        with self.__get_cursor() as cursor:
+            cursor.execute("INSERT INTO medical_rooms VALUES(:room_number, :description)",
+                           room_number=room_number, description=description)
+    
     def update_allergies(self, patient_id, allergy_ids):
         if (patient_id is None or allergy_ids is None):
             raise ValueError("Parameters cannot be none")
