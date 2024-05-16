@@ -29,16 +29,16 @@ class FakeDB:
         self.users.append(User("blocked@example.com", "scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68", "Blocked", "User", "BLOCKED", tokens=[self.tokens[3]], id=10))
         self.appointments = [
              Appointments(
-                patient=MedicalPatient("test1"),
-                doctor=User("test1d"),
+                patient=self.patients[0],
+                doctor=self.users[3],
                 appointment_time=datetime.datetime.now(),
                 status=0,
                 location=MedicalRoom("101", "Room 101"),
                 description="Regular checkup"
             ),
             Appointments(
-                patient=MedicalPatient("test2"),
-                doctor=User("test2d"),
+                patient=self.patients[0],
+                doctor=self.users[3],
                 appointment_time=datetime.datetime.now(),
                 status=0,
                 location=MedicalRoom("102", "Room 102"),
