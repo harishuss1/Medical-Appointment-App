@@ -87,7 +87,7 @@ class MedicalPatientTestCases(unittest.TestCase):
             med_patient = MedicalPatient(150, "patient@patient.com", "1234567", "Bob", "Nash", 12345, datetime.date(1968, 5, 17), "A+", 180, avatar_path="/instance/1/bob.png")
         self.assertRaises(ValueError, create_patient)
         
-    def test_createpatient_badaccesslevel(self):
+    def test_createpatient_noneaccesslevel(self):
         def create_patient():
             med_patient = MedicalPatient(150, "patient@patient.com", "1234567", "Bob", "Nash", None, datetime.date(1968, 5, 17), "A+", 180, avatar_path="/instance/1/bob.png")
         self.assertRaises(ValueError, create_patient)
@@ -97,7 +97,7 @@ class MedicalPatientTestCases(unittest.TestCase):
             med_patient = MedicalPatient(150, "patient@patient.com", "1234567", "Bob", "Nash", "PATIENT", "date.datetime(1968, 5, 17)", "A+", 180, avatar_path="/instance/1/bob.png")
         self.assertRaises(ValueError, create_patient)
         
-    def test_createpatient_baddate(self):
+    def test_createpatient_nonedate(self):
         def create_patient():
             med_patient = MedicalPatient(150, "patient@patient.com", "1234567", "Bob", "Nash", "PATIENT", None, "A+", 180, avatar_path="/instance/1/bob.png")
         self.assertRaises(ValueError, create_patient)
@@ -107,7 +107,7 @@ class MedicalPatientTestCases(unittest.TestCase):
             med_patient = MedicalPatient(150, "patient@patient.com", "1234567", "Bob", "Nash", "PATIENT", datetime.date(1968, 5, 17), 1820, 180, avatar_path="/instance/1/bob.png")
         self.assertRaises(ValueError, create_patient)
         
-    def test_createpatient_badbloodtype(self):
+    def test_createpatient_nonebloodtype(self):
         def create_patient():
             med_patient = MedicalPatient(150, "patient@patient.com", "1234567", "Bob", "Nash", "PATIENT", datetime.date(1968, 5, 17), None, 180, avatar_path="/instance/1/bob.png")
         self.assertRaises(ValueError, create_patient)
@@ -131,3 +131,6 @@ class MedicalPatientTestCases(unittest.TestCase):
         def create_patient():
             med_patient = MedicalPatient(150, "patient@patient.com", "1234567", "Bob", "Nash", "PATIENT", datetime.date(1968, 5, 17), "A+", None, avatar_path="/instance/1/bob.png")
         self.assertRaises(ValueError, create_patient)
+        
+if __name__ == '__main__':
+    unittest.main()

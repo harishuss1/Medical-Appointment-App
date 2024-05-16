@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, current_app, flash, redirect, render_template, request, send_from_directory, url_for
+from flask import Blueprint, current_app, flash, redirect, render_template, request, send_from_directory, url_for, jsonify
 from flask_login import current_user, login_user, login_required, logout_user
 from oracledb import DatabaseError, IntegrityError
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -67,9 +67,14 @@ def logout():
     return redirect(url_for('auth.login'))
 
 
-@bp.route('/profile/', methods=['GET', 'POST'])
+@bp.route('/profile/')
 @login_required
 def profile():
+    return render_template("profile.html", current_user=current_user)
+
+@bp.route('/profile/changeavatar', methods=['GET', 'POST'] )
+@login_required
+def changeavatar():
     form = AvatarForm()
 
     if request.method == 'POST' and form.validate_on_submit():
@@ -99,8 +104,8 @@ def profile():
                 return redirect(url_for('home.index'))
         else:
             flash("No file was submitted.", "error")
-    return render_template("profile.html", form=form, current_user=current_user)
 
+    return render_template("change_avatar.html", form=form, current_user=current_user)
 
 @bp.route('/profile/changepassword', methods=['GET', 'POST'])
 @login_required
@@ -123,7 +128,7 @@ def changepassword():
                 flash("Something went wrong with the database")
         except ValueError as e: 
             flash("Incorrect values were passed")
-    return render_template("profile.html", form=form, current_user=current_user)
+    return render_template("change_password.html", form=form, current_user=current_user)
 
 
 @bp.route('/profile/<email>/<filename>')
@@ -131,8 +136,48 @@ def changepassword():
 def get_avatar(email, filename):
     return send_from_directory(os.path.join(current_app.config['IMAGES'], email), filename)
 
-@bp.route('/profile/userApiToken/', methods=['GET'])
+@bp.route('/profile/generate_api_tokens', methods=['POST'])
+@login_required
+def generate_api_tokens():
+    user_id = current_user.id
+    num_tokens = int(request.form.get('num_tokens'))  # Get the number of tokens from the form data
+    db = get_db()
+    
+    for _ in range(num_tokens):
+        token = secrets.token_urlsafe(20)
+        db.store_api_token(user_id, token)
+    
+    flash(f"{num_tokens} new API tokens have been generated and stored.", "success")
+    return redirect(url_for('auth.user_api_token'))
+
+
+@bp.route('/profile/userApiToken', methods=['GET'])
 @login_required
 def user_api_token():
-    api_token = secrets.token_urlsafe(20)
-    return render_template('user_api_token.html', api_token=api_token)
+    db = get_db()
+    user_id = current_user.id
+    api_tokens = db.get_user_api_tokens(user_id)
+    return render_template('user_api_token.html', api_tokens=api_tokens)
+
+@bp.route('/profile/remove_api_token/<token>', methods=['POST'])
+@login_required
+def remove_api_token(token):
+    db = get_db()
+    try:
+        db.delete_api_token(current_user.id, token)
+        flash("API token removed successfully.", "success")
+    except Exception as e:
+        flash("Error removing API token.", "error")
+    return redirect(url_for('auth.user_api_token'))
+
+@bp.route('/profile/remove_all_api_tokens', methods=['POST'])
+@login_required
+def remove_all_api_tokens():
+    try:
+        db = get_db()
+        db.delete_all_api_tokens(current_user.id)
+        flash("All API tokens have been removed.", "success")
+    except Exception as e:
+        flash("An error occurred while removing API tokens.", "error")
+        print("Error removing API tokens:", e)
+    return redirect(url_for('auth.user_api_token'))

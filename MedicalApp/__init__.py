@@ -18,7 +18,7 @@ def create_app(test_config=None):
     )
 
     app.config['IMAGES'] = os.path.join(app.instance_path, "IMAGES")
-    
+
     os.makedirs(app.instance_path, exist_ok=True)
     os.makedirs(app.config['IMAGES'], exist_ok=True)
 
@@ -48,15 +48,18 @@ def init_app(app):
     from .auth_views import bp as login_bp
     app.register_blueprint(login_bp)
 
-    from .doctor_view import bp as doctor_bp
-    app.register_blueprint(doctor_bp)
+    from .doctor_view import bp as doctor_view_bp
+    app.register_blueprint(doctor_view_bp)
 
     from .home_view import bp as home_bp
     app.register_blueprint(home_bp)
-    
-    from .patient_api import bp as patient_bp
-    app.register_blueprint(patient_bp)
-    
+
+    from .patient_api import bp as patient_api_bp
+    app.register_blueprint(patient_api_bp)
+
+    from .doctor_api import bp as doctor_api_bp
+    app.register_blueprint(doctor_api_bp)
+
     from .allergy_api import bp as allergy_bp
     app.register_blueprint(allergy_bp)
 
@@ -71,7 +74,7 @@ def init_app(app):
 
     from .patients_views import bp as patient_bp
     app.register_blueprint(patient_bp)
-    
+
     from .user_views import bp as user_bp
     app.register_blueprint(user_bp)
 
