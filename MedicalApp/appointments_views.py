@@ -40,10 +40,12 @@ def book_appointment():
     form.set_patients()
     form.set_doctors()
     form.set_rooms()
-    if current_user.access_level == 'PATIENT' or current_user.access_level == 'ADMIN_USER':
+    user = 'doctor'
+    if current_user.access_level == 'PATIENT':
         if get_db().get_patients_by_id(current_user.id) is None:
             flash("Please update your patient details before booking an appointment")
             return redirect(url_for('patient.update_patient'))
+        user = 'patient'
         form.patient.data = str(current_user.id)
         form.patient.render_kw = {'disabled' : ''} 
         form.location.data = '101'
@@ -64,9 +66,7 @@ def book_appointment():
 
             new_id = get_db().add_appointment(new_appointment)
             flash("Appointement added to the List of Appointments")
-
-            return redirect(
-                url_for('appointments.get_appointment', id=new_id))
+            return redirect(url_for(f"{user}.dashboard"))
         except DatabaseError as e:
             flash("something went wrong with the database")
             return redirect('home.index')
@@ -77,6 +77,8 @@ def book_appointment():
 @login_required
 @patient_access
 def get_appointment(id):
+    form = AppointmentResponseForm()
+    form.set_choices()
     try:
         db = get_db()
         appointment = db.get_appointment_by_id(id)
@@ -86,7 +88,7 @@ def get_appointment(id):
     if appointment is None:
         flash("Appointment cannot be found", 'error')
         return redirect(url_for('appointments.book_appointment'))
-    return render_template('specific_appointment.html', appointment=appointment)
+    return render_template('specific_appointment.html', appointment=appointment, form=form)
 
 
 @bp.route('/confirmed/<string:user_type>/')
