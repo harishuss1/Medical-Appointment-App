@@ -1,5 +1,5 @@
 import datetime
-from flask import Blueprint, Response, abort, jsonify, make_response, request
+from flask import Blueprint, Response, abort, jsonify, make_response, redirect, request, url_for
 from flask_login import current_user
 from oracledb import DatabaseError, IntegrityError
 from .db.dbmanager import get_db
@@ -18,9 +18,67 @@ def login_required(func):
 @bp.route('', methods=['GET', 'POST'])
 def get_appointments_api():
     if request.method == 'POST':
-        appointment = Appointments.from_json(request.json)
-        get_db().add_appointment(appointment)
-        return jsonify(message="Appointment added successfully"), 201
+        appointment_json = request.json
+        try:
+            if ('doctor' not in appointment_json and 'appointment_time' not in appointment_json and 'description' not in appointment_json):
+                    abort(make_response(jsonify(id="400", description='You have not provided the correct fields to update'), 400))
+            try:
+                doctor_id = int(appointment_json['doctor_id'])
+                doctor = get_db().get_user_by_id(doctor_id)
+                if doctor is None:
+                    abort(make_response(jsonify(id="404", description='Doctor does not exist'), 404))
+                if doctor.access_level != 'STAFF' and doctor.access_level != 'ADMIN':
+                    abort(make_response(jsonify(id="400", description='User provided is not a doctor'), 400))
+            except:
+                abort(make_response(jsonify(id="400", description='Incorrect type for doctor id'), 400))
+            time = appointment_json['appointment_time']
+            try:
+                datetime_object = datetime.strptime(time, '%Y-%m-%d')
+            except:
+                abort(make_response(jsonify(id="400", description='Date provided is invalid. use YYYY-MM-DD format.'), 400))
+            description = appointment_json['description']
+
+            if current_user.access_level == 'PATIENT':
+                appointment = Appointments(current_user, doctor, datetime_object, 0, '101', description) #default room location of 101
+
+            elif current_user.access_level == 'STAFF' or current_user.access_level == 'ADMIN':
+                if ('patient' not in appointment_json and 'location' not in appointment_json):
+                    abort(make_response(jsonify(id="400", description='You have not provided the correct fields to update'), 400))
+                try:
+                    patient_id = int(appointment_json['patient_id'])
+                    patient = get_db().get_user_by_id(patient_id)
+                    if patient is None:
+                        abort(make_response(jsonify(id="404", description='Doctor does not exist'), 404))
+                except:
+                    abort(make_response(jsonify(id="400", description='Incorrect type for doctor id'), 400))
+
+                location = get_db().get_medical_room_by_room_number(appointment_json['location'])
+                if location is None:
+                    abort(make_response(jsonify(id="404", description='The room you have provided do not exist'), 404))
+                appointment.location = location
+                
+                if current_user.id == doctor.id:
+                    status = 1
+                else:
+                    status = 0
+                appointment = Appointments(patient, doctor, datetime_object, status, location, description)
+                
+
+            id = get_db().add_appointment(appointment)
+            appointment = get_db().get_appointment_by_id(id)
+            # return redirect(url_for('get_appointment_by_id_api', id=id))
+
+        except DatabaseError as e:
+            abort(make_response(jsonify(id="409", description='Something went wrong with our database'), 409))
+        except TypeError as e:
+            abort(make_response(jsonify(id="400", description="The data sent is of incorrect type"), 400))
+        except ValueError as e:
+            abort(make_response(jsonify(id="400", description="The data sent cannot be empty"), 400))
+        except Exception as e:
+            abort(make_response(jsonify(id="400", description="You have not given us all parameters necessary. Please review your request."), 400))
+        
+        appointment_json = appointment.to_json()
+        return jsonify(message="Appointment added successfully", appointment=appointment_json), 201
 
     if request.args:
         page = int(request.args.get("page", 1))
@@ -42,16 +100,15 @@ def get_appointments_api():
         else:
             abort(400)
 
-    appointments = get_db().get_appointments()
-    json_appointments = [{
-        "id": appointment.id,
-        "patient": appointment.patient.to_json(()),
-        "doctor": appointment.doctor.to_json(),
-        "appointment_time": appointment.appointment_time.isoformat(),
-        "location": appointment.location.to_json(),
-        "description": appointment.description
-    } for appointment in appointments]
-    return jsonify(json_appointments)
+    appointments = get_db().get_appointments_page_number(page, doctor_first_name, doctor_last_name, patient_first_name, patient_last_name)
+    
+    data = {}
+    data['results'] = []
+    
+    for appointment in appointments:
+        json = appointment.to_json()
+        data['results'].append(json)
+    return jsonify(data)
 
 
 @bp.route('/<int:id>', methods=['GET', 'PUT', 'DELETE'])
@@ -88,6 +145,7 @@ def get_appointment_by_id_api(id):
                                 abort(make_response(jsonify(id="404", description='Doctor does not exist'), 404))
                             if doctor.access_level != 'STAFF' and doctor.access_level != 'ADMIN':
                                 abort(make_response(jsonify(id="400", description='User provided is not a doctor'), 400))
+                            appointment.doctor = doctor
                         except:
                             abort(make_response(jsonify(id="400", description='Incorrect type for doctor id'), 400))
                     if 'time' in appointment_json:
@@ -121,8 +179,8 @@ def get_appointment_by_id_api(id):
                 return jsonify(message="Appointment updated successfully"), 200
             except IntegrityError as e:
                 abort(make_response(jsonify(id="400", description='The allergie(s) you have provided do not exist'), 400))
-            # except DatabaseError as e:
-            #     abort(make_response(jsonify(id="409", description='Something went wrong with our database'), 409))
+            except DatabaseError as e:
+                abort(make_response(jsonify(id="409", description='Something went wrong with our database'), 409))
             except TypeError as e:
                 abort(make_response(jsonify(id="400", description="The data sent is of incorrect type"), 400))
             except ValueError as e:
