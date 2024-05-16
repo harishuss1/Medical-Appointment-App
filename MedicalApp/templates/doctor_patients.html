@@ -19,8 +19,10 @@
             </tr>
         </thead>
         {% for patient in patients %}
-            <td>{{ patient }}</td>
-            <td>{{ patient.email }}</td>
+            <tr>
+                <td>{{ patient }}</td>
+                <td>{{ patient.email }}</td>
+            </tr>
         {% endfor %}
     </table>
 {% endblock content %}

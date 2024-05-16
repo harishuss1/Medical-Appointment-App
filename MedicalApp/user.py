@@ -1,7 +1,10 @@
 import datetime
 import json
+import os
+from flask import url_for
 from flask_login import UserMixin
 from MedicalApp.allergy import Allergy
+import urllib.parse
 
 
 class User(UserMixin):
@@ -32,6 +35,18 @@ class User(UserMixin):
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
 
+    def to_json(self,prepended_url=None):
+        data = {}
+        data['id'] = str(self.id)
+        data['email'] = str(self.email)
+        data['password'] = str(self.password)
+        data['first_name'] = str(self.first_name)
+        data['last_name'] = str(self.last_name)
+        data['access_level'] = str(self.access_level)
+        data['avatar_path'] = str(
+            self.avatar_path) if self.avatar_path else None
+        return data
+
 
 class MedicalPatient(User):
     def __init__(self, weight, email, password, first_name, last_name, access_level, dob, blood_type, height, allergies=None, avatar_path=None, id=None):
@@ -56,7 +71,7 @@ class MedicalPatient(User):
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
     
-    def to_json(self):
+    def to_json(self, prepended_url):
         data = {}
         data['id'] = str(self.id)
         data['avatar_path'] = str(self.avatar_path)
