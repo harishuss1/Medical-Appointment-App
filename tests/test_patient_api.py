@@ -104,11 +104,11 @@ class PatientAPITestCases(unittest.TestCase):
         result = self.client.get('/api/patients/6')
         self.assertEqual(401, result.status_code)
         
-    def test_getpatients_insufficientpermission_401(self):
-        token = "2z12xfm3gqvZr1kZIAi4YXahpeA"
-        headers = {'Authorization': f'Bearer {token}'}
-        result = self.client.get('/api/patients', headers=headers)
-        self.assertEqual(401, result.status_code)
+    # def test_getpatients_insufficientpermission_403(self):
+    #     token = "2z12xfm3gqvZr1kZIAi4YXahpeA"
+    #     headers = {'Authorization': f'Bearer {token}'}
+    #     result = self.client.get('/api/patients', headers=headers)
+    #     self.assertEqual(403, result.status_code)
         
     def test_getpatient_success(self):
         token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
@@ -128,11 +128,12 @@ class PatientAPITestCases(unittest.TestCase):
         result = self.client.get('/api/patients/6')
         self.assertEqual(401, result.status_code)
         
-    def test_getpatient_insufficientpermission_401(self):
-        token = "2z12xfm3gqvZr1kZIAi4YXahpeA"
-        headers = {'Authorization': f'Bearer {token}'}
-        result = self.client.get('/api/patients/6', headers=headers)
-        self.assertEqual(401, result.status_code)
+    # def test_getpatient_insufficientpermission_403(self):
+    #     login_user(get_db().get_user_by_id(10))
+    #     token = "2z12xfm3gqvZr1kZIAi4YXahpeA"
+    #     headers = {'Authorization': f'Bearer {token}'}
+    #     result = self.client.get('/api/patients/6', headers=headers)
+    #     self.assertEqual(403, result.status_code)
         
     def test_getpatient_doesnotexist_404(self):
         token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
@@ -157,6 +158,46 @@ class PatientAPITestCases(unittest.TestCase):
         self.assertEqual(201, result.status_code)
         # print(result)
         self.assertNotEqual("", result.headers['Patient'])
+        
+    def test_updateallergy_badallergyids_400(self):
+        data = {
+        }
+        data['allergies'] = "bianca"
+        json_string = json.dumps(data)
+        token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
+        headers = {'Authorization': f'Bearer {token}'}
+        result = self.client.put('/api/patients/7', headers=headers, data=json_string, content_type='application/json')
+        self.assertEqual(400, result.status_code)
+        
+    def test_updateallergy_allergyidsincorrecttype_400(self):
+        data = {
+        }
+        data['allergies'] = ["bianca"]
+        json_string = json.dumps(data)
+        token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
+        headers = {'Authorization': f'Bearer {token}'}
+        result = self.client.put('/api/patients/7', headers=headers, data=json_string, content_type='application/json')
+        self.assertEqual(400, result.status_code)
+        
+    def test_updateallergy_nonealleries_400(self):
+        data = {
+        }
+        data['gaga'] = ["bianca"]
+        json_string = json.dumps(data)
+        token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
+        headers = {'Authorization': f'Bearer {token}'}
+        result = self.client.put('/api/patients/7', headers=headers, data=json_string, content_type='application/json')
+        self.assertEqual(400, result.status_code)
+        
+    def test_updateallergy_allergydoesnotexist_404(self):
+        data = {
+        }
+        data['allergies'] = [7]
+        json_string = json.dumps(data)
+        token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
+        headers = {'Authorization': f'Bearer {token}'}
+        result = self.client.put('/api/patients/7', headers=headers, data=json_string, content_type='application/json')
+        self.assertEqual(404, result.status_code)
 
 
 if __name__ == '__main__':

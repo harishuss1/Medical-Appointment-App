@@ -11,7 +11,7 @@ class FakeDB:
 
     def __init__(self):
         self.allergies = [Allergy(1, "Peanuts", "Allergic reaction to peanuts causing hives and swelling."), Allergy(
-            2, "Penicillin", "Allergic reaction to penicillin causing difficulty breathing and rash.")]
+            2, "Penicillin", "Allergic reaction to penicillin causing difficulty breathing and rash."), Allergy(3, "Blueberries", "Allergic reaction to blueberries causing hives and swelling.")]
         self.tokens = ["km9b5-UeGr3SDy6PszxFZRRvqiE",
                        "mIzbZLyEzNKW7SP5NAx9eUHUq_w", "tF1fG-t-R5hu3USXZcDIlKvIwXI", "ErU49l4Du_LEvsV1AgU9SIllZ1g", "2z12xfm3gqvZr1kZIAi4YXahpeA"]
         self.patients = []
@@ -36,6 +36,19 @@ class FakeDB:
 
         for user in self.users:
             if (token in user.tokens):
+                return user
+        return None
+    
+    def get_user_by_id(self, id):
+        if (id is None):
+            raise ValueError("Parameters cannot be None")
+        try:
+            id = int(id)
+        except:
+            raise TypeError("Parameters of incorrect type")
+        
+        for user in self.users:
+            if (id == user.id):
                 return user
         return None
 
@@ -111,6 +124,31 @@ class FakeDB:
         patient = self.get_patients_by_id(patient_id)
         patient.allergies = new_allergies
 
+    def get_allergies_page_number(self, page, name):
+        if (page is None):
+            raise ValueError("Parameters cannot be none")
+        if (name is not None and not isinstance(name, str)):
+            raise TypeError("Parameters of incorrect type")
+
+        try:
+            page = int(page)
+        except:
+            raise TypeError("Parameters of incorrect type")
+
+        allergies = []
+        offset = ((page - 1)*2)
+        count = 2
+        
+        end = count+offset if count+offset <= len(self.allergies) else len(self.allergies)
+
+        for i in range(offset, end):
+            allergy = self.allergies[i]
+            if name is None:
+                allergies.append(allergy)
+            if name is not None and allergy.name == name:
+                allergies.append(allergy)
+        return allergies
+    
     def get_patients_page_number(self, page, first_name, last_name):
         if (page is None):
             raise ValueError("Parameters cannot be none")

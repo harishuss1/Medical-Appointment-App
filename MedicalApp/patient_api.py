@@ -10,18 +10,18 @@ import urllib.parse
 
 bp = Blueprint('patient_api', __name__, url_prefix="/api/patients")
 
-def patient_access(func):
+def login_required(func):
     def wrapper(*args, **kwargs):
-        if current_user.access_level != 'PATIENT' and current_user.access_level != 'STAFF' and current_user.access_level != 'ADMIN' and current_user.access_level != 'ADMIN_USER':
+        if not current_user.is_authenticated:
             return abort(401, "You do not have access to this page!")
         return func(*args, **kwargs)
     wrapper.__name__ = func.__name__
     return wrapper
 
-def login_required(func):
+def patient_access(func):
     def wrapper(*args, **kwargs):
-        if not current_user.is_authenticated:
-            return abort(401, "You do not have access to this page!")
+        if current_user.access_level != 'PATIENT' and current_user.access_level != 'STAFF' and current_user.access_level != 'ADMIN' and current_user.access_level != 'ADMIN_USER':
+            return abort(403, "You do not have access to this page!")
         return func(*args, **kwargs)
     wrapper.__name__ = func.__name__
     return wrapper
@@ -87,10 +87,15 @@ def get_patient(patient_id):
         patient = get_db().get_patients_by_id(patient_id)
         if patient == None:
             abort(make_response(jsonify(id="404", description="The patient you are trying to query does not exist"), 404))
-        
+
         if request.method == 'PUT':
             json_data = request.json
             allergy_ids = []
+            try:
+                json_data['allergies']
+            except:
+                abort(make_response(jsonify(id="400", description=f"No allergies parameter found."), 400))
+
             for allergy in json_data['allergies']:
                 allergy_id = None
                 try:
@@ -102,9 +107,9 @@ def get_patient(patient_id):
                     abort(make_response(jsonify(id="404", description=f"The allergy id {allergy_id} does not exist."), 404))
                 if allergy not in patient.allergies:
                     allergy_ids.append(allergy_id)
-                    
+
             get_db().update_allergies(patient_id, allergy_ids)
-            
+
             resp = make_response({}, 201)
             resp.headers['Patient'] = url_for('patient_api.get_patient', patient_id=patient_id)
             return resp
