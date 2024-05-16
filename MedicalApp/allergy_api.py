@@ -10,8 +10,26 @@ import urllib.parse
 
 bp = Blueprint('allergy_api', __name__, url_prefix="/api/allergies")
 
+def login_required(func):
+    def wrapper(*args, **kwargs):
+        if not current_user.is_authenticated:
+            return abort(401, "You do not have access to this page!")
+        return func(*args, **kwargs)
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+def patient_access(func):
+    def wrapper(*args, **kwargs):
+        if current_user.access_level != 'PATIENT' and current_user.access_level != 'STAFF' and current_user.access_level != 'ADMIN' and current_user.access_level != 'ADMIN_USER':
+            return abort(403, "You do not have access to this page!")
+        return func(*args, **kwargs)
+    wrapper.__name__ = func.__name__
+    return wrapper
+
 
 @bp.route('', methods=['GET'])
+@login_required
+@patient_access
 def get_allergies():
     allergies = []
     page = None
@@ -62,8 +80,9 @@ def get_allergies():
 
     return jsonify(data)
 
-
 @bp.route('/<int:allergy_id>', methods=['GET'])
+@login_required
+@patient_access
 def get_allergy(allergy_id):
     allergy = None
     try:

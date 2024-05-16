@@ -1,4 +1,6 @@
 class MedicalRoom:
+
+
     def __init__(self,room_number, description):
         if not isinstance(room_number, str):
             raise ValueError("Room Number must be a string")
@@ -9,3 +11,9 @@ class MedicalRoom:
 
     def __str__(self):
         return f"Room Number: {self.room_number}, Description: {self.description}"
+
+    def to_json(self):
+        data = {}
+        data['room_number'] = str(self.room_number)
+        data['description'] = str(self.description)
+        return data
