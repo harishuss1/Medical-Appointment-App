@@ -27,42 +27,17 @@ class Appointments:
         description = data['description']
 
         return Appointments(data['id'], patient, doctor, appointment_time, status, location, description)
-    
-    def from_json(data):
-        if not isinstance(data, dict):
-            raise TypeError("Data must be a dictionary")
-
-        patient_data = data['patient']
-        doctor_data = data['doctor']
-
-        if not isinstance(patient_data, dict):
-            raise ValueError("Patient data must be a dictionary")
-
-        if not isinstance(doctor_data, dict):
-            raise ValueError("Doctor data must be a dictionary")
-
-        patient = MedicalPatient.from_json(patient_data)
-        doctor = User.from_json(doctor_data)
-
-        appointment_time = str(data['appointment_time'])
-        status = data['status']
-        location = data['location']
-        description = data['description']
-
-        return Appointments(data['id'], patient, doctor, appointment_time, status, location, description)
 
     def to_json(self):
-            data = {}
-            data['id']= str(self.id),
-            #waiting on patient tojson
-            data['patient']= str(self.patient.to_json()),
-            #waiting on doctor tojson
-            #data['doctor']: str(self.doctor.to_json()),
-            data['appointment_time']= str(self.appointment_time),
-            data['status']= str(self.status),
-            data['location']= str(self.location.to_json()),
-            data['description']= str(self.description)
-            return data
+        data = {}
+        data['id'] = str(self.id)
+        data['patient'] = str(self.patient.to_json(prepended_url=None))  
+        data['doctor'] = str(self.doctor.to_json(prepended_url=None)) 
+        data['appointment_time'] = str(self.appointment_time)
+        data['status'] = str(self.status)
+        data['location'] = self.location.to_json()  
+        data['description'] = str(self.description)
+        return data
     
     def __init__(self, patient, doctor, appointment_time, status, location, description, id=None):
         if id != None and not isinstance(id, int):
