@@ -2,6 +2,7 @@ import datetime
 
 import oracledb
 from MedicalApp.allergy import Allergy
+from MedicalApp.medical_room import MedicalRoom
 from ..user import User, MedicalPatient
 from oracledb import IntegrityError
 from ..appointments import Appointments
@@ -29,6 +30,13 @@ class FakeDB:
         self.users.append(User("bobby@example.com", "scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68", "Bobby", "Nash", "DOCTOR", tokens=[self.tokens[3]], id=9))
         self.users.append(User("blocked@example.com", "scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68", "Blocked", "User", "BLOCKED", tokens=[self.tokens[3]], id=10))
         self.appointments = []
+        self.rooms = [
+            MedicalRoom("101", "Test1"),
+            MedicalRoom("102", "Test2"),
+            MedicalRoom("103", "Test3"),
+            MedicalRoom("104", "Test4"),
+            MedicalRoom("105", "Test5"),
+        ]
 
     def get_user_by_token(self, token):
         if (not isinstance(token, str)):
@@ -189,6 +197,23 @@ class FakeDB:
             if p.id == patient_id:
                 patient = p
         return patient
+    def get_medical_rooms(self):
+        return self.rooms
+
+    def get_medical_room_by_room_number(self, room_number):
+        for room in self.rooms:
+            if room.room_number == room_number:
+                return room
+        return None
+
+    def get_medical_room_page_number(self, page, room_number):
+        if room_number:
+            return [room for room in self.rooms if room.room_number == room_number]
+        else:
+            start_index = (page - 1) * 20
+            end_index = min(start_index + 20, len(self.rooms))
+            return self.rooms[start_index:end_index]
+
 
     def run_file(self, file_path):
         pass

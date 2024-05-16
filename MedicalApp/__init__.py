@@ -73,6 +73,9 @@ def init_app(app):
     from .appointments_views import bp as appointments_bp
     app.register_blueprint(appointments_bp)
 
+    from .appointments_api import bp as appointments_api_bp
+    app.register_blueprint(appointments_api_bp)
+
     from .note_views import bp as notes_bp
     app.register_blueprint(notes_bp)
 
@@ -84,6 +87,9 @@ def init_app(app):
 
     from .medical_rooms_view import bp as medical_rooms_bp
     app.register_blueprint(medical_rooms_bp)
+
+    from .medical_room_api import bp as room_bp
+    app.register_blueprint(room_bp)
 
     app.teardown_appcontext(close_db)
 

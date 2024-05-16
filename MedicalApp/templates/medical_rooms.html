@@ -1,8 +1,26 @@
 {% extends "base.html" %}
+{% block nav %}
+    {% set user = "patient" %}
+    {% if current_user.access_level == 'STAFF' %}
+        {% set user = "doctor" %}
+        <li><a href="{{ url_for('doctor.dashboard') }}">Dashboard</a></li>
+        <li><a href="{{ url_for('doctor.patients') }}">See all patients</a></li>
+        <li><a href="{{ url_for('note.notes', user_id=current_user.id) }}">See all notes</a></li>
+    {% else %}
+        <li><a href="{{ url_for('patient.dashboard') }}">Dashboard</a></li>
+    {% endif %}
+    <li><a href="{{ url_for('appointments.book_appointment') }}">Book an appointment</a></li>
+    <li><a href="{{ url_for('patient.update_patient') }}">Update Details</a></li>
+    <li><a href="{{ url_for('patient.view_patient') }}">View Details</a></li>
+    <li><a href="{{ url_for('appointments.confirmed_appointments', user_type=user) }}">See all confirmed appointments</a></li>
+    <li><a href="{{ url_for('appointments.requested_appointments', user_type=user) }}">See appointment requests</a></li>
+    <li><a href="{{ url_for('medical_rooms.get_medical_rooms') }}">Medical Rooms</a></li>
+{% endblock nav %}
 {% block content %}
 <ul>
     {% for medical_room in medicalrooms %}
     <li><a href="{{ url_for('medical_rooms.get_medical_room', room_number=medical_room.room_number) }}">{{ medical_room }}</a></li>
     {% endfor %}
 </ul>
+
 {% endblock content %}

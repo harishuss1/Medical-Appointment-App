@@ -27,22 +27,19 @@ class Appointments:
         description = data['description']
 
         return Appointments(data['id'], patient, doctor, appointment_time, status, location, description)
-    
-    def to_json(self):
-        return {
-            'id': self.id,
-            ##waiting on patient tojson
-            'patient': self.patient.to_json(),
-            ##waiting on doctor tojson
-            'doctor': self.doctor.to_json(),
-            ##cast the appointment time to a string and represented it by Year-Month-Day
-            'appointment_time': str(self.appointment_time),
-            'status': self.status,
-            'location': self.location,
-            'description': self.description
-        }
 
-    def __init__(self, patient, doctor, appointment_time, status, location=None, description=None, id=None):
+    def to_json(self):
+            data = {}
+            data['id']= str(self.id),
+            data['patient']= str(self.patient.to_json()),
+            #data['doctor']: str(self.doctor.to_json()),
+            data['appointment_time']= str(self.appointment_time),
+            data['status']= str(self.status),
+            data['location']= str(self.location.to_json()),
+            data['description']= str(self.description)
+            return data
+    
+    def __init__(self, patient, doctor, appointment_time, status, location, description, id=None):
         if id != None and not isinstance(id, int):
             raise ValueError('Illegal type for patient id')
         self.id = id
@@ -63,11 +60,11 @@ class Appointments:
             raise ValueError('Illegal value for status')
         self.status = status
 
-        if location != None and not isinstance(location, MedicalRoom):
+        if not isinstance(location, MedicalRoom):
             raise ValueError('Illegal type for location')
         self.location = location
 
-        if description != None and not isinstance(description, str):
+        if not isinstance(description, str):
             raise ValueError('Illegal type for description')
         self.description = description
 
