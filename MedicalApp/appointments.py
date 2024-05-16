@@ -57,7 +57,7 @@ class Appointments:
             #waiting on patient tojson
             data['patient']= str(self.patient.to_json()),
             #waiting on doctor tojson
-            #'doctor': self.doctor.to_json(),
+            #data['doctor']: str(self.doctor.to_json()),
             data['appointment_time']= str(self.appointment_time),
             data['status']= str(self.status),
             data['location']= str(self.location.to_json()),
