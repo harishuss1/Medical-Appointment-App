@@ -44,7 +44,7 @@
                 {% if current_user.access_level != 'PATIENT' %}
                     <li><a href="{{ url_for('doctor.dashboard') }}">Doctor Dashboard</a></li>
                 {% endif %}
-                {% if current_user.access_level != 'PATIENT' and current_user.access_level != 'DOCTOR' %}
+                {% if current_user.access_level != 'PATIENT' and current_user.access_level != 'STAFF' %}
                     <li><a href="{{ url_for('admin.admin_dashboard') }}">Admin Dashboard</a></li>
                 {% endif %}
                 {% if current_user.access_level == 'ADMIN' %}
