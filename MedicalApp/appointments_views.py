@@ -25,13 +25,6 @@ def doctor_access(func):
     wrapper.__name__ = func.__name__
     return wrapper
 
-@bp.route('/')
-@login_required
-@patient_access
-def view_appointments():
-    appointments = get_db().get_patient_appointments(current_user.id)
-    return render_template('patient_appointments.html', appointments=appointments)
-
 @bp.route('/book/', methods=['GET', 'POST'])
 @login_required
 @patient_access

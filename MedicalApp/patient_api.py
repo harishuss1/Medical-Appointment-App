@@ -114,7 +114,7 @@ def get_patient(patient_id):
             resp.headers['Patient'] = url_for('patient_api.get_patient', patient_id=patient_id)
             return resp
     except IntegrityError as e:
-        abort(make_response(jsonify(id="409", description='The allergie(s) you have provided do not exist'), 400))
+        abort(make_response(jsonify(id="400", description='The allergie(s) you have provided do not exist'), 400))
     except DatabaseError as e:
         abort(make_response(jsonify(id="409", description='Something went wrong with our database'), 409))
     except TypeError as e:
