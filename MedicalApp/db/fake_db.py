@@ -138,6 +138,7 @@ class FakeDB:
         doctors = [doctor for doctor in self.users if (first_name is None or doctor.first_name == first_name) and (
             last_name is None or doctor.last_name == last_name)]
         return doctors[(page-1)*20: page*20]
+    
     def get_medical_rooms(self):
         return self.rooms
 
