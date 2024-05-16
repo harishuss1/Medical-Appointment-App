@@ -13,25 +13,37 @@ def get_appointments_api():
     if request.method == 'POST':
         appointment = Appointments.from_json(request.json)
         get_db().add_appointment(appointment)
+        return jsonify(message="Appointment added successfully"), 201
 
     if request.args:
-        page = int(request.args.get("page"))
+        page = int(request.args.get("page", 1))
         id = request.args.get("id")
-
-        if page is None or not isinstance(page, int):
-            page = 1
 
         if id:
             appointment = get_db().get_appointment_by_id(id)
             if appointment:
-                return jsonify(appointment.__dict__)
+                return jsonify({
+                    "id": appointment.id,
+                    "patient": appointment.patient.to_json(),
+                    "doctor": appointment.doctor.to_json(),
+                    "appointment_time": appointment.appointment_time.isoformat(),
+                    "location": appointment.location.to_json(),
+                    "description": appointment.description
+                })
             else:
                 abort(404)
         else:
             abort(400)
 
     appointments = get_db().get_appointments()
-    json_appointments = [x.__dict__ for x in appointments]
+    json_appointments = [{
+        "id": appointment.id,
+        "patient": appointment.patient.to_json(()),
+        "doctor": appointment.doctor.to_json(),
+        "appointment_time": appointment.appointment_time.isoformat(),
+        "location": appointment.location.to_json(),
+        "description": appointment.description
+    } for appointment in appointments]
     return jsonify(json_appointments)
 
 
@@ -40,7 +52,11 @@ def get_appointment_by_id_api(id):
     appointment = get_db().get_appointment_by_id(id)
     if request.method == 'GET':
         try:
-            return jsonify(appointment.to_json())
+            appointment = get_db().get_appointment_by_id(id)
+            if appointment:
+                return jsonify(appointment.to_dict())
+            else:
+                abort(404)
         except Exception:
             abort(500)
     
@@ -108,4 +124,3 @@ def get_appointment_by_id_api(id):
             return jsonify(message="Appointment deleted successfully"), 200
         except Exception:
             abort(500)
-

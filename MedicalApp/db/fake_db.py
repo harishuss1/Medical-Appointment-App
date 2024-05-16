@@ -1,6 +1,9 @@
 import datetime
 
 import oracledb
+from MedicalApp.appointments_views import update_appointment
+from MedicalApp.medical_room import MedicalRoom
+import datetime
 from MedicalApp.allergy import Allergy
 from MedicalApp.medical_room import MedicalRoom
 from ..user import User, MedicalPatient
@@ -29,7 +32,24 @@ class FakeDB:
         self.users.append(User("eddie@example.com", "scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68", "Eddie", "Diaz", "PATIENT", tokens=[self.tokens[2]], id=8))
         self.users.append(User("bobby@example.com", "scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68", "Bobby", "Nash", "DOCTOR", tokens=[self.tokens[3]], id=9))
         self.users.append(User("blocked@example.com", "scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68", "Blocked", "User", "BLOCKED", tokens=[self.tokens[3]], id=10))
-        self.appointments = []
+        self.appointments = [
+             Appointments(
+                patient=MedicalPatient("test1"),
+                doctor=User("test1d"),
+                appointment_time=datetime.datetime.now(),
+                status=0,
+                location=MedicalRoom("101", "Room 101"),
+                description="Regular checkup"
+            ),
+            Appointments(
+                patient=MedicalPatient("test2"),
+                doctor=User("test2d"),
+                appointment_time=datetime.datetime.now(),
+                status=0,
+                location=MedicalRoom("102", "Room 102"),
+                description="Dental appointment"
+            )
+        ]
         self.rooms = [
             MedicalRoom("101", "Test1"),
             MedicalRoom("102", "Test2"),
@@ -91,6 +111,39 @@ class FakeDB:
         if not isinstance(appointment, Appointments):
             raise TypeError("Invalid appointment type")
         self.appointments.append(appointment)
+
+    def update_appointment(self, appointment):
+        updated_appointments = [
+            appointment if appt.id == appointment.id else appt
+            for appt in self.appointments
+        ]
+        if len(updated_appointments) == len(self.appointments):
+            raise ValueError("Appointment not found")
+        self.appointments = updated_appointments
+
+    def delete_appointment_by_id(self, appointment_id):
+        self.appointments = [
+            appointment for appointment in self.appointments if appointment.id != appointment_id
+        ]
+        if len(self.appointments) == len(update_appointment):
+            raise ValueError("Appointment not found")
+
+    def get_medical_rooms(self):
+        return self.rooms
+
+    def get_medical_room_by_room_number(self, room_number):
+        for room in self.rooms:
+            if room.room_number == room_number:
+                return room
+        return None
+
+    def get_medical_room_page_number(self, page, room_number):
+        if room_number:
+            return [room for room in self.rooms if room.room_number == room_number]
+        else:
+            start_index = (page - 1) * 20
+            end_index = min(start_index + 20, len(self.rooms))
+            return self.rooms[start_index:end_index]
 
     def get_all_allergies(self):
         return self.allergies
@@ -225,6 +278,35 @@ class FakeDB:
             end_index = min(start_index + 20, len(self.rooms))
             return self.rooms[start_index:end_index]
 
+
+    def get_doctors(self):
+        doctors = [user for user in self.users if user.access_level in [
+            'STAFF', 'ADMIN']]
+        return doctors
+
+    def get_doctor_by_id(self, id):
+        if id is None:
+            raise ValueError("ID cannot be none")
+
+        for doctor in self.users:
+            if doctor.id == id:
+                return doctor
+        return None
+
+    def get_doctors_page_number(self, page, first_name, last_name):
+        if page is None:
+            raise ValueError("Parameters cannot be none")
+        if (first_name is not None and not isinstance(first_name, str)) or (last_name is not None and not isinstance(last_name, str)):
+            raise TypeError("Parameters of incorrect type")
+
+        try:
+            page = int(page)
+        except:
+            raise TypeError("Parameters of incorrect type")
+
+        doctors = [doctor for doctor in self.users if (first_name is None or doctor.first_name == first_name) and (
+            last_name is None or doctor.last_name == last_name)]
+        return doctors[(page-1)*20: page*20]
 
     def run_file(self, file_path):
         pass
