@@ -4,6 +4,7 @@ from flask_login import current_user
 from oracledb import DatabaseError, IntegrityError
 from .db.dbmanager import get_db
 from MedicalApp.appointments import Appointments
+from datetime import datetime
 
 bp = Blueprint('appointments_api', __name__, url_prefix='/api/appointments/')
 
@@ -20,7 +21,7 @@ def get_appointments_api():
     if request.method == 'POST':
         appointment_json = request.json
         try:
-            if ('doctor' not in appointment_json and 'appointment_time' not in appointment_json and 'description' not in appointment_json):
+            if ('doctor_id' not in appointment_json and 'appointment_time' not in appointment_json and 'description' not in appointment_json):
                     abort(make_response(jsonify(id="400", description='You have not provided the correct fields to update'), 400))
             try:
                 doctor_id = int(appointment_json['doctor_id'])
@@ -134,10 +135,10 @@ def get_appointment_by_id_api(id):
             try:
                 # Check if the current user is a patient or a doctor
                 if current_user.access_level == 'PATIENT':
-                    if ('doctor' not in appointment_json and 'appointment_time' not in appointment_json and 'description' not in appointment_json):
+                    if ('doctor_id' not in appointment_json and 'appointment_time' not in appointment_json and 'description' not in appointment_json):
                         abort(make_response(jsonify(id="400", description='You have not provided the correct fields to update'), 400))
                     # Patient can only update appointment_time and description
-                    if 'doctor' in appointment_json:
+                    if 'doctor_id' in appointment_json:
                         try:
                             doctor_id = int(appointment_json['doctor_id'])
                             doctor = get_db().get_user_by_id(doctor_id)
@@ -148,10 +149,10 @@ def get_appointment_by_id_api(id):
                             appointment.doctor = doctor
                         except:
                             abort(make_response(jsonify(id="400", description='Incorrect type for doctor id'), 400))
-                    if 'time' in appointment_json:
+                    if 'appointment_time' in appointment_json:
                         time = appointment_json['appointment_time']
                         try:
-                            datetime_object = datetime.strptime(time, '%Y-%m-%d')
+                            datetime_object = datetime.strptime(time, "%Y-%m-%d")
                             appointment.appointment_time = datetime_object
                         except:
                             abort(make_response(jsonify(id="400", description='Date provided is invalid. use YYYY-MM-DD format.'), 400))
@@ -176,7 +177,9 @@ def get_appointment_by_id_api(id):
                             abort(make_response(jsonify(id="404", description='The room you have provided do not exist'), 404))
                         appointment.location = location
                 get_db().update_appointment(appointment)
-                return jsonify(message="Appointment updated successfully"), 200
+                resp = make_response({}, 201)
+                resp.headers['Appointment'] = url_for('appointments_api.get_appointment_by_id_api', id=id)
+                return resp
             except IntegrityError as e:
                 abort(make_response(jsonify(id="400", description='The allergie(s) you have provided do not exist'), 400))
             except DatabaseError as e:

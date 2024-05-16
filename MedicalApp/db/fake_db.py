@@ -25,7 +25,7 @@ class FakeDB:
         self.users.append(User("maddie@example.com", "scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68", "Maddie", "Buckley", "PATIENT", tokens=[self.tokens[0]], id=6))
         self.users.append(User("chimney@example.com", "scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68", "Howard", "Han", "PATIENT", tokens=[self.tokens[1]], id=7))
         self.users.append(User("eddie@example.com", "scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68", "Eddie", "Diaz", "PATIENT", tokens=[self.tokens[2]], id=8))
-        self.users.append(User("bobby@example.com", "scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68", "Bobby", "Nash", "DOCTOR", tokens=[self.tokens[3]], id=9))
+        self.users.append(User("bobby@example.com", "scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68", "Bobby", "Nash", "STAFF", tokens=[self.tokens[3]], id=9))
         self.users.append(User("blocked@example.com", "scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68", "Blocked", "User", "BLOCKED", tokens=[self.tokens[3]], id=10))
         self.appointments = [
              Appointments(
@@ -34,7 +34,8 @@ class FakeDB:
                 appointment_time=datetime.datetime.now(),
                 status=0,
                 location=MedicalRoom("101", "Room 101"),
-                description="Regular checkup"
+                description="Regular checkup",
+                id=1
             ),
             Appointments(
                 patient=self.patients[0],
@@ -42,7 +43,8 @@ class FakeDB:
                 appointment_time=datetime.datetime.now(),
                 status=0,
                 location=MedicalRoom("102", "Room 102"),
-                description="Dental appointment"
+                description="Dental appointment",
+                id=2
             )
         ]
         self.rooms = [
@@ -108,13 +110,10 @@ class FakeDB:
         self.appointments.append(appointment)
 
     def update_appointment(self, appointment):
-        updated_appointments = [
-            appointment if appt.id == appointment.id else appt
-            for appt in self.appointments
-        ]
-        if len(updated_appointments) == len(self.appointments):
-            raise ValueError("Appointment not found")
-        self.appointments = updated_appointments
+        for a in self.appointments:
+            if appointment.id == a.id:
+                self.appointments.remove(a)
+                self.appointments.append(appointment)
 
     def delete_appointment_by_id(self, appointment_id):
         self.appointments = [
