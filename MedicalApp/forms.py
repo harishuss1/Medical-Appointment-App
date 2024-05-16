@@ -6,7 +6,10 @@ from wtforms.validators import DataRequired, Email, Length, EqualTo
 from flask_wtf.file import FileField, FileRequired
 
 
-from .db.dbmanager import get_db
+
+def check_date(self, field):
+        if len(field.data) > datetime.today():
+            raise ValidationError("You cannot book an appointment before today's date")
 
 class AppointmentResponseForm(FlaskForm):
     select_confirmation = RadioField('Acceptance:', choices=[(
@@ -45,7 +48,7 @@ class AppointmentForm(FlaskForm):
     doctor = SelectField("Doctor:", validators=[DataRequired()], choices=[])
     appointment_time = DateField(
         "Appointment Time:", validators=[DataRequired()], render_kw={
-                                          'min' : datetime.utcnow().strftime("%Y-%m-%d")
+                                          'min': datetime.today()
                                           })
     location = SelectField("Location:")
     description = StringField("Description:", validators=[DataRequired()])
@@ -139,7 +142,7 @@ class ChangeUserRoleForm(FlaskForm):
 
 class PatientDetailsForm(FlaskForm):
     dob = DateField('Date of Birth', validators=[DataRequired()], render_kw={
-                                          'max': datetime.utcnow().strftime("%Y-%m-%d")
+                                          'max': datetime.today()
                                           })
     blood_type = SelectField('Blood Type', choices=[('A+', 'A+'), ('A-', 'A-'), ('B+', 'B+'), (
         'B-', 'B-'), ('AB+', 'AB+'), ('AB-', 'AB-'), ('O+', 'O+'), ('O-', 'O-')], validators=[DataRequired()])

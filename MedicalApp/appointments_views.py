@@ -3,7 +3,6 @@ from flask_login import current_user, login_required
 from oracledb import DatabaseError
 from MedicalApp.appointments import Appointments
 from .forms import AppointmentForm, AppointmentResponseForm
-from .db.dbmanager import get_db
 from MedicalApp.db import dbmanager
 
 bp = Blueprint('appointments', __name__, url_prefix='/appointments/')
@@ -29,7 +28,7 @@ def doctor_access(func):
 @login_required
 @patient_access
 def view_appointments():
-    appointments = get_db().get_patient_appointments(current_user.id)
+    appointments = dbmanager.get_db().get_patient_appointments(current_user.id)
     return render_template('patient_appointments.html', appointments=appointments)
 
 @bp.route('/book/', methods=['GET', 'POST'])

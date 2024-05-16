@@ -1,4 +1,4 @@
-from flask import Blueprint, Response, abort, jsonify, make_response, request
+from flask import Blueprint, abort, jsonify, request
 from flask_login import current_user
 from MedicalApp.db.dbmanager import get_db
 from MedicalApp.appointments import Appointments
@@ -11,25 +11,37 @@ def get_appointments_api():
     if request.method == 'POST':
         appointment = Appointments.from_json(request.json)
         get_db().add_appointment(appointment)
+        return jsonify(message="Appointment added successfully"), 201
 
     if request.args:
-        page = int(request.args.get("page"))
+        page = int(request.args.get("page", 1))
         id = request.args.get("id")
-
-        if page is None or not isinstance(page, int):
-            page = 1
 
         if id:
             appointment = get_db().get_appointment_by_id(id)
             if appointment:
-                return jsonify(appointment.__dict__)
+                return jsonify({
+                    "id": appointment.id,
+                    "patient": appointment.patient.to_json(),
+                    "doctor": appointment.doctor.to_json(),
+                    "appointment_time": appointment.appointment_time.isoformat(),
+                    "location": appointment.location.to_json(),
+                    "description": appointment.description
+                })
             else:
                 abort(404)
         else:
             abort(400)
 
     appointments = get_db().get_appointments()
-    json_appointments = [x.__dict__ for x in appointments]
+    json_appointments = [{
+        "id": appointment.id,
+        "patient": appointment.patient.to_json(()),
+        "doctor": appointment.doctor.to_json(),
+        "appointment_time": appointment.appointment_time.isoformat(),
+        "location": appointment.location.to_json(),
+        "description": appointment.description
+    } for appointment in appointments]
     return jsonify(json_appointments)
 
 
@@ -38,7 +50,10 @@ def get_appointment_by_id_api(id):
     if request.method == 'GET':
         try:
             appointment = get_db().get_appointment_by_id(id)
-            return jsonify(appointment.to_json())
+            if appointment:
+                return jsonify(appointment.to_dict())
+            else:
+                abort(404)
         except Exception:
             abort(500)
     
@@ -55,12 +70,12 @@ def get_appointment_by_id_api(id):
                     doctor_id = appointment_json.get('doctor.id')
 
                     if doctor_id is None:
-                        abort(make_response(jsonify(message="Doctor ID is required for update"), 400))
+                        abort(400, jsonify(message="Doctor ID is required for update"))
 
                     doctor = get_db().get_doctor_by_id(doctor_id)
 
                     if doctor is None:
-                        abort(make_response(jsonify(message=f"Doctor with ID {doctor_id} not found"), 404))
+                        abort(404, jsonify(message=f"Doctor with ID {doctor_id} not found"))
                     
                     target_appointment.doctor = doctor
                     target_appointment.appointment_time = appointment.appointment_time
@@ -82,4 +97,3 @@ def get_appointment_by_id_api(id):
             return jsonify(message="Appointment deleted successfully"), 200
         except Exception:
             abort(500)
-
