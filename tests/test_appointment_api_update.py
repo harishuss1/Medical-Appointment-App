@@ -173,8 +173,6 @@ class AppointmentsUpdateTestCases(unittest.TestCase):
         token = "ErU49l4Du_LEvsV1AgU9SIllZ1g"
         headers = {'Authorization': f'Bearer {token}'}
         result = self.client.put(f'/api/appointments/1', data=json_data, headers=headers, content_type='application/json')
-        # response_data = json.loads(result.get_data(as_text=True))
-        # print(response_data['description'])
         self.assertEqual(404, result.status_code)
         
     def test_update_appointment_doctor_badstatus_404(self):
@@ -193,8 +191,6 @@ class AppointmentsUpdateTestCases(unittest.TestCase):
         token = "ErU49l4Du_LEvsV1AgU9SIllZ1g"
         headers = {'Authorization': f'Bearer {token}'}
         result = self.client.put(f'/api/appointments/1', data=json_data, headers=headers, content_type='application/json')
-        # response_data = json.loads(result.get_data(as_text=True))
-        # print(response_data['description'])
         self.assertEqual(404, result.status_code)
         
     def test_update_appointment_doctor_badstatustype_400(self):
@@ -213,8 +209,6 @@ class AppointmentsUpdateTestCases(unittest.TestCase):
         token = "ErU49l4Du_LEvsV1AgU9SIllZ1g"
         headers = {'Authorization': f'Bearer {token}'}
         result = self.client.put(f'/api/appointments/1', data=json_data, headers=headers, content_type='application/json')
-        # response_data = json.loads(result.get_data(as_text=True))
-        # print(response_data['description'])
         self.assertEqual(400, result.status_code)
         
     def test_update_appointment_blocked_403(self):
@@ -232,8 +226,6 @@ class AppointmentsUpdateTestCases(unittest.TestCase):
         token = "2z12xfm3gqvZr1kZIAi4YXahpeA"
         headers = {'Authorization': f'Bearer {token}'}
         result = self.client.put(f'/api/appointments/1', data=json_data, headers=headers, content_type='application/json')
-        # response_data = json.loads(result.get_data(as_text=True))
-        # print(response_data['description'])
         self.assertEqual(403, result.status_code)
         
 if __name__ == '__main__':

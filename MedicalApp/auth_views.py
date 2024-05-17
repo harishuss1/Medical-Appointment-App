@@ -179,5 +179,4 @@ def remove_all_api_tokens():
         flash("All API tokens have been removed.", "success")
     except Exception as e:
         flash("An error occurred while removing API tokens.", "error")
-        print("Error removing API tokens:", e)
     return redirect(url_for('auth.user_api_token'))
