@@ -100,7 +100,7 @@ def block_user(email):
         return redirect(url_for('home.index'))
     form = BlockUserForm()
     form.email.data = email
-    form.location.render_kw = {'disabled': ''}
+    form.email.render_kw = {'disabled': ''}
     if request.method == 'POST' and form.validate_on_submit():
         user_delete = form.email.data
         db = get_db()
@@ -123,7 +123,7 @@ def change_user_role(email):
         return redirect(url_for('home.index'))
     form = ChangeUserRoleForm()
     form.email.data = email
-    form.location.render_kw = {'disabled': ''}
+    form.email.render_kw = {'disabled': ''}
     if request.method == 'POST' and form.validate_on_submit():
         user_delete = form.email.data
         new_user_type = form.user_type.data
