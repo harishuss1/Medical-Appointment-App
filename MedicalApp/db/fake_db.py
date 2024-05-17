@@ -1,6 +1,7 @@
 import datetime 
 import oracledb 
 from MedicalApp.allergy import Allergy 
+from MedicalApp.appointments_views import update_appointment
 from MedicalApp.medical_room import MedicalRoom 
 from ..user import User, MedicalPatient 
 from oracledb import IntegrityError 
@@ -114,6 +115,21 @@ class FakeDB:
             if appointment.id == a.id:
                 self.appointments.remove(a)
                 self.appointments.append(appointment)
+
+    def get_appointments_page_number(self, page, doctor_first_name, doctor_last_name, patient_first_name, patient_last_name):
+        if page is None: 
+            raise ValueError("Page parameter cannot be None or empty")
+        
+        appointments = []
+        for appointment in self.appointments:
+            if (doctor_first_name is None or doctor_first_name == appointment.doctor.first_name) and \
+            (doctor_last_name is None or doctor_last_name == appointment.doctor.last_name) and \
+            (patient_first_name is None or patient_first_name == appointment.patient.first_name) and \
+            (patient_last_name is None or patient_last_name == appointment.patient.last_name):
+                appointments.append(appointment)
+        start_index = (page - 1) * 20
+        end_index = start_index + 20
+        return appointments[start_index:end_index]
 
     def delete_appointment_by_id(self, appointment_id):
         self.appointments = [
