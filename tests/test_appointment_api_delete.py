@@ -22,32 +22,16 @@ class AppointmentAPITestCases(unittest.TestCase):
         self.ctx.pop()
 
     def test_delete_appointment_success_204(self):
-        # Assume appointment_id is 1 for this example
+        # Assume appointment_id is 1
         appointment_id = 1
-        token = "your_token_here"
+        token = "ErU49l4Du_LEvsV1AgU9SIllZ1g"
         headers = {'Authorization': f'Bearer {token}'}
-
-        #create an appointment 
-        data = {
-            "doctor_id": 9,
-            "appointment_time": "2025-01-01",
-            "description": "checkuppppp"
-        }
-        json_string = json.dumps(data)
-        create_result = self.client.post('/api/appointments', data=json_string, headers=headers, content_type='application/json',follow_redirects=True)
-
-        # Check the appointment was created 
-        self.assertEqual(201, create_result.status_code)
-        # Get the URL of new created appointment
-        appointment_url = create_result.headers['URL']  
-
-        #delete the appointment
-        delete_result = self.client.delete(appointment_url, headers=headers)
+        create_result = self.client.delete(f'/api/appointments/{appointment_id}', headers=headers, content_type='application/json',follow_redirects=True)
 
         # Check if the appointment was deleted successfully
-        self.assertEqual(204, delete_result.status_code)
+        self.assertEqual(204, create_result.status_code)
 
-    def test_delete_nonexistent_appointment(self):
+    def test_delete_nonexistent_appointment_abort_401(self):
         # appointment id = 999  which does not exist
         appointment_id = 999
         token = "dontexist"
@@ -57,6 +41,16 @@ class AppointmentAPITestCases(unittest.TestCase):
         delete_result = self.client.delete(f'/api/appointments/{appointment_id}', headers=headers)
         
         self.assertEqual(401, delete_result.status_code)
+
+    def test_delete_noaccess_abort_403(self):
+        appointment_id = 1
+        token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
+        headers = {'Authorization': f'Bearer {token}'}
+        
+        #delete appointment
+        delete_result = self.client.delete(f'/api/appointments/{appointment_id}', headers=headers)
+        
+        self.assertEqual(403, delete_result.status_code)
 
 
 if __name__ == '__main__':

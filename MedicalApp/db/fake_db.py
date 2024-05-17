@@ -108,7 +108,10 @@ class FakeDB:
     def add_appointment(self, appointment):
         if not isinstance(appointment, Appointments):
             raise TypeError("Invalid appointment type")
+        appointment.id = len(self.appointments) + 1
         self.appointments.append(appointment)
+        return appointment.id
+        
 
     def update_appointment(self, appointment):
         for a in self.appointments:
@@ -132,11 +135,8 @@ class FakeDB:
         return appointments[start_index:end_index]
 
     def delete_appointment_by_id(self, appointment_id):
-        self.appointments = [
-            appointment for appointment in self.appointments if appointment.id != appointment_id
-        ]
-        if len(self.appointments) == len(update_appointment):
-            raise ValueError("Appointment not found")
+        appointment= self.get_appointment_by_id(appointment_id)    
+        self.appointments.remove(appointment)
 
     def get_medical_rooms(self):
         return self.rooms

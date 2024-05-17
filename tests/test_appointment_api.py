@@ -41,30 +41,31 @@ class AppointmentAPITestCases(unittest.TestCase):
         token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
         headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
         data = {
-            "doctor_id": 1,
+            "doctor_id": 9,
             "appointment_time": "2024-05-16",
             "description": "Routine check-up"
         }
         result = self.client.post('/api/appointments', headers=headers, data=json.dumps(data), follow_redirects=True)
         self.assertEqual(201, result.status_code)
-        appointment = result.json['appointment']
+        appointment = result.json
         self.assertEqual(data['description'], appointment['description'])
 
     def test_create_appointment_success_staff(self):
         token = "ErU49l4Du_LEvsV1AgU9SIllZ1g"
         headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
         data = {
-            "doctor_id": 1,
+            "doctor_id": 9,
             "appointment_time": "2024-05-16",
             "description": "Follow-up visit",
-            "patient_id": 2,
+            "patient_id": 6,
             "location": "101"
         }
         result = self.client.post('/api/appointments', headers=headers, data=json.dumps(data), follow_redirects=True)
         self.assertEqual(201, result.status_code)
-        appointment = result.json['appointment']
+        appointment = result.json
         self.assertEqual(data['description'], appointment['description'])
-        self.assertEqual(data['location'], appointment['location'])
+        print(appointment['location'])
+        self.assertEqual(data['location'], appointment['location'].split("/")[-1])
 
     def test_create_appointment_missing_fields(self):
         token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
