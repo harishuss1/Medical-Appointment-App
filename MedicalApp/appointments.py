@@ -1,7 +1,11 @@
 import datetime
 import json
+
+from flask import url_for
 from MedicalApp.medical_room import MedicalRoom
 from MedicalApp.user import User, MedicalPatient
+import urllib.parse
+
 
 
 class Appointments:
@@ -28,14 +32,14 @@ class Appointments:
 
         return Appointments(data['id'], patient, doctor, appointment_time, status, location, description)
 
-    def to_json(self):
+    def to_json(self,prepended_url=None):
         data = {}
         data['id'] = str(self.id)
-        data['patient'] = str(self.patient.to_json(prepended_url=None))  
-        data['doctor'] = str(self.doctor.to_json(prepended_url=None)) 
+        data["patient"] =  urllib.parse.urljoin(prepended_url, url_for('patient_api.get_patient', patient_id=self.patient.id))
+        data['doctor'] = urllib.parse.urljoin(prepended_url, url_for('doctor_api.get_doctor', doctor_id=self.doctor.id))
         data['appointment_time'] = str(self.appointment_time)
         data['status'] = str(self.status)
-        data['location'] = self.location.to_json()  
+        data['location'] = urllib.parse.urljoin(prepended_url, url_for('medical_rooms_api.get_room_number', room_number =self.location.room_number))
         data['description'] = str(self.description)
         return data
     
