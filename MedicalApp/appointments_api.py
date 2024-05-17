@@ -63,6 +63,8 @@ def get_appointments_api():
                 else:
                     status = 0
                 appointment = Appointments(patient, doctor, datetime_object, status, location, description)
+            else:
+                abort(make_response(jsonify(id="403", description='You do not have permission to update an appointment'), 403))
                 
 
             id = get_db().add_appointment(appointment)
