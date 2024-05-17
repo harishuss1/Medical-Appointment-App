@@ -177,51 +177,48 @@ def update_patient_appointment(id):
         if appointment is None:
             abort(404, "This appointment does not exist")
 
+        if appointment.status != 0:
+            flash("Only pending appointments can be updated")
+            return redirect(url_for(f'{(current_user.access_level).lower()}.dashboard'))
+
         form = AppointmentForm()
         form.set_patients()
         form.set_doctors()
         form.set_rooms()
 
-        if request.method == 'GET':
-            form.doctor.data = appointment.doctor.id
-            form.appointment_time.data = appointment.appointment_time
-            form.description.data = appointment.description
-            form.patient.data = str(current_user.id)
-            form.patient.render_kw = {'disabled': ''}
-            form.location.data = '101'
-            form.location.render_kw = {'disabled': ''}
-
-        if appointment.status != 0:
-            flash("Only pending appointments can be updated")
-            return redirect(url_for(f'{current_user.access_level}.dashboard'))
+        form.patient.data = str(current_user.id)
+        form.patient.render_kw = {'disabled': ''}
+        form.location.data = '101'
+        form.location.render_kw = {'disabled': ''}
 
         if request.method == 'POST':
             if form.validate_on_submit():
                 patient = get_db().get_patients_by_id(form.patient.data)
                 doctor = get_db().get_user_by_id(form.doctor.data)
-                time = datetime.strptime(
-                    form.appointment_time.data, "%Y-%m-%d").date()
-                status = appointment.status
-                location = get_db().get_medical_room_by_room_number(form.location.data)
+                status = 0
                 description = form.description.data
+                location = get_db().get_medical_room_by_room_number(form.location.data)
+                time = form.appointment_time.data
 
                 updated_appointment = Appointments(
                     patient, doctor, time, status, location, description)
-                get_db().update_appointment(id, updated_appointment)
+                updated_appointment.id = id
+
+                get_db().update_appointment(updated_appointment)
+
                 flash("Appointment has been successfully updated")
                 return redirect(url_for(f'{(current_user.access_level).lower()}.dashboard'))
             else:
                 flash(f"There was an error in the form submission {
-                      form.errors()}")
+                      form.errors}")
                 return render_template('update_specific_appointment.html', appointment=appointment, form=form)
     except DatabaseError as e:
         flash("Something went wrong with the database")
         return redirect(url_for(f'{(current_user.access_level).lower()}.dashboard'))
-    except TypeError as e:
-        flash("Incorrect types")
-        return redirect(url_for(f'{(current_user.access_level).lower()}.dashboard'))
     except ValueError as e:
         flash("Incorrect values were passed")
         return redirect(url_for(f'{(current_user.access_level).lower()}.dashboard'))
-
+    form.doctor.data = str(appointment.doctor.id)
+    form.appointment_time.data = appointment.appointment_time
+    form.description.data = appointment.description
     return render_template('update_specific_appointment.html', appointment=appointment, form=form)
