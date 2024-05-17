@@ -32,21 +32,23 @@ class AppointmentsUpdateTestCases(unittest.TestCase):
         self.assertNotEqual("", result.headers['Appointment'])
         self.assertNotEqual(9, result.headers['Appointment'].split("/")[-1])
         
-    # def test_update_appointment_invalid_data(self):
+    def test_update_appointment_invalid_id(self):
         
-    #     updated_appointment_data = {
-    #         "doctor_id": "invalid_id",  
-    #         "appointment_time": "2025-01-01", 
-    #         "description": "" 
-    #     }
+        updated_appointment_data = {
+            "doctor_id": "invalid_id",  
+            "appointment_time": "2025-01-01", 
+            "description": "yayyyy" 
+        }
         
-    #     json_data = json.dumps(updated_appointment_data)
+        json_data = json.dumps(updated_appointment_data)
         
-    #     token = "mIzbZLyEzNKW7SP5NAx9eUHUq_w"
-    #     headers = {'Authorization': f'Bearer {token}'}
-    #     update_response = self.client.put(f'/api/appointments/1', data=json_data, headers=headers, content_type='application/json')
+        token = "mIzbZLyEzNKW7SP5NAx9eUHUq_w"
+        headers = {'Authorization': f'Bearer {token}'}
+        update_response = self.client.put(f'/api/appointments/1', data=json_data, headers=headers, content_type='application/json')
         
-    #     self.assertEqual(400, update_response.status_code)
+        self.assertEqual(400, update_response.status_code)
+        
+    
         
 if __name__ == '__main__':
     unittest.main()
