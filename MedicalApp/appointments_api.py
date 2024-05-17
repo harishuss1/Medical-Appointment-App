@@ -102,7 +102,7 @@ def get_appointments_api():
             abort(make_response(jsonify(id="404", description="No appointments found"), 404))
 
         data = {}
-        count = len(get_db().get_all_appointments())
+        count = len(get_db().get_appointments())
         data['count'] = count
         data['previous'] = urllib.parse.urljoin(request.url_root, url_for('appointment_api.get_appointments_api', page=(page-1))) if page > 1 else ""
         data['next'] = urllib.parse.urljoin(request.url_root, url_for('appointment_api.get_appointments_api', page=(page+1))) if (count - (page * 10)) > 0 else ""

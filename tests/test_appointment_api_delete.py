@@ -50,7 +50,7 @@ class AppointmentAPITestCases(unittest.TestCase):
     def test_delete_nonexistent_appointment(self):
         # appointment id = 999  which does not exist
         appointment_id = 999
-        token = "your_token_here"
+        token = "dontexist"
         headers = {'Authorization': f'Bearer {token}'}
         
         #delete appointment
