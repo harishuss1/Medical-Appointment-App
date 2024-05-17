@@ -60,3 +60,17 @@ def get_notes():
     data['results'] = [note.to_json(request.url_root) for note in notes]
 
     return jsonify(data)
+
+@bp.route('/<int:note_id>', methods=['GET'])
+def get_note_by_id(note_id):
+    try:
+        note = get_db().get_note_by_id(note_id)
+        if not note:
+            abort(make_response(jsonify(id="404", description="Note not found"), 404))
+        return jsonify(note.to_json(request.url_root))
+    except ValueError:
+        abort(make_response(jsonify(id="400", description="Invalid note ID"), 400))
+    except TypeError:
+        abort(make_response(jsonify(id="400", description="Note ID must be an integer"), 400))
+    except DatabaseError:
+        abort(make_response(jsonify(id="409", description='Something went wrong with our database'), 409))
