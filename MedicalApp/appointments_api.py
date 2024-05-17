@@ -5,6 +5,8 @@ from oracledb import DatabaseError, IntegrityError
 from .db.dbmanager import get_db
 from MedicalApp.appointments import Appointments
 from datetime import datetime
+import urllib.parse
+
 
 bp = Blueprint('appointments_api', __name__, url_prefix='/api/appointments/')
 
@@ -67,7 +69,6 @@ def get_appointments_api():
 
             id = get_db().add_appointment(appointment)
             appointment = get_db().get_appointment_by_id(id)
-            # return redirect(url_for('get_appointment_by_id_api', id=id))
 
         except DatabaseError as e:
             abort(make_response(jsonify(id="409", description='Something went wrong with our database'), 409))
@@ -83,33 +84,42 @@ def get_appointments_api():
 
     if request.args:
         page = int(request.args.get("page", 1))
-        id = request.args.get("id")
+        doctor_first_name = request.args.get("doctor_first_name")
+        doctor_last_name = request.args.get("doctor_last_name")
+        patient_first_name = request.args.get("patient_first_name")
+        patient_last_name = request.args.get("patient_last_name")
 
-        if id:
-            appointment = get_db().get_appointment_by_id(id)
-            if appointment:
-                return jsonify({
-                    "id": appointment.id,
-                    "patient": appointment.patient.to_json(),
-                    "doctor": appointment.doctor.to_json(),
-                    "appointment_time": appointment.appointment_time.isoformat(),
-                    "location": appointment.location.to_json(),
-                    "description": appointment.description
-                })
-            else:
-                abort(404)
-        else:
-            abort(400)
+        try:
+            appointments = get_db().get_appointments_page_number(page, doctor_first_name, doctor_last_name, patient_first_name, patient_last_name)
+        except DatabaseError as e:
+            abort(make_response(jsonify(id="409", description='Something went wrong with our database'), 409))
+        except TypeError as e:
+            abort(make_response(jsonify(id="400", description="The data sent is of incorrect type"), 400))
+        except ValueError as e:
+            abort(make_response(jsonify(id="400", description="The data sent cannot be empty"), 400))
 
-    appointments = get_db().get_appointments() #.get_appointments_page_number(page, doctor_first_name, doctor_last_name, patient_first_name, patient_last_name)
+        if not appointments:
+            abort(make_response(jsonify(id="404", description="No appointments found"), 404))
+
+        data = {}
+        count = len(get_db().get_all_appointments())
+        data['count'] = count
+        data['previous'] = urllib.parse.urljoin(request.url_root, url_for('appointment_api.get_appointments_api', page=(page-1))) if page > 1 else ""
+        data['next'] = urllib.parse.urljoin(request.url_root, url_for('appointment_api.get_appointments_api', page=(page+1))) if (count - (page * 10)) > 0 else ""
+        data['results'] = [appointment.to_json() for appointment in appointments]
+
+        return jsonify(data)
     
-    data = {}
-    data['results'] = []
-    
-    for appointment in appointments:
-        json = appointment.to_json()
-        data['results'].append(json)
-    return jsonify(data)
+    else:
+        try:
+            appointments = get_db().get_appointments()
+        except DatabaseError as e:
+            abort(make_response(jsonify(id="409", description='Something went wrong with our database'), 409))
+
+        data = {}
+        data['results'] = [appointment.to_json() for appointment in appointments]
+        return jsonify(data)
+
 
 
 @bp.route('/<int:id>', methods=['GET', 'PUT', 'DELETE'])

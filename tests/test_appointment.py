@@ -18,11 +18,35 @@ class AppointmentsTestCases(unittest.TestCase):
         self.ctx.pop()
 
     def test_create_appointment_successful(self):
-        patient = MedicalPatient(70.0, "patient@example.com", "test1", "Patient", datetime.date(2001, 1, 1), "A+", 170.0, access_level="PATIENT")
-        doctor = User("doctor@doctor.com", "password", "Dr. Smith", "Smith", "STAFF")
+        patient = MedicalPatient(
+            weight=70.0,
+            email="patient@example.com",
+            password="test1",
+            first_name="Patient",
+            last_name="LastName",
+            dob=datetime.date(2001, 1, 1),
+            blood_type="A+",
+            height=170.0,
+            access_level="PATIENT"
+        )
+        doctor = User(
+            email="doctor@doctor.com",
+            password="password",
+            first_name="Dr. Smith",
+            last_name="Smith",
+            access_level="STAFF"
+        )
         room = MedicalRoom("101", "Room 101")
         appointment_time = datetime.datetime.now()
-        appointment = Appointments(patient, doctor, appointment_time, 0, room, "Regular checkup", 1)
+        appointment = Appointments(
+            patient=patient,
+            doctor=doctor,
+            appointment_time=appointment_time,
+            status=0,
+            location=room,
+            description="Regular checkup",
+            id=1
+        )
         self.assertEqual(patient, appointment.patient)
         self.assertEqual(doctor, appointment.doctor)
         self.assertEqual(appointment_time, appointment.appointment_time)
