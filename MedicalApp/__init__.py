@@ -1,7 +1,7 @@
-import os
-from flask import Flask, render_template
-from .db.dbmanager import close_db, init_db_command
-from flask_login import LoginManager
+import os 
+from flask import Flask, render_template 
+from .db.dbmanager import close_db, init_db_command 
+from flask_login import LoginManager 
 from MedicalApp.db.dbmanager import close_db, init_db_command, get_db
 
 
@@ -40,6 +40,16 @@ def init_app(app):
     def load_user(user_id):
         user = get_db().get_user_by_id(user_id)
         return user
+    
+    #API logic:
+    @login_manager.request_loader
+    def request_loader(request): #special obj flask gives that represents everything in the request
+        api_key = request.headers.get('Authorization')
+        user = None
+        if api_key:
+            api_key = api_key.split(' ')[1]
+            user = get_db().get_user_by_token(api_key)
+        return user
 
     # REGISTER BLUEPRINTS HERE
     from .admin_view import admin_bp
@@ -66,6 +76,9 @@ def init_app(app):
     from .appointments_views import bp as appointments_bp
     app.register_blueprint(appointments_bp)
 
+    from .appointments_api import bp as appointments_api_bp
+    app.register_blueprint(appointments_api_bp)
+
     from .note_views import bp as notes_bp
     app.register_blueprint(notes_bp)
     
@@ -80,6 +93,9 @@ def init_app(app):
 
     from .medical_rooms_view import bp as medical_rooms_bp
     app.register_blueprint(medical_rooms_bp)
+
+    from .medical_room_api import bp as room_bp
+    app.register_blueprint(room_bp)
 
     app.teardown_appcontext(close_db)
 

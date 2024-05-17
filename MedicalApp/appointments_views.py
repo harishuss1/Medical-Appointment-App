@@ -4,7 +4,6 @@ from oracledb import DatabaseError
 from MedicalApp.appointments import Appointments
 from .forms import AppointmentForm, AppointmentResponseForm
 from .db.dbmanager import get_db
-from MedicalApp.db import dbmanager
 
 bp = Blueprint('appointments', __name__, url_prefix='/appointments/')
 
@@ -24,13 +23,6 @@ def doctor_access(func):
         return func(*args, **kwargs)
     wrapper.__name__ = func.__name__
     return wrapper
-
-@bp.route('/')
-@login_required
-@patient_access
-def view_appointments():
-    appointments = get_db().get_patient_appointments(current_user.id)
-    return render_template('patient_appointments.html', appointments=appointments)
 
 @bp.route('/book/', methods=['GET', 'POST'])
 @login_required

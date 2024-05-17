@@ -20,7 +20,7 @@ class TestDoctorAPI(unittest.TestCase):
         self.assertTrue('count' in result.json)
 
     def test_get_doctor(self):
-        result = self.client.get('/api/doctors/1')
+        result = self.client.get('/api/doctors/9')
         self.assertEqual(200, result.status_code)
         self.assertIsNotNone(result.json)
         self.assertTrue('id' in result.json)
