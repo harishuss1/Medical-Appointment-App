@@ -1,4 +1,7 @@
+import datetime
 from flask import Blueprint, jsonify, make_response, request, abort, url_for
+
+from MedicalApp.user import MedicalPatient, User
 from .db.dbmanager import get_db
 from oracledb import DatabaseError
 from MedicalApp.note import Note
@@ -81,13 +84,31 @@ def create_note():
     if not data:
         abort(make_response(jsonify(id="400", description="Request body is empty"), 400))
 
+    patient_data = data.get('patient')
+    note_taker_data = data.get('note_taker')
+    note_data = {
+        'note_date': data.get('note_date'),
+        'note': data.get('note'),
+        'attachement_path': data.get('attachement_path', [])
+    }
+
     try:
-        new_note = Note(**data)
+        dob_str = patient_data.get('dob')
+        note_date_str = note_data['note_date']
+        dob = datetime.datetime.strptime(dob_str, "%Y-%m-%d").date()
+        note_date = datetime.datetime.strptime(note_date_str, "%Y-%m-%d").date()
+
+        del patient_data['dob']
+        del note_data['note_date']
+
+        patient = MedicalPatient(dob=dob, **patient_data)
+        note_taker = User(**note_taker_data)
+        new_note = Note(patient=patient, note_taker=note_taker, note_date=note_date, **note_data)
         created_note_id = get_db().create_note(new_note)
-        return jsonify({"id": created_note_id}), 201
+        return jsonify({"message": "Note created succesfully"}), 201
     except ValueError as e:
         abort(make_response(jsonify(id="400", description=str(e)), 400))
     except TypeError as e:
         abort(make_response(jsonify(id="400", description=str(e)), 400))
-    except DatabaseError:
-        abort(make_response(jsonify(id="409", description='Something went wrong with our database'), 409))
+    except DatabaseError as e:
+        abort(make_response(jsonify(id="409", description=str(e)), 409))

@@ -3,6 +3,7 @@ from MedicalApp.allergy import Allergy
 from ..user import User, MedicalPatient
 from oracledb import IntegrityError
 from ..appointments import Appointments
+from ..note import Note
 
 
 class FakeDB:
@@ -28,6 +29,35 @@ class FakeDB:
         self.users.append(User("chimney@example.com", "scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68", "Howard", "Han", "ADMIN", id=2))
         self.users.append(User("eddie@example.com", "scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68", "Eddie", "Diaz", "STAFF", id=3))
         self.appointments = []
+
+    def get_notes(self, patient_id):
+        if patient_id is None:
+            raise ValueError("Patient ID cannot be None")
+        
+        patient_notes = [note for note in self.notes if note.patient_email == patient_id]
+        return patient_notes
+
+    def get_notes_page_number(self, page, patient_id, note_taker_id):
+        if page is None:
+            raise ValueError("Page cannot be None")
+        
+        filtered_notes = self.notes
+        if patient_id is not None:
+            filtered_notes = [note for note in filtered_notes if note.patient_email == patient_id]
+        if note_taker_id is not None:
+            filtered_notes = [note for note in filtered_notes if note.note_taker_email == note_taker_id]
+        
+        start_index = (page - 1) * 20
+        end_index = start_index + 20
+        paginated_notes = filtered_notes[start_index:end_index]
+        
+        return paginated_notes
+
+    # def add_note(self, note):
+    #     if not isinstance(note, Note):
+    #         raise TypeError("Note must be an instance of the Note class")
+        
+    #     self.notes.append(note)
 
     def get_appointment_by_id(self, appointment_id):
         for appointment in self.appointments:
