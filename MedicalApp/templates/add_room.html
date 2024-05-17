@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% block content %}
 {% block nav %}
     <li><a href="{{ url_for('doctor.dashboard') }}">Dashboard</a></li>
     <li><a href="{{ url_for('appointments.confirmed_appointments', user_type='doctor') }}">See all confirmed appointments</a></li>
@@ -11,6 +10,7 @@
     <li><a href="{{ url_for('appointments.book_appointment') }}">Book an appointment</a></li>
     <li><a href="{{ url_for('medical_rooms.add_medical_room') }}">Add medical room</a></li>
 {% endblock nav %}
+{% block content %}
 <h1>{% block title %}Create Medical Room{% endblock title %}</h1>
 <form method="post" id="add-note" enctype="multipart/form-data">
     {{ form.csrf_token }}

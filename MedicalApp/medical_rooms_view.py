@@ -49,15 +49,15 @@ def add_medical_room():
     form = AddMedicalRoom()
     if request.method == 'POST' and form.validate_on_submit():
         room_number = form.room.data
-        description = form.description.data
+        description = str(form.description.data)
         try:
-            room = get_db().get_patients_by_id(room_number)
+            room = get_db().get_medical_room_by_room_number(room_number)
             if room is not None:
                 flash("this room already exists")
                 form = AddMedicalRoom()
-                return redirect(render_template('add_room.html', form=form))
+                return redirect(url_for('medical_rooms.add_medical_room'))
             get_db().add_medical_room(room_number, description)
-            return redirect(url_for('medical_room.get_medical_room', room_number=room_number))
+            return redirect(url_for('medical_rooms.get_medical_room', room_number=room_number))
         except DatabaseError as e:
             flash("something went wrong with the database")
         except ValueError as e:

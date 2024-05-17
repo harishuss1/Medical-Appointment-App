@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% if current_user.access_level == 'STAFF' %}
+
 {% block nav %}
     <li><a href="{{ url_for('doctor.dashboard') }}">Dashboard</a></li>
     <li><a href="{{ url_for('appointments.confirmed_appointments', user_type='doctor') }}">See all confirmed appointments</a></li>
