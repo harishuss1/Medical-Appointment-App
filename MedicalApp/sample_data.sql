@@ -7,12 +7,6 @@ INSERT INTO medical_access_level (user_type) VALUES ('ADMIN_USER');
 INSERT INTO medical_users (email, password, first_name, last_name, avatar_path, user_type)
 VALUES ('admin@example.com', 'scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68', 'Admin', 'Adminson', '/avatars/admin.jpg', 'ADMIN');
 
-INSERT INTO medical_patients (id, dob, blood_type, height, weight)
-VALUES (1, '1990-05-15', 'A+', 175.5, 70.3);
-
-INSERT INTO medical_patients (id, dob, blood_type, height, weight)
-VALUES (2, '1985-08-20', 'AB-', 162.0, 65.8);
-
 INSERT INTO medical_users (email, password, first_name, last_name, avatar_path, user_type)
 SELECT 'buck@example.com', 'scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68', 'Evan', 'Buckley', '/avatars/buck.jpg', 'PATIENT' FROM dual UNION ALL
 SELECT 'athena@example.com', 'scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68', 'Athena', 'Grant', '/avatars/athena.jpg', 'STAFF' FROM dual UNION ALL

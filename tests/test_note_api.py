@@ -47,6 +47,8 @@ class TestNoteAPI(unittest.TestCase):
         self.assertEqual("Follow-up examination conducted. Patient reports improvement in condition. Continuing current medication.", results[0]['note'])
         self.assertEqual(["/attachments/attachments1.pdf"], results[0]['attachment_path'])
         self.assertEqual(1, results[0]['id'])
+        
+    
     
 
 if __name__ == '__main__':
