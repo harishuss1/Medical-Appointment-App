@@ -64,8 +64,7 @@ def get_medical_rooms():
             abort(make_response(jsonify(id="400", description=f"Empty room number or description params."), 400))
         try:
             get_db().add_medical_room(room_number, description)
-            resp = make_response({}, 201)
-            resp.headers['Room'] = url_for('medical_rooms_api.get_room_number', room_number=room_number)
+            resp = make_response(get_db().get_medical_room_by_room_number(room_number).to_json(), 201)
             return resp
         except IntegrityError as e:
             abort(make_response(jsonify(id="400", description='The room you have provided already exists'), 400))
