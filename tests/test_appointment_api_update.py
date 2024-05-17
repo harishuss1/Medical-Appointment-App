@@ -217,5 +217,24 @@ class AppointmentsUpdateTestCases(unittest.TestCase):
         # print(response_data['description'])
         self.assertEqual(400, result.status_code)
         
+    def test_update_appointment_blocked_403(self):
+        
+        updated_appointment_data = {
+            "doctor_id": 9,  
+            "appointment_time": "2025-01-01", 
+            "description": "yayyyy",
+            "status": "blahh",
+            "location": "105"
+        }
+        
+        json_data = json.dumps(updated_appointment_data)
+        
+        token = "2z12xfm3gqvZr1kZIAi4YXahpeA"
+        headers = {'Authorization': f'Bearer {token}'}
+        result = self.client.put(f'/api/appointments/1', data=json_data, headers=headers, content_type='application/json')
+        # response_data = json.loads(result.get_data(as_text=True))
+        # print(response_data['description'])
+        self.assertEqual(403, result.status_code)
+        
 if __name__ == '__main__':
     unittest.main()
