@@ -81,6 +81,9 @@ def init_app(app):
 
     from .note_views import bp as notes_bp
     app.register_blueprint(notes_bp)
+    
+    from .note_api import bp as note_bp
+    app.register_blueprint(note_bp)
 
     from .patients_views import bp as patient_bp
     app.register_blueprint(patient_bp)

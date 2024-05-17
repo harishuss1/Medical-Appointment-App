@@ -261,8 +261,7 @@ def update_patient_appointment(id):
                 flash("Appointment has been successfully updated")
                 return redirect(url_for(f'{(current_user.access_level).lower()}.dashboard'))
             else:
-                flash(f"There was an error in the form submission {
-                      form.errors}")
+                flash(f"There was an error in the form submission {form.errors}")
                 return render_template('update_specific_appointment.html', appointment=appointment, form=form)
     except DatabaseError as e:
         flash("Something went wrong with the database")

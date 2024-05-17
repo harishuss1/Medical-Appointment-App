@@ -656,6 +656,174 @@ class Database:
                     row[5]), row[6], str(row[7]), float(row[8]), avatar_path=row[9], id=int(row[10]))
         return patient
 
+    def get_notes(self, patient_id):
+        if patient_id is None:
+            raise ValueError("Patient ID cannot be None")
+
+        try:
+            patient_id = int(patient_id)
+        except ValueError:
+            raise TypeError("Patient ID must be an integer")
+
+        notes = []
+        query = """
+            SELECT n.id, n.note_date, n.note, p.weight, u.email, u.password, u.first_name, u.last_name, u.user_type, p.dob, p.blood_type, p.height, u.avatar_path, u.id, d.email, d.password, d.first_name, d.last_name, d.user_type, d.avatar_path, d.id
+            FROM medical_notes n
+            INNER JOIN medical_patients p ON n.patient_id = p.id
+            INNER JOIN medical_users u ON p.id = u.id
+            INNER JOIN medical_users d ON n.note_taker_id = d.id
+            WHERE n.patient_id = :patient_id
+        """
+        try:
+            with self.__get_cursor() as cursor:
+                cursor.execute(query, {"patient_id": patient_id})
+                rows = cursor.fetchall()
+                for row in rows:
+                    note_id = row[0]
+                    note_date = row[1]
+                    note_text = str(row[2]) if row[2] is not None else None
+                    patient_weight = row[3]
+                    patient_email = row[4]
+                    patient_password = row[5]
+                    patient_first_name = row[6]
+                    patient_last_name = row[7]
+                    patient_user_type = row[8]
+                    patient_dob = row[9]
+                    patient_blood_type = row[10]
+                    patient_height = row[11]
+                    patient_avatar_path = str(row[12]) if row[12] is not None else None
+                    patient_id = row[13]
+                    note_taker_email = row[14]
+                    note_taker_password = row[15]
+                    note_taker_first_name = row[16]
+                    note_taker_last_name = row[17]
+                    note_taker_user_type = row[18]
+                    note_taker_avatar_path = str(row[19]) if row[19] is not None else None
+                    note_taker_id = row[20]
+
+                    patient = MedicalPatient(
+                        weight=patient_weight, 
+                        email=patient_email, 
+                        password=patient_password, 
+                        first_name=patient_first_name, 
+                        last_name=patient_last_name, 
+                        access_level=patient_user_type, 
+                        dob=patient_dob, 
+                        blood_type=patient_blood_type, 
+                        height=patient_height, 
+                        avatar_path=patient_avatar_path, 
+                        id=patient_id
+                    )
+                    note_taker = User(
+                        email=note_taker_email, 
+                        password=note_taker_password, 
+                        first_name=note_taker_first_name, 
+                        last_name=note_taker_last_name, 
+                        access_level=note_taker_user_type, 
+                        avatar_path=note_taker_avatar_path, 
+                        id=note_taker_id
+                    )
+                    notes.append(Note(
+                        patient=patient, 
+                        note_taker=note_taker, 
+                        note_date=note_date, 
+                        note=note_text, 
+                        id=note_id
+                    ))
+        except Exception as error:
+            print(f"Error fetching notes: {error}")
+        return notes
+    
+    def get_notes_page_number(self, page, patient_id, note_taker_id):
+        if page is None:
+            raise ValueError("Parameters cannot be none")
+        if patient_id is not None and not isinstance(patient_id, int):
+            raise TypeError("Patient ID must be an integer")
+        if note_taker_id is not None and not isinstance(note_taker_id, int):
+            raise TypeError("Note taker ID must be an integer")
+            
+        try:
+            page = int(page)
+        except ValueError:
+            raise TypeError("Page must be an integer")
+        
+        notes = []
+        query = """
+            SELECT n.id, n.note_date, n.note, p.weight, u.email, u.password, u.first_name, u.last_name, u.user_type, p.dob, p.blood_type, p.height, u.avatar_path, u.id, d.email, d.password, d.first_name, d.last_name, d.user_type, d.avatar_path, d.id
+            FROM medical_notes n
+            INNER JOIN medical_patients p ON n.patient_id = p.id
+            INNER JOIN medical_users u ON p.id = u.id
+            INNER JOIN medical_users d ON n.note_taker_id = d.id
+            WHERE (:patient_id IS NULL OR n.patient_id = :patient_id)
+            AND (:note_taker_id IS NULL OR n.note_taker_id = :note_taker_id)
+            ORDER BY n.note_date DESC
+            OFFSET :offset ROWS
+            FETCH NEXT :count ROWS ONLY
+        """
+        try:
+            with self.__get_cursor() as cursor:
+                cursor.execute(query, {
+                    'patient_id': patient_id,
+                    'note_taker_id': note_taker_id,
+                    'offset': (page - 1) * 20,
+                    'count': 20
+                })
+                for row in cursor.fetchall():
+                    note_id = row[0]
+                    note_date = row[1]
+                    note_text = str(row[2]) if row[2] is not None else None
+                    patient_weight = row[3]
+                    patient_email = row[4]
+                    patient_password = row[5]
+                    patient_first_name = row[6]
+                    patient_last_name = row[7]
+                    patient_user_type = row[8]
+                    patient_dob = row[9]
+                    patient_blood_type = row[10]
+                    patient_height = row[11]
+                    patient_avatar_path = str(row[12]) if row[12] is not None else None
+                    patient_id = row[13]
+                    note_taker_email = row[14]
+                    note_taker_password = row[15]
+                    note_taker_first_name = row[16]
+                    note_taker_last_name = row[17]
+                    note_taker_user_type = row[18]
+                    note_taker_avatar_path = str(row[19]) if row[19] is not None else None
+                    note_taker_id = row[20]
+
+                    patient = MedicalPatient(
+                        weight=patient_weight, 
+                        email=patient_email, 
+                        password=patient_password, 
+                        first_name=patient_first_name, 
+                        last_name=patient_last_name, 
+                        access_level=patient_user_type, 
+                        dob=patient_dob, 
+                        blood_type=patient_blood_type, 
+                        height=patient_height, 
+                        avatar_path=patient_avatar_path, 
+                        id=patient_id
+                    )
+                    note_taker = User(
+                        email=note_taker_email, 
+                        password=note_taker_password, 
+                        first_name=note_taker_first_name, 
+                        last_name=note_taker_last_name, 
+                        access_level=note_taker_user_type, 
+                        avatar_path=note_taker_avatar_path, 
+                        id=note_taker_id
+                    )
+                    notes.append(Note(
+                        patient=patient, 
+                        note_taker=note_taker, 
+                        note_date=note_date, 
+                        note=note_text, 
+                        id=note_id
+                    ))
+        except Exception as error:
+            print(f"Error fetching notes: {error}")
+        return notes
+        
     def get_notes_by_patient_id(self, patient_id):
         if (patient_id is None):
             raise ValueError("Parameters cannot be none")
@@ -780,6 +948,7 @@ class Database:
                 cursor.execute('insert into medical_note_attachments (note_id, attachment_path)  values (:note_id, :attachement_path)',
                                note_id=note_id,
                                attachement_path=str(path))
+            return note_id
                 
     def update_note(self, note, paths):
         if not isinstance(note, Note):

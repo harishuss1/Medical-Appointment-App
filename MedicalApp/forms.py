@@ -9,7 +9,7 @@ from .allergy import Allergy
 
 
 def check_date(self, field):
-        if len(field.data) > datetime.today():
+        if len(field.data) > datetime.utcnow().strftime("%Y-%m-%d"):
             raise ValidationError("You cannot book an appointment before today's date")
         
 class AddMedicalRoom(FlaskForm):

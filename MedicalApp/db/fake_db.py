@@ -5,6 +5,7 @@ from MedicalApp.medical_room import MedicalRoom
 from ..user import User, MedicalPatient 
 from oracledb import IntegrityError 
 from ..appointments import Appointments
+from MedicalApp.note import Note
 
 class FakeDB:
 
@@ -55,6 +56,65 @@ class FakeDB:
             MedicalRoom("104", "Test4"),
             MedicalRoom("105", "Test5"),
         ]
+        self.note = []
+        self.note.append(Note(patient=self.patients[0], note_taker=self.users[3], note_date=datetime.date(2024,5,30), note='Follow-up examination conducted. Patient reports improvement in condition. Continuing current medication.', attachement_path=["/attachments/attachments1.pdf"],id=1))
+        self.note.append(Note(patient=self.patients[1], note_taker=self.users[3], note_date=datetime.date(2024,6,7), note='Patient presented with symptoms of flu. Prescribed medication and advised bed rest.', attachement_path=["attachments.attachment2.pdf"],id=2))
+        self.note.append(Note(patient=self.patients[1], note_taker=self.users[3], note_date=datetime.date(2024,8,21), note='Patient presented with symptoms of flu again. Medication does not work.', attachement_path=["attachments.attachment4.pdf"],id=3))
+
+    def get_notes(self):
+        return self.note
+    
+    def get_notes_page_number(self, page, patient_id=None, note_taker_id=None):
+        if page is None:
+            raise ValueError("Page number cannot be None")
+        if patient_id is not None and not isinstance(patient_id, int):
+            raise TypeError("Patient ID must be an integer")
+        if note_taker_id is not None and not isinstance(note_taker_id, int):
+            raise TypeError("Note taker ID must be an integer")
+
+        try:
+            page = int(page)
+        except ValueError:
+            raise TypeError("Page number must be an integer")
+
+        notes = []
+        offset = (page - 1) * 2
+        count = 2
+        if patient_id is not None or note_taker_id is not None:
+            filtered_notes = [
+                note for note in self.note
+                if (patient_id is not None and note.patient.id == patient_id) or
+                (note_taker_id is not None and note.note_taker.id == note_taker_id)
+            ]
+        else:
+            filtered_notes = self.note
+
+        end = min(count + offset, len(filtered_notes))
+
+        for i in range(offset, end):
+            notes.append(filtered_notes[i])
+
+        return notes
+    
+    def get_note_by_id(self, id):
+        if (id is None):
+            raise ValueError("Parameters cannot be None")
+        try:
+            id = int(id)
+        except:
+            raise TypeError("Parameters of incorrect type")
+        
+        for note in self.note:
+            if (id == note.id):
+                return note
+        return None
+    
+    def create_note(self, note):
+        if not isinstance(note, Note):
+            raise TypeError("Invalid note type")
+        note.id = len(self.note)+1
+        self.note.append(note)
+        return note.id
         
     def add_medical_room(self, room_number, description):
         if (room_number is None or description is None):
@@ -108,7 +168,10 @@ class FakeDB:
     def add_appointment(self, appointment):
         if not isinstance(appointment, Appointments):
             raise TypeError("Invalid appointment type")
+        appointment.id = len(self.appointments) + 1
         self.appointments.append(appointment)
+        return appointment.id
+        
 
     def update_appointment(self, appointment):
         for a in self.appointments:
@@ -116,12 +179,24 @@ class FakeDB:
                 self.appointments.remove(a)
                 self.appointments.append(appointment)
 
+    def get_appointments_page_number(self, page, doctor_first_name, doctor_last_name, patient_first_name, patient_last_name):
+        if page is None: 
+            raise ValueError("Page parameter cannot be None or empty")
+        
+        appointments = []
+        for appointment in self.appointments:
+            if (doctor_first_name is None or doctor_first_name == appointment.doctor.first_name) and \
+            (doctor_last_name is None or doctor_last_name == appointment.doctor.last_name) and \
+            (patient_first_name is None or patient_first_name == appointment.patient.first_name) and \
+            (patient_last_name is None or patient_last_name == appointment.patient.last_name):
+                appointments.append(appointment)
+        start_index = (page - 1) * 20
+        end_index = start_index + 20
+        return appointments[start_index:end_index]
+
     def delete_appointment_by_id(self, appointment_id):
-        self.appointments = [
-            appointment for appointment in self.appointments if appointment.id != appointment_id
-        ]
-        if len(self.appointments) == len(update_appointment):
-            raise ValueError("Appointment not found")
+        appointment= self.get_appointment_by_id(appointment_id)    
+        self.appointments.remove(appointment)
 
     def get_medical_rooms(self):
         return self.rooms
