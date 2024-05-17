@@ -167,13 +167,14 @@ class PatientDetailsForm(FlaskForm):
 
     def prefill(self):
         patient = get_db().get_patients_by_id(current_user.id)
-        self.dob.data = patient.dob
-        self.blood_type.data = patient.blood_type
-        self.height.data = patient.height
-        self.weight.data = patient.weight
-        self.allergies.choices = [(str(allergy.id), allergy.name)
-                              for allergy in patient.allergies]
-        self.allergies.data = [str(allergy.id) for allergy in patient.allergies]
+        if patient is not None:
+            self.dob.data = patient.dob
+            self.blood_type.data = patient.blood_type
+            self.height.data = patient.height
+            self.weight.data = patient.weight
+            self.allergies.choices = [(str(allergy.id), allergy.name)
+                                for allergy in patient.allergies]
+            self.allergies.data = [str(allergy.id) for allergy in patient.allergies]
 
 
 class ChangePasswordForm(FlaskForm):
