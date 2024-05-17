@@ -11,18 +11,11 @@
     <li><a href="{{ url_for('medical_rooms.add_medical_room') }}">Add medical room</a></li>
 {% endblock nav %}
 {% block content %}
-<h1>{% block title %}Note{% endblock title %}</h1>
-<ul id="note">
-        <li>Note taker: {{ note.note_taker.first_name }} {{ note.note_taker.last_name }}</li>
-        <li>Patient: {{ note.patient.first_name }} {{ note.patient.last_name }}</li>
-        <li>Note date: {{ note.note_date }}</li>
-        <li>Note: {{ note.note }}.</li>
-        <form method="post" id="add-note" enctype="multipart/form-data">
-            {{ form.csrf_token }}
-            {{ form.attachement.label }} {{ form.attachement() }}
-            <button type="submit">Update Note</button>
-        </form>
-        <button id="download-attachements"><a href="{{ url_for('note.get_attachments', note_id=note.id) }}">Download PDF file</a></button>
-</ul>
-
+<h1>{% block title %}Create Medical Room{% endblock title %}</h1>
+<form method="post" id="add-note" enctype="multipart/form-data">
+    {{ form.csrf_token }}
+    {{ form.room.label }} {{ form.room() }}
+    {{ form.description.label }} {{ form.description() }}
+    <button type="submit">Add Room</button>
+</form>
 {% endblock content %}

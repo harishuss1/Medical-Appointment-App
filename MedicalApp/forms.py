@@ -4,13 +4,17 @@ from flask_wtf import FlaskForm
 from wtforms import DateField, FloatField, MultipleFileField, SelectField, SelectMultipleField, FileField, StringField, IntegerField, EmailField, DateField, PasswordField, TextAreaField, SubmitField, RadioField, SelectField, ValidationError
 from wtforms.validators import DataRequired, Email, Length, EqualTo
 from flask_wtf.file import FileField, FileRequired
-#from .db.dbmanager import get_db
+from .db.dbmanager import get_db
 
 
 
 def check_date(self, field):
         if len(field.data) > datetime.today():
             raise ValidationError("You cannot book an appointment before today's date")
+        
+class AddMedicalRoom(FlaskForm):
+    description = TextAreaField('Description', validators=[DataRequired()])
+    room = StringField('Room', validators=[DataRequired()])
 
 class AppointmentResponseForm(FlaskForm):
     select_confirmation = RadioField('Acceptance:', choices=[(
