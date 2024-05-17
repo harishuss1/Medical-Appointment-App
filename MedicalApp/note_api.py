@@ -24,7 +24,7 @@ def get_notes():
     page = 1
     patient_id = None
     note_taker_id = None
-    
+
     if request.args:
         page = request.args.get("page", 1)
         try:
@@ -59,7 +59,7 @@ def get_notes():
         except DatabaseError:
             abort(make_response(jsonify(id="409", description='Something went wrong with our database'), 409))
 
-    if not notes:
+    if notes is None or len(notes) == 0:
         abort(make_response(jsonify(id="404", description="No notes currently available in the database"), 404))
 
     data = {}

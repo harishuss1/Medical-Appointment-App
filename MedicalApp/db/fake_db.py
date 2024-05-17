@@ -79,12 +79,14 @@ class FakeDB:
         notes = []
         offset = (page - 1) * 2
         count = 2
-
-        filtered_notes = [
-            note for note in self.note
-            if (patient_id is not None and note.patient.id == patient_id) or
-            (note_taker_id is not None and note.note_taker.id == note_taker_id)
-        ]
+        if patient_id is not None or note_taker_id is not None:
+            filtered_notes = [
+                note for note in self.note
+                if (patient_id is not None and note.patient.id == patient_id) or
+                (note_taker_id is not None and note.note_taker.id == note_taker_id)
+            ]
+        else:
+            filtered_notes = self.note
 
         end = min(count + offset, len(filtered_notes))
 

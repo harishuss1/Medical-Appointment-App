@@ -28,7 +28,7 @@ class TestNoteAPI(unittest.TestCase):
         json_string = json.dumps(data)
         token = "mIzbZLyEzNKW7SP5NAx9eUHUq_w"
         headers = {'Authorization': f'Bearer {token}'}
-        result = self.client.post('/api/notes/', data=json_string, headers=headers, content_type='application/json')
+        result = self.client.post('/api/notes', data=json_string, headers=headers, content_type='application/json')
         self.assertEqual(201, result.status_code)
         self.assertNotEqual("", result.json)
         self.assertEqual("Test Note", result.json["note"])
