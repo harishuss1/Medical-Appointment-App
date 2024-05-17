@@ -38,7 +38,7 @@ class AppointmentAPITestCases(unittest.TestCase):
         self.assertTrue(len(results) > 0)
 
     #def test_create_appointment_success_patient(self):
-     #   token = "patient_token"
+     #   token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
       #  headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
        # data = {
         #    "doctor_id": 1,
@@ -67,14 +67,26 @@ class AppointmentAPITestCases(unittest.TestCase):
        # self.assertEqual(data['location'], appointment['location'])
 
     def test_create_appointment_missing_fields(self):
-        token = "patient_token"
+        token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
         headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
         data = {}
         result = self.client.post('/api/appointments', headers=headers, data=json.dumps(data), follow_redirects=True)
         self.assertEqual(400, result.status_code)
 
+    def test_create_appointment_invalid_patient_id(self):
+        token = "km9b5-UeGr3SDy6PszxFZRRvqiE" 
+        headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
+        data = {
+            "doctor_id": 1,
+            "appointment_time": "2024-05-16T10:00:00",
+            "description": "Routine check-up",
+            "patient_id": "invalid"  
+        }
+        result = self.client.post('/api/appointments', headers=headers, data=json.dumps(data), follow_redirects=True)
+        self.assertEqual(400, result.status_code)
+
     def test_create_appointment_invalid_doctor_id(self):
-        token = "patient_token"
+        token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
         headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
         data = {
             "doctor_id": "invalid",
@@ -84,8 +96,20 @@ class AppointmentAPITestCases(unittest.TestCase):
         result = self.client.post('/api/appointments', headers=headers, data=json.dumps(data), follow_redirects=True)
         self.assertEqual(400, result.status_code)
 
+    def test_create_appointment_nonexistent_patient(self):
+        token = "km9b5-UeGr3SDy6PszxFZRRvqiE" 
+        headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
+        data = {
+            "doctor_id": 1,
+            "appointment_time": "2024-05-16T10:00:00",
+            "description": "Routine check-up",
+            "patient_id": 999  
+        }
+        result = self.client.post('/api/appointments', headers=headers, data=json.dumps(data), follow_redirects=True)
+        self.assertEqual(400, result.status_code)
+
     def test_create_appointment_nonexistent_doctor(self):
-        token = "patient_token"
+        token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
         headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
         data = {
             "doctor_id": 999,
@@ -95,8 +119,21 @@ class AppointmentAPITestCases(unittest.TestCase):
         result = self.client.post('/api/appointments', headers=headers, data=json.dumps(data), follow_redirects=True)
         self.assertEqual(400, result.status_code)
 
+    def test_create_appointment_invalid_description(self):
+        token = "km9b5-UeGr3SDy6PszxFZRRvqiE"  # Patient token
+        headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
+        data = {
+            "doctor_id": 1,
+            "appointment_time": "2024-05-16T10:00:00",
+            "description": "",  # Invalid description (empty string)
+            "patient_id": 2
+        }
+        result = self.client.post('/api/appointments', headers=headers, data=json.dumps(data), follow_redirects=True)
+        self.assertEqual(400, result.status_code)
+
+
     def test_create_appointment_invalid_date_format(self):
-        token = "patient_token"
+        token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
         headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
         data = {
             "doctor_id": 1,
@@ -130,7 +167,7 @@ class AppointmentAPITestCases(unittest.TestCase):
         self.assertEqual(400, result.status_code)
 
     def test_unauthorized_patient_access(self):
-        token = "patient_token"
+        token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
         headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
         data = {
             "doctor_id": 1,
