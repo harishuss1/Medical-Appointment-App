@@ -38,7 +38,6 @@ def dashboard():
         flash("Something went wrong with the database")
         return redirect(url_for('home.index'))
     return render_template('patient_dashboard.html', appointments=appointments)
-
 @bp.route('/details/update/', methods=['GET', 'POST'])
 @login_required
 @patient_access
@@ -48,21 +47,26 @@ def update_patient():
         allergies = get_db().get_all_allergies()
         form.allergies.choices = [(Allergy['id'], Allergy['name'])
                               for Allergy in allergies]
-        if request.method == 'POST' and form.validate_on_submit():
-            dob = form.dob.data
-            blood_type = form.blood_type.data
-            height = form.height.data
-            weight = form.weight.data
-            selected_allergies = form.allergies.data  # Storing ids
+        if request.method == 'POST':
+            if form.validate_on_submit():
+                dob = form.dob.data
+                blood_type = form.blood_type.data
+                height = form.height.data
+                weight = form.weight.data
+                selected_allergies = form.allergies.data  # Storing ids
 
-            get_db().update_patient_details(current_user.id, dob,
-                                            blood_type, height, weight, selected_allergies)
+                get_db().update_patient_details(current_user.id, dob,
+                                                blood_type, height, weight, selected_allergies)
 
-            patient_allergies = get_db().get_patient_allergies(current_user.id)
-            form.allergies.data = [Allergy.id for Allergy in patient_allergies]
+                patient_allergies = get_db().get_patient_allergies(current_user.id)
+                form.allergies.data = [Allergy.id for Allergy in patient_allergies]
 
-            flash('Your information has been updated.')
-            return redirect(url_for('patient.view_patient'))
+                flash('Your information has been updated.')
+                return redirect(url_for('patient.view_patient'))
+            else:
+                flash('Please enter correct inputs.')
+                return render_template('update_patient.html', form=form)
+
     except DatabaseError as e:
         flash("something went wrong with the database")
         return redirect('home.index')
@@ -71,7 +75,6 @@ def update_patient():
         return redirect(url_for('home.index'))
     form.prefill()
     return render_template('update_patient.html', form=form)
-
 
 @bp.route('/details/', methods=['GET'])
 @login_required
