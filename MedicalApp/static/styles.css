@@ -7,6 +7,23 @@ body, html {
     display: flex;
     flex-direction: column;
 }
+.flash-messages {
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    width: 300px;
+}
+
+.alert {
+    margin-bottom: 15px;
+    padding: 20px;
+    border-radius: 10px;
+    font-size: 20px;
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+    color: #856404;
+}
+
 
 .header {
     display: flex;
