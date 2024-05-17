@@ -74,3 +74,20 @@ def get_note_by_id(note_id):
         abort(make_response(jsonify(id="400", description="Note ID must be an integer"), 400))
     except DatabaseError:
         abort(make_response(jsonify(id="409", description='Something went wrong with our database'), 409))
+
+@bp.route('', methods=['POST'])
+def create_note():
+    data = request.json
+    if not data:
+        abort(make_response(jsonify(id="400", description="Request body is empty"), 400))
+
+    try:
+        new_note = Note(**data)
+        created_note_id = get_db().create_note(new_note)
+        return jsonify({"id": created_note_id}), 201
+    except ValueError as e:
+        abort(make_response(jsonify(id="400", description=str(e)), 400))
+    except TypeError as e:
+        abort(make_response(jsonify(id="400", description=str(e)), 400))
+    except DatabaseError:
+        abort(make_response(jsonify(id="409", description='Something went wrong with our database'), 409))
