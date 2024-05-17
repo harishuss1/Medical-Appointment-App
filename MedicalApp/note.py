@@ -25,3 +25,18 @@ class Note:
         self.note_date = note_date
         self.note = note
         self.attachement_path = attachement_path
+
+    def to_json(self, prepended_url=None):
+        data = {
+            'patient': self.patient.to_json(prepended_url),
+            'note_taker': self.note_taker.to_json(prepended_url),
+            'note_date': self.note_date.isoformat(),
+            'note': self.note,
+            'attachment_path': self.attachement_path
+        }
+        if self.id is not None:
+            data['id'] = self.id
+        return data
+  
+
+    
