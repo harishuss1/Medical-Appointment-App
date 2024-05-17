@@ -234,18 +234,19 @@ class Database:
                 FROM medical_users u
                 WHERE
                 u.USER_TYPE = 'STAFF' AND
-                ({ "first_name = :first_name" if first_name is not None and first_name != '' else ":first_name != first_name"} OR
-                { "last_name = :last_name" if last_name is not None and last_name != '' else ":last_name != last_name"}
+                (:first_name IS NULL OR first_name = :first_name) AND
+                (:last_name IS NULL OR last_name = :last_name)
                 OFFSET :offset ROWS
                 FETCH NEXT :count ROWS ONLY
                 """,
-                offset=((page - 1)*10),
-                count=10,
+                offset=((page - 1)*20),
+                count=20,
                 first_name=str(first_name) if first_name else None,
                 last_name=str(last_name) if last_name else None)
             for row in results:
                 doctors.append(User(row[2], row[3], row[4], row[5], row[6], avatar_path=row[1], id=int(row[0])))
         return doctors
+
 
     def get_doctor_by_id(self, id):
         if (id is None):

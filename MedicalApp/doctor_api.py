@@ -25,6 +25,7 @@ def patient_access(func):
     return wrapper
 
 @bp.route('', methods=['GET'])
+@login_required
 def get_doctors():
     doctors = []
     page = None
@@ -82,6 +83,7 @@ def get_doctors():
 
 
 @bp.route('/<int:doctor_id>', methods=['GET'])
+@login_required
 def get_doctor(doctor_id):
     doctor = None
     try:
