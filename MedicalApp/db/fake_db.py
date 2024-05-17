@@ -1,11 +1,12 @@
-import datetime 
+import datetime  
 import oracledb 
-from MedicalApp.allergy import Allergy 
+import oracledb 
+from MedicalApp.allergy import Allergy  
 from MedicalApp.medical_room import MedicalRoom 
-from ..user import User, MedicalPatient 
-from oracledb import IntegrityError 
+from MedicalApp.medical_room import MedicalRoom 
+from ..user import User, MedicalPatient  
+from oracledb import IntegrityError  
 from ..appointments import Appointments
-from ..note import Note
 
 class FakeDB:
 
@@ -88,35 +89,6 @@ class FakeDB:
             if (id == user.id):
                 return user
         return None
-
-    def get_notes(self, patient_id):
-        if patient_id is None:
-            raise ValueError("Patient ID cannot be None")
-        
-        patient_notes = [note for note in self.notes if note.patient_email == patient_id]
-        return patient_notes
-
-    def get_notes_page_number(self, page, patient_id, note_taker_id):
-        if page is None:
-            raise ValueError("Page cannot be None")
-        
-        filtered_notes = self.notes
-        if patient_id is not None:
-            filtered_notes = [note for note in filtered_notes if note.patient_email == patient_id]
-        if note_taker_id is not None:
-            filtered_notes = [note for note in filtered_notes if note.note_taker_email == note_taker_id]
-        
-        start_index = (page - 1) * 20
-        end_index = start_index + 20
-        paginated_notes = filtered_notes[start_index:end_index]
-        
-        return paginated_notes
-
-    # def add_note(self, note):
-    #     if not isinstance(note, Note):
-    #         raise TypeError("Note must be an instance of the Note class")
-        
-    #     self.notes.append(note)
 
     def get_appointment_by_id(self, appointment_id):
         if (appointment_id is None):
