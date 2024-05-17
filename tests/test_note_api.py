@@ -1,5 +1,9 @@
+import json
+import datetime
 import unittest
 from MedicalApp import create_app
+from MedicalApp.user import User, MedicalPatient
+from MedicalApp.note import Note
 
 
 class TestNoteAPI(unittest.TestCase):
@@ -12,27 +16,23 @@ class TestNoteAPI(unittest.TestCase):
 
     def tearDown(self):
         self.ctx.pop()
-
-    # def test_get_notes(self):
-    #     result = self.client.get('/api/notes/')
-    #     self.assertEqual(200, result.status_code)
-    #     self.assertIsNotNone(result.json)
-    #     self.assertTrue('count' in result.json)
-
-    # def test_get_note_by_id(self):
-    #     result = self.client.get('/api/notes/1')
-    #     self.assertEqual(200, result.status_code)
-    #     self.assertIsNotNone(result.json)
-    #     self.assertTrue('id' in result.json)
-
-    # def test_get_note_by_id_not_found(self):
-    #     result = self.client.get('/api/notes/9999')
-    #     self.assertEqual(404, result.status_code)
-
-    # def test_get_note_by_id_invalid_id(self):
-    #     result = self.client.get('/api/notes/test')
-    #     self.assertEqual(400, result.status_code)
-
+        
+    def test_addnote_success_201(self):
+        data = {
+        }
+        data['patient_id'] = 7
+        data['note_taker_id'] = 9
+        data['note_date'] = "2024-07-22"
+        data['note'] = "Test Note"
+        data['attachment_paths'] = "/attachments/attachment1.pdf"
+        json_string = json.dumps(data)
+        token = "mIzbZLyEzNKW7SP5NAx9eUHUq_w"
+        headers = {'Authorization': f'Bearer {token}'}
+        result = self.client.put('/api/notes/', data=json_string, headers=headers, content_type='application/json')
+        self.assertEqual(201, result.status_code)
+        self.assertNotEqual("", result.headers['Note'])
+        self.assertNotEqual(9, result.headers['Note'].split("/")[-1])
+    
 
 if __name__ == '__main__':
     unittest.main()

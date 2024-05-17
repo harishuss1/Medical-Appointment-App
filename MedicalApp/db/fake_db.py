@@ -1,10 +1,9 @@
 import datetime  
 import oracledb 
-import oracledb 
 from MedicalApp.allergy import Allergy  
 from MedicalApp.medical_room import MedicalRoom 
-from MedicalApp.medical_room import MedicalRoom 
-from ..user import User, MedicalPatient  
+from MedicalApp.note import Note
+from ..user import User, MedicalPatient
 from oracledb import IntegrityError  
 from ..appointments import Appointments
 
@@ -56,6 +55,11 @@ class FakeDB:
             MedicalRoom("104", "Test4"),
             MedicalRoom("105", "Test5"),
         ]
+        self.note = []
+        self.note.append(Note(patient=self.patients[0], note_taker=self.users[3], note_date='2024-05-30', note='Follow-up examination conducted. Patient reports improvement in condition. Continuing current medication.', attachement_path="/attachments/attachments1.pdf",id=1))
+        self.note.append(Note(patient=self.patients[1], note_taker=self.users[3], note_date='2024-06-14', note='Patient presented with symptoms of flu. Prescribed medication and advised bed rest.', attachement_path="attachments.attachment2.pdf",id=2))
+        self.note.append(Note(patient=self.patients[1], note_taker=self.users[3], note_date='2024-07-02', note='Patient presented with symptoms of flu again. Medication does not work.', attachement_path="attachments.attachment4.pdf",id=3))
+        
         
     def add_medical_room(self, room_number, description):
         if (room_number is None or description is None):
@@ -124,6 +128,27 @@ class FakeDB:
         if len(self.appointments) == len(update_appointment):
             raise ValueError("Appointment not found")
 
+    def get_notes(self):
+        return self.note
+    
+    def get_note_by_id(self, id):
+        if (id is None):
+            raise ValueError("Parameters cannot be None")
+        try:
+            id = int(id)
+        except:
+            raise TypeError("Parameters of incorrect type")
+        
+        for note in self.note:
+            if (id == note.id):
+                return note
+        return None
+    
+    def add_appointment(self, note):
+        if not isinstance(note, Note):
+            raise TypeError("Invalid note type")
+        self.note.append(note)
+    
     def get_medical_rooms(self):
         return self.rooms
 
