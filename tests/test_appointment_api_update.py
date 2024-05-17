@@ -3,6 +3,7 @@ import unittest
 import datetime
 from MedicalApp import create_app
 from MedicalApp.appointments import Appointments
+from MedicalApp.db.dbmanager import get_db
 from MedicalApp.user import User, MedicalPatient
 from MedicalApp.medical_room import MedicalRoom
 
@@ -32,7 +33,7 @@ class AppointmentsUpdateTestCases(unittest.TestCase):
         self.assertNotEqual("", result.headers['Appointment'])
         self.assertNotEqual(9, result.headers['Appointment'].split("/")[-1])
         
-    def test_update_appointment_invalid_id(self):
+    def test_update_appointment_patient_invalid_id(self):
         
         updated_appointment_data = {
             "doctor_id": "invalid_id",  
@@ -44,11 +45,65 @@ class AppointmentsUpdateTestCases(unittest.TestCase):
         
         token = "mIzbZLyEzNKW7SP5NAx9eUHUq_w"
         headers = {'Authorization': f'Bearer {token}'}
-        update_response = self.client.put(f'/api/appointments/1', data=json_data, headers=headers, content_type='application/json')
+        result = self.client.put(f'/api/appointments/1', data=json_data, headers=headers, content_type='application/json')
         
-        self.assertEqual(400, update_response.status_code)
+        self.assertEqual(400, result.status_code)
+        
+    def test_update_appointment_patient_invalid_id(self):
+        
+        updated_appointment_data = {
+            "doctor_id": 9,  
+            "appointment_time": "2025/01/01", 
+            "description": "yayyyy" 
+        }
+        
+        json_data = json.dumps(updated_appointment_data)
+        
+        token = "mIzbZLyEzNKW7SP5NAx9eUHUq_w"
+        headers = {'Authorization': f'Bearer {token}'}
+        result = self.client.put(f'/api/appointments/1', data=json_data, headers=headers, content_type='application/json')
+        
+        self.assertEqual(400, result.status_code)
+        
+    def test_update_appointment_patient_invalid_date(self):
+        
+        updated_appointment_data = {
+            "doctor_id": 9,  
+            "appointment_time": "2025/01/01", 
+            "description": "yayyyy" 
+        }
+        
+        json_data = json.dumps(updated_appointment_data)
+        
+        token = "mIzbZLyEzNKW7SP5NAx9eUHUq_w"
+        headers = {'Authorization': f'Bearer {token}'}
+        result = self.client.put(f'/api/appointments/1', data=json_data, headers=headers, content_type='application/json')
+        
+        self.assertEqual(400, result.status_code)
+        
+    def test_update_appointment_patient_ignores_access_data(self):
+        
+        updated_appointment_data = {
+            "doctor_id": 9,  
+            "appointment_time": "2025-01-01", 
+            "description": "yayyyy",
+            "status": -1,
+            "location": "105"
+            
+        }
+        
+        json_data = json.dumps(updated_appointment_data)
+        
+        token = "mIzbZLyEzNKW7SP5NAx9eUHUq_w"
+        headers = {'Authorization': f'Bearer {token}'}
+        result = self.client.put(f'/api/appointments/1', data=json_data, headers=headers, content_type='application/json')
+        
+        self.assertEqual(201, result.status_code)
+        self.assertEqual('1', result.headers['Appointment'].split("/")[-1])
+        appointment = get_db().get_appointment_by_id(1)
+        self.assertEqual("yayyyy", appointment.description)
+        self.assertEqual(0, appointment.status)
         
     
-        
 if __name__ == '__main__':
     unittest.main()
