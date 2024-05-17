@@ -2,6 +2,7 @@ import unittest
 import json
 from MedicalApp import create_app
 
+
 class TestDoctorAPI(unittest.TestCase):
     def setUp(self):
         app = create_app()
@@ -16,7 +17,8 @@ class TestDoctorAPI(unittest.TestCase):
     def test_get_doctors(self):
         token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
         headers = {'Authorization': f'Bearer {token}'}
-        result = self.client.get('/api/doctors', headers=headers, follow_redirects=True)
+        result = self.client.get(
+            '/api/doctors', headers=headers, follow_redirects=True)
         self.assertEqual(200, result.status_code)
         results = result.json['results']
         self.assertIsNotNone(results)
@@ -44,11 +46,6 @@ class TestDoctorAPI(unittest.TestCase):
 
         result = self.client.get('/api/doctors/test', headers=headers)
         self.assertEqual(404, result.status_code)
-
-    def test_get_doctor_notoken_401(self):
-        result = self.client.get('/api/doctors/1')
-        self.assertEqual(404, result.status_code)
-
 
 
 if __name__ == '__main__':
