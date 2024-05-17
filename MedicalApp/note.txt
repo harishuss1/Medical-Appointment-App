@@ -1,29 +1,11 @@
+Test to create note using curl
+
 curl -X POST -H "Content-Type: application/json" -d '{
-    "patient": {
-        "weight": 60.0,
-        "email": "maddie@example.com",
-        "password": "doctor456",
-        "first_name": "Maddie",
-        "last_name": "Buckley",
-        "access_level": "PATIENT",
-        "dob": "1985-10-05",
-        "blood_type": "O-",
-        "height": 168.0,
-        "avatar_path": "/avatars/maddie.jpg",
-        "id": 6
-    },
-    "note_taker": {
-        "email": "bobby@example.com",
-        "password": "doctor456",
-        "first_name": "Bobby",
-        "last_name": "Nash",
-        "access_level": "STAFF",
-        "avatar_path": "/avatars/bobby.jpg",
-        "id": 4
-    },
+    "patient_id": 6,
+    "note_taker_id": 4,
     "note_date": "2024-05-30",
     "note": "This is a new note.",
-    "attachement_path": [
+    "attachment_paths": [
         "/attachments/attachment1.pdf",
         "/attachments/attachment2.jpg"
     ]

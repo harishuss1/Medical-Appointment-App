@@ -1,6 +1,6 @@
 import datetime
 from flask import Blueprint, jsonify, make_response, request, abort, url_for
-
+from flask_login import login_required, current_user
 from MedicalApp.user import MedicalPatient, User
 from .db.dbmanager import get_db
 from oracledb import DatabaseError
@@ -9,7 +9,16 @@ import urllib.parse
 
 bp = Blueprint('note_api', __name__, url_prefix='/api/notes/')
 
+def login_required(func):
+    def wrapper(*args, **kwargs):
+        if not current_user.is_authenticated:
+            return abort(401, "You do not have access to this page!")
+        return func(*args, **kwargs)
+    wrapper.__name__ = func.__name__
+    return wrapper
+
 @bp.route('', methods=['GET'])
+@login_required
 def get_notes():
     notes = []
     page = 1
@@ -65,6 +74,7 @@ def get_notes():
     return jsonify(data)
 
 @bp.route('/<int:note_id>', methods=['GET'])
+@login_required
 def get_note_by_id(note_id):
     try:
         note = get_db().get_note_by_id(note_id)
@@ -79,36 +89,45 @@ def get_note_by_id(note_id):
         abort(make_response(jsonify(id="409", description='Something went wrong with our database'), 409))
 
 @bp.route('', methods=['POST'])
+@login_required
 def create_note():
-    data = request.json
-    if not data:
-        abort(make_response(jsonify(id="400", description="Request body is empty"), 400))
+    data = request.get_json()
 
-    patient_data = data.get('patient')
-    note_taker_data = data.get('note_taker')
-    note_data = {
-        'note_date': data.get('note_date'),
-        'note': data.get('note'),
-        'attachement_path': data.get('attachement_path', [])
-    }
+    if not data:
+        return jsonify({'error': 'Bad Request', 'message': 'No data provided'}), 400
+
+    patient_id = data.get('patient_id')
+    note_taker_id = data.get('note_taker_id')
+    note_date = data.get('note_date')
+    note_content = data.get('note')
+    attachment_paths = data.get('attachment_paths')
+
+    if not (patient_id and note_taker_id and note_date and note_content):
+        return jsonify({'error': 'Bad Request', 'message': 'Missing required fields'}), 400
 
     try:
-        dob_str = patient_data.get('dob')
-        note_date_str = note_data['note_date']
-        dob = datetime.datetime.strptime(dob_str, "%Y-%m-%d").date()
-        note_date = datetime.datetime.strptime(note_date_str, "%Y-%m-%d").date()
+        patient_id = int(patient_id)
+        note_taker_id = int(note_taker_id)
+    except ValueError:
+        return jsonify({'error': 'Bad Request', 'message': 'Patient ID and note taker ID must be integers'}), 400
 
-        del patient_data['dob']
-        del note_data['note_date']
+    try:
+        patient = get_db().get_patients_by_id(patient_id)
+        note_taker = get_db().get_user_by_id(note_taker_id)
 
-        patient = MedicalPatient(dob=dob, **patient_data)
-        note_taker = User(**note_taker_data)
-        new_note = Note(patient=patient, note_taker=note_taker, note_date=note_date, **note_data)
-        created_note_id = get_db().create_note(new_note)
-        return jsonify({"message": "Note created succesfully"}), 201
-    except ValueError as e:
-        abort(make_response(jsonify(id="400", description=str(e)), 400))
-    except TypeError as e:
-        abort(make_response(jsonify(id="400", description=str(e)), 400))
-    except DatabaseError as e:
-        abort(make_response(jsonify(id="409", description=str(e)), 409))
+        if not patient or not note_taker:
+            return jsonify({'error': 'Bad Request', 'message': 'Invalid patient or note_taker ID'}), 400
+
+        note = Note(
+            patient=patient,
+            note_taker=note_taker,
+            note_date=datetime.datetime.strptime(note_date, '%Y-%m-%d'),
+            note=note_content,
+            attachement_path=attachment_paths
+        )
+
+        get_db().create_note(note)
+
+        return jsonify({"message": "Note created successfully"}), 201
+    except DatabaseError:
+        abort(make_response(jsonify(id="409", description='Something went wrong with our database'), 409))
