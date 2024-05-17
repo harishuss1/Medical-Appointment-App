@@ -103,7 +103,7 @@ class NoteForm(FlaskForm):
 
 
 class AddAttachementForm(FlaskForm):
-    attachement = MultipleFileField('Add an attachement')
+    attachement = MultipleFileField('Add an attachement', validators=[DataRequired()])
 
 
 class BlockUserForm(FlaskForm):
