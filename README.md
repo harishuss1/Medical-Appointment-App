@@ -2,7 +2,7 @@
 # Medical Appointment App
 
 ## Web URL to website:
-http://10.172.19.22:5040/
+http://10.172.19.22:5050/
 will work by using Dawson College Wi-Fi or connecting through Forti VPN
 
 ## Gitlab repo
