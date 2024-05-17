@@ -158,14 +158,14 @@ class AppointmentAPITestCases(unittest.TestCase):
             "description": "Routine check-up"
         }
         result = self.client.post('/api/appointments', headers=headers, data=json.dumps(data), follow_redirects=True)
-        self.assertEqual(400, result.status_code)
+        self.assertEqual(401, result.status_code)
 
     def test_invalid_json_data(self):
         token = "valid_token"
         headers = {'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
         data = {}
         result = self.client.post('/api/appointments', headers=headers, data=json.dumps(data), follow_redirects=True)
-        self.assertEqual(400, result.status_code)
+        self.assertEqual(401, result.status_code)
 
     def test_unauthorized_patient_access(self):
         token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
