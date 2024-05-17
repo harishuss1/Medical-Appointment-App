@@ -12,7 +12,7 @@ bp = Blueprint('doctor', __name__, url_prefix="/doctor/")
 def doctor_access(func):
     def wrapper(*args, **kwargs):
         if current_user.access_level != 'STAFF' and current_user.access_level != 'ADMIN':
-            return abort(401, "You do not have access to this page!")
+            return abort(403, "You do not have access to this page!")
         return func(*args, **kwargs)
     wrapper.__name__ = func.__name__
     return wrapper
