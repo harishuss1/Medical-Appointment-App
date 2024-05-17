@@ -95,23 +95,25 @@ def get_patient(patient_id):
                 json_data['allergies']
             except:
                 abort(make_response(jsonify(id="400", description=f"No allergies parameter found."), 400))
+                
+            for allergy in patient.allergies:
+                allergy_ids.append(allergy.id)
 
-            for allergy in json_data['allergies']:
+            for a in json_data['allergies']:
                 allergy_id = None
                 try:
-                    allergy_id = int(allergy)
+                    allergy_id = int(a)
                 except:
                     abort(make_response(jsonify(id="400", description=f"The allergy id {allergy_id} is of incorrect type."), 400))
                 allergy = get_db().get_allergy_by_id(allergy_id)
                 if allergy is None:
                     abort(make_response(jsonify(id="404", description=f"The allergy id {allergy_id} does not exist."), 404))
-                if allergy not in patient.allergies:
+                if allergy_id not in allergy_ids:
                     allergy_ids.append(allergy_id)
 
             get_db().update_allergies(patient_id, allergy_ids)
 
-            resp = make_response({}, 201)
-            resp.headers['Patient'] = url_for('patient_api.get_patient', patient_id=patient_id)
+            resp = make_response(get_db().get_patients_by_id(patient_id).to_json(request.url_root), 201)
             return resp
     except IntegrityError as e:
         abort(make_response(jsonify(id="400", description='The allergie(s) you have provided do not exist'), 400))

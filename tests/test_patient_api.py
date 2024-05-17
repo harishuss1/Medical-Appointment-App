@@ -149,14 +149,15 @@ class PatientAPITestCases(unittest.TestCase):
     def test_addallergy_success_201(self):
         data = {
         }
-        data['allergies'] = [1]
+        data['allergies'] = [2]
         json_string = json.dumps(data)
         token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
         headers = {'Authorization': f'Bearer {token}'}
-        result = self.client.put('/api/patients/7', headers=headers, data=json_string, content_type='application/json')
+        result = self.client.put('/api/patients/6', headers=headers, data=json_string, content_type='application/json')
         self.assertEqual(201, result.status_code)
-        # print(result)
-        self.assertNotEqual("", result.headers['Patient'])
+        result = result.json
+        self.assertEqual(2, len(result['allergies']))
+        #self.assertEqual
         
     def test_updateallergy_badallergyids_400(self):
         data = {

@@ -298,10 +298,24 @@ class FakeDB:
             page = int(page)
         except:
             raise TypeError("Parameters of incorrect type")
+        
+        doctors = self.get_doctors()
+        offset = ((page - 1)*2)
+        count = 2
+        
+        results = []
+        
+        end = count+offset if count+offset <= len(doctors) else len(doctors)
 
-        doctors = [doctor for doctor in self.users if (first_name is None or doctor.first_name == first_name) and (
-            last_name is None or doctor.last_name == last_name)]
-        return doctors[(page-1)*20: page*20]
+        for i in range(offset, end):
+            doctor = doctors[i]
+            if first_name is None and last_name is None:
+                results.append(doctor)
+            if first_name is not None and doctor.first_name == first_name:
+                results.append(doctor)
+            if last_name is not None and doctor.last_name == last_name:
+                results.append(doctor)
+        return results
 
     def run_file(self, file_path):
         pass

@@ -16,14 +16,14 @@ class TestDoctorAPI(unittest.TestCase):
     def test_get_doctors(self):
         token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
         headers = {'Authorization': f'Bearer {token}'}
-        result = self.client.get('/api/doctors/', headers=headers)
+        result = self.client.get('/api/doctors', headers=headers, follow_redirects=True)
         self.assertEqual(200, result.status_code)
         results = result.json['results']
         self.assertIsNotNone(results)
-        self.assertEqual(5, len(results))
-        self.assertEqual("Eddie", results[2]['first_name'])
-        self.assertEqual("Diaz", results[2]['last_name'])
-        self.assertEqual("eddie@example.com", results[2]['email'])
+        self.assertEqual(1, len(results))
+        self.assertEqual("Bobby", results[0]['first_name'])
+        self.assertEqual("Nash", results[0]['last_name'])
+        self.assertEqual("bobby@example.com", results[0]['email'])
 
     def test_get_doctor(self):
         token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
