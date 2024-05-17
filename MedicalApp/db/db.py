@@ -207,6 +207,7 @@ class Database:
                 SELECT 
                 u.id, u.AVATAR_PATH, u.EMAIL, u.PASSWORD, u.FIRST_NAME, u.LAST_NAME, u.USER_TYPE
                 FROM medical_users u
+                WHERE u.user_type = 'STAFF' or u.user_type = 'ADMIN'
                 """)
             for row in results:
                 doctors.append(User(row[2], row[3], row[4], row[5], row[6], 
@@ -233,13 +234,13 @@ class Database:
                 FROM medical_users u
                 WHERE
                 u.USER_TYPE = 'STAFF' AND
-                (:first_name IS NULL OR first_name = :first_name) AND
-                (:last_name IS NULL OR last_name = :last_name)
+                ({ "first_name = :first_name" if first_name is not None and first_name != '' else ":first_name != first_name"} OR
+                { "last_name = :last_name" if last_name is not None and last_name != '' else ":last_name != last_name"}
                 OFFSET :offset ROWS
                 FETCH NEXT :count ROWS ONLY
                 """,
-                offset=((page - 1)*20),
-                count=20,
+                offset=((page - 1)*10),
+                count=10,
                 first_name=str(first_name) if first_name else None,
                 last_name=str(last_name) if last_name else None)
             for row in results:
@@ -624,6 +625,18 @@ class Database:
                 allergies.append(
                     Allergy(int(row[0]), str(row[1]), str(row[2])))
         return allergies
+    
+    def add_allergy(self, name, description):
+        if (name is None or description is None):
+            raise ValueError("Parameters cannot be none")
+
+        with self.__get_cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO medical_allergies (name, description)
+                VALUES (:name, :description)
+                """,
+                name=name, description=description)
 
     def get_patient_details(self, patient_id):
         if (patient_id is None):
@@ -1052,10 +1065,24 @@ class Database:
         with self.__get_cursor() as cursor:
             if not isinstance(appointment, Appointments):
                 raise TypeError("expected type of Appointments")
-            with self.__get_cursor() as cursor:
-                cursor.execute(" UPDATE medical_appointments SET doctor_id =: doctor_id, appointment_time =: appointment_time, status =: status, location =: location, description =: description WHERE id =:id",
-                               doctor_id=appointment.doctor.id, appointment_time=appointment.appointment_time, status=appointment.status, location=appointment.location.room_number, description=appointment.description, id=appointment.id)
-                
+            cursor.execute("""
+                UPDATE medical_appointments 
+                SET doctor_id = :doctor_id, 
+                    appointment_time = :appointment_time, 
+                    status = :status, 
+                    location = :location, 
+                    description = :description 
+                WHERE id = :id
+                """, {
+                    'doctor_id': appointment.doctor.id, 
+                    'appointment_time': appointment.appointment_time, 
+                    'status': appointment.status, 
+                    'location': appointment.location.room_number, 
+                    'description': appointment.description, 
+                    'id': appointment.id
+                })
+            self.__connection.commit()
+
     def get_appointments(self):
         appointments = []
         with self.__get_cursor() as cursor:

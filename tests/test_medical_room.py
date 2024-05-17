@@ -66,7 +66,8 @@ class MedicalRoomConstructorTest(unittest.TestCase):
         headers = {'Authorization': f'Bearer {token}'}
         result = self.client.post('/api/medical_rooms', headers=headers, data=json_string, content_type='application/json')
         self.assertEqual(201, result.status_code)
-        self.assertEqual("118", result.headers['Room'].split("/")[-1])
+        result = result.json
+        self.assertEqual("118", result['room_number'])
         
     def test_createmedicalroom_medicalroomexists(self):
         data = {}

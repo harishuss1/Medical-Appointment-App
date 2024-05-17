@@ -8,6 +8,14 @@ from datetime import datetime
 
 bp = Blueprint('appointments_api', __name__, url_prefix='/api/appointments/')
 
+def patient_access(func):
+    def wrapper(*args, **kwargs):
+        if current_user.access_level != 'PATIENT' and current_user.access_level != 'STAFF' and current_user.access_level != 'ADMIN':
+            return abort(403, "You do not have access to this page!")
+        return func(*args, **kwargs)
+    wrapper.__name__ = func.__name__
+    return wrapper
+
 def login_required(func):
     def wrapper(*args, **kwargs):
         if not current_user.is_authenticated:
@@ -17,6 +25,8 @@ def login_required(func):
     return wrapper
 
 @bp.route('', methods=['GET', 'POST'])
+@login_required
+@patient_access
 def get_appointments_api():
     if request.method == 'POST':
         appointment_json = request.json
@@ -116,6 +126,7 @@ def get_appointments_api():
 
 @bp.route('/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 @login_required
+@patient_access
 def get_appointment_by_id_api(id):
     appointment = get_db().get_appointment_by_id(id)
     if request.method == 'GET':

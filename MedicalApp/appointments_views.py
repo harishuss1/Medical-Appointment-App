@@ -1,3 +1,4 @@
+import datetime
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 from oracledb import DatabaseError
@@ -10,19 +11,21 @@ bp = Blueprint('appointments', __name__, url_prefix='/appointments/')
 
 def patient_access(func):
     def wrapper(*args, **kwargs):
-        if current_user.access_level != 'PATIENT' and current_user.access_level != 'STAFF' and current_user.access_level != 'ADMIN' and current_user.access_level != 'ADMIN_USER':
+        if current_user.access_level != 'PATIENT' and current_user.access_level != 'STAFF':
             return abort(403, "You do not have access to this page!")
         return func(*args, **kwargs)
     wrapper.__name__ = func.__name__
     return wrapper
 
+
 def doctor_access(func):
     def wrapper(*args, **kwargs):
-        if current_user.access_level != 'STAFF' and current_user.access_level != 'ADMIN' and current_user.access_level != 'ADMIN_USER':
+        if current_user.access_level != 'STAFF' and current_user.access_level != 'ADMIN':
             return abort(403, "You do not have access to this page!")
         return func(*args, **kwargs)
     wrapper.__name__ = func.__name__
     return wrapper
+
 
 @bp.route('/book/', methods=['GET', 'POST'])
 @login_required
@@ -39,9 +42,9 @@ def book_appointment():
             return redirect(url_for('patient.update_patient'))
         user = 'patient'
         form.patient.data = str(current_user.id)
-        form.patient.render_kw = {'disabled' : ''} 
+        form.patient.render_kw = {'disabled': ''}
         form.location.data = '101'
-        form.location.render_kw = {'disabled' : ''}
+        form.location.render_kw = {'disabled': ''}
     if request.method == "POST" and form.validate_on_submit():
         try:
             patient = get_db().get_patients_by_id(form.patient.data)
@@ -52,7 +55,7 @@ def book_appointment():
                 status = 1
             location = get_db().get_medical_room_by_room_number(form.location.data)
             description = form.description.data
-            
+
             new_appointment = Appointments(
                 patient, doctor, time, status, location, description)
 
@@ -64,6 +67,7 @@ def book_appointment():
             return redirect('home.index')
 
     return render_template('appointments.html', form=form)
+
 
 @bp.route('/<int:id>/')
 @login_required
@@ -133,9 +137,11 @@ def requested_appointments(user_type):
         return redirect(url_for(f'{user_type}.dashboard'))
 
 # CHANGE!!!
+
+
 @bp.route('/requests/<int:id>/', methods=['GET', 'POST'])
 @login_required
-@patient_access
+@doctor_access
 def update_appointment(id):
     form = AppointmentResponseForm()
     form.set_choices()
@@ -153,10 +159,66 @@ def update_appointment(id):
     except TypeError as e:
         flash("Incorrect types")
         return redirect(url_for('appointments.requested_appointments', user_type='doctor'))
-    except ValueError as e: 
+    except ValueError as e:
         flash("Incorrect values were passed")
         return redirect(url_for('appointments.requested_appointments', user_type='doctor'))
 
     if appointment is None:
         abort(404, "This address does not exist")
     return render_template('specific_appointment.html', appointment=appointment, form=form)
+
+
+@bp.route('/update/<int:id>/', methods=['GET', 'POST'])
+@login_required
+@patient_access
+def update_patient_appointment(id):
+    try:
+        appointment = get_db().get_appointment_by_id(id)
+        if appointment is None:
+            abort(404, "This appointment does not exist")
+
+        if appointment.status != 0:
+            flash("Only pending appointments can be updated")
+            return redirect(url_for(f'{(current_user.access_level).lower()}.dashboard'))
+
+        form = AppointmentForm()
+        form.set_patients()
+        form.set_doctors()
+        form.set_rooms()
+
+        form.patient.data = str(current_user.id)
+        form.patient.render_kw = {'disabled': ''}
+        form.location.data = '101'
+        form.location.render_kw = {'disabled': ''}
+
+        if request.method == 'POST':
+            if form.validate_on_submit():
+                patient = get_db().get_patients_by_id(form.patient.data)
+                doctor = get_db().get_user_by_id(form.doctor.data)
+                status = 0
+                description = form.description.data
+                location = get_db().get_medical_room_by_room_number(form.location.data)
+                time = form.appointment_time.data
+
+                updated_appointment = Appointments(
+                    patient, doctor, time, status, location, description)
+                updated_appointment.id = id
+
+                get_db().update_appointment(updated_appointment)
+
+                flash("Appointment has been successfully updated")
+                return redirect(url_for(f'{(current_user.access_level).lower()}.dashboard'))
+            else:
+                flash(f"There was an error in the form submission {
+                      form.errors}")
+                return render_template('update_specific_appointment.html', appointment=appointment, form=form)
+    except DatabaseError as e:
+        flash("Something went wrong with the database")
+        return redirect(url_for(f'{(current_user.access_level).lower()}.dashboard'))
+    except ValueError as e:
+        flash("Incorrect values were passed")
+        return redirect(url_for(f'{(current_user.access_level).lower()}.dashboard'))
+    form.doctor.data = str(appointment.doctor.id)
+    form.appointment_time.data = appointment.appointment_time
+    form.description.data = appointment.description
+    return render_template('update_specific_appointment.html', appointment=appointment, form=form)

@@ -4,7 +4,7 @@ from .user import User
 from .db.dbmanager import get_db
 from oracledb import InternalError, DatabaseError
 from flask_login import current_user, login_user, logout_user, login_required
-from .forms import AppointmentResponseForm
+from .forms import AllergyForm, AppointmentResponseForm
 from .db.db import Database
 
 bp = Blueprint('doctor', __name__, url_prefix="/doctor/")
@@ -59,4 +59,20 @@ def notes(patient_id):
     except ValueError as e: 
         flash("Incorrect values were passed")
         return redirect(url_for('doctor.dashboard'))
+    
+
+@bp.route('/allergies/add', methods=['GET', 'POST'])
+@login_required
+@doctor_access
+def add_allergy():
+    form = AllergyForm()
+    if form.validate_on_submit():
+        try:
+            get_db().add_allergy(form.name.data, form.description.data)
+            flash('Allergy has been successfully added')
+            return redirect(url_for('doctor.dashboard'))
+        except DatabaseError as e:
+            flash("Something went wrong with the database")
+            return redirect(url_for('doctor.dashboard'))
+    return render_template('add_allergy.html', form=form)
 
