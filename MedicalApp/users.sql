@@ -13,14 +13,14 @@ CREATE TABLE medical_users (
     first_name  VARCHAR2(1000) NOT NULL,
     last_name   VARCHAR2(1000) NOT NULL,
     avatar_path VARCHAR2(2000),
-    user_type   VARCHAR2(20) REFERENCES medical_access_level(user_type)
+    user_type   VARCHAR2(20) REFERENCES medical_access_level(user_type) ON DELETE CASCADE
 );
 
 
 CREATE TABLE medical_api_tokens(
-user_id integer not null,
+user_id integer not null ,
 token VARCHAR2(162) not null,
-CONSTRAINT user_fk FOREIGN KEY (user_id) REFERENCES medical_users(id)
+CONSTRAINT user_fk FOREIGN KEY (user_id) REFERENCES medical_users(id) ON DELETE CASCADE
 );
 
 /*

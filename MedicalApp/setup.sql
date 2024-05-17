@@ -9,7 +9,7 @@ create table medical_patients(
     blood_type varchar(3),
     height float,
     weight float,
-    CONSTRAINT p_fk FOREIGN KEY (id) REFERENCES medical_users(id)
+    CONSTRAINT p_fk FOREIGN KEY (id) REFERENCES medical_users(id) ON DELETE CASCADE
 );
 
 create table medical_allergies (
@@ -22,8 +22,8 @@ create table medical_allergies (
 create table medical_patient_allergies(
     patient_id integer,
     allergy_id integer,
-    CONSTRAINT pa_fk FOREIGN KEY (patient_id) REFERENCES medical_users(id),
-    CONSTRAINT a_fk FOREIGN KEY (allergy_id) REFERENCES medical_allergies(id)
+    CONSTRAINT pa_fk FOREIGN KEY (patient_id) REFERENCES medical_users(id) ON DELETE CASCADE,
+    CONSTRAINT a_fk FOREIGN KEY (allergy_id) REFERENCES medical_allergies(id) ON DELETE CASCADE
 );
 
 create table medical_rooms(
@@ -44,9 +44,9 @@ create table medical_appointments(
     location varchar2(20),
     description nclob,
     CONSTRAINT status_value CHECK (status = 0 OR status = -1 or status = 1),
-    CONSTRAINT location_fk FOREIGN KEY (location) REFERENCES medical_rooms(room_number),
-    CONSTRAINT pid_fk FOREIGN KEY (patient_id) REFERENCES medical_users(id),
-    CONSTRAINT did_fk FOREIGN KEY (doctor_id) REFERENCES medical_users(id)
+    CONSTRAINT location_fk FOREIGN KEY (location) REFERENCES medical_rooms(room_number) ON DELETE CASCADE,
+    CONSTRAINT pid_fk FOREIGN KEY (patient_id) REFERENCES medical_users(id) ON DELETE CASCADE,
+    CONSTRAINT did_fk FOREIGN KEY (doctor_id) REFERENCES medical_users(id) ON DELETE CASCADE
 );
 
 create table medical_notes(
@@ -58,15 +58,15 @@ create table medical_notes(
     note_date TIMESTAMP NOT NULL,
     note NCLOB,
     constraint pan_fk FOREIGN KEY(patient_id)
-        REFERENCES medical_users(id),
+        REFERENCES medical_users(id) ON DELETE CASCADE,
     constraint n_fk FOREIGN KEY(note_taker_id)
-        REFERENCES medical_users(id)
+        REFERENCES medical_users(id) ON DELETE CASCADE
 );
 
 create table medical_note_attachments(
     note_id integer,
     attachment_path varchar2(1000) not null,
-    CONSTRAINT note_fk FOREIGN KEY (note_id) REFERENCES medical_notes(id)
+    CONSTRAINT note_fk FOREIGN KEY (note_id) REFERENCES medical_notes(id) ON DELETE CASCADE
 );
 
 commit;
