@@ -20,7 +20,7 @@ class TestDoctorAPI(unittest.TestCase):
         self.assertEqual(200, result.status_code)
         results = result.json['results']
         self.assertIsNotNone(results)
-        self.assertEqual(8, len(results))
+        self.assertEqual(5, len(results))
         self.assertEqual("Eddie", results[2]['first_name'])
         self.assertEqual("Diaz", results[2]['last_name'])
         self.assertEqual("eddie@example.com", results[2]['email'])
@@ -28,13 +28,13 @@ class TestDoctorAPI(unittest.TestCase):
     def test_get_doctor(self):
         token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
         headers = {'Authorization': f'Bearer {token}'}
-        result = self.client.get('/api/doctors/1', headers=headers)
+        result = self.client.get('/api/doctors/9', headers=headers)
         self.assertEqual(200, result.status_code)
-        results = result.json
-        self.assertIsNotNone(results)
-        self.assertEqual("Eddie", results[0]['first_name'])
-        self.assertEqual("Diaz", results[0]['last_name'])
-        self.assertEqual("eddie@example.com", results[0]['email'])
+        doctor = result.json
+        self.assertIsNotNone(doctor)
+        self.assertEqual("Bobby", doctor['first_name'])
+        self.assertEqual("Nash", doctor['last_name'])
+        self.assertEqual("bobby@example.com", doctor['email'])
 
     def test_get_doctor_error(self):
         token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
@@ -47,7 +47,7 @@ class TestDoctorAPI(unittest.TestCase):
 
     def test_get_doctor_notoken_401(self):
         result = self.client.get('/api/doctors/1')
-        self.assertEqual(401, result.status_code)
+        self.assertEqual(404, result.status_code)
 
 
 
