@@ -2,6 +2,7 @@ from datetime import date
 import datetime
 import oracledb
 import os
+import secrets
 from flask import g
 
 from MedicalApp.allergy import Allergy
@@ -111,10 +112,6 @@ class Database:
                               row[12], avatar_path=row[13], id=int(row[7]))
                 patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
                     row[23]), avatar_path=row[20], id=int(row[14]))
-                doctor = User(row[8], row[9], row[10], row[11],
-                              row[12], avatar_path=row[13], id=int(row[7]))
-                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
-                    row[23]), avatar_path=row[20], id=int(row[14]))
                 location = MedicalRoom(row[25], row[26])
                 appointments.append(Appointments(
                     patient, doctor, row[3], row[4], location, str(row[6]), id=row[0]))
@@ -210,7 +207,6 @@ class Database:
                 SELECT 
                 u.id, u.AVATAR_PATH, u.EMAIL, u.PASSWORD, u.FIRST_NAME, u.LAST_NAME, u.USER_TYPE
                 FROM medical_users u
-                WHERE u.user_type = 'STAFF' OR u.user_type = 'ADMIN'
                 """)
             for row in results:
                 doctors.append(User(row[2], row[3], row[4], row[5], row[6], 
@@ -293,10 +289,6 @@ class Database:
                               row[12], avatar_path=row[13], id=int(row[7]))
                 patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
                     row[23]), avatar_path=row[20], id=int(row[14]))
-                doctor = User(row[8], row[9], row[10], row[11],
-                              row[12], avatar_path=row[13], id=int(row[7]))
-                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
-                    row[23]), avatar_path=row[20], id=int(row[14]))
                 location = MedicalRoom(row[25], row[26])
                 appointments.append(Appointments(
                     patient, doctor, row[3], row[4], location, str(row[6]), id=row[0]))
@@ -318,10 +310,6 @@ class Database:
                 id=id)
             row = results.fetchone()
             if row:
-                doctor = User(row[8], row[9], row[10], row[11],
-                              row[12], avatar_path=row[13], id=int(row[7]))
-                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
-                    row[23]), avatar_path=row[20], id=int(row[14]))
                 doctor = User(row[8], row[9], row[10], row[11],
                               row[12], avatar_path=row[13], id=int(row[7]))
                 patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
@@ -374,10 +362,6 @@ class Database:
                               row[12], avatar_path=row[13], id=int(row[7]))
                 patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
                     row[23]), avatar_path=row[20], id=int(row[14]))
-                doctor = User(row[8], row[9], row[10], row[11],
-                              row[12], avatar_path=row[13], id=int(row[7]))
-                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
-                    row[23]), avatar_path=row[20], id=int(row[14]))
                 location = MedicalRoom(row[25], row[26])
                 appointments.append(Appointments(
                     patient, doctor, row[3], row[4], location, str(row[6]), id=row[0]))
@@ -400,6 +384,24 @@ class Database:
                 patient = User(
                     row[0], row[1], row[2], row[3], row[4], avatar_path=row[5], id=int(row[6]))
         return (patient)
+    
+    def get_user_by_token(self, token):
+        if (not isinstance(token, str)):
+            raise TypeError("Parameters of incorrect type")
+        user = None
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                """SELECT email, password, first_name, 
+                last_name, user_type, avatar_path, id
+                FROM medical_users INNER JOIN medical_api_tokens
+                ON id = user_id
+                WHERE token = :token""",
+                                     token=token)
+            row = results.fetchone()
+            if row:
+                user = User(
+                    row[0], row[1], row[2], row[3], row[4], avatar_path=row[5], id=int(row[6]))
+        return (user)
     
     def get_users_and_roles(self):
         users = []
@@ -491,6 +493,16 @@ class Database:
                     appointments.append(Appointments(patient, doctor,
                                                      row[3], int(row[4]), location, str(row[6]), id=row[0]))
         return appointments
+    
+    def add_medical_room(self, room_number, description):
+        if (room_number is None or description is None):
+            raise ValueError("Parameters cannot be none")
+        if room_number is not None and not isinstance(room_number, str) or description is not None and not isinstance(description, str) :
+            raise TypeError("Parameters of incorrect type")
+        
+        with self.__get_cursor() as cursor:
+            cursor.execute("INSERT INTO medical_rooms VALUES(:room_number, :description)",
+                           room_number=room_number, description=description)
     
     def update_allergies(self, patient_id, allergy_ids):
         if (patient_id is None or allergy_ids is None):
@@ -756,7 +768,6 @@ class Database:
                                note_id=note_id,
                                attachement_path=str(path))
                 
-
     def update_note(self, note, paths):
         if not isinstance(note, Note):
             raise TypeError("expected Note object")
@@ -768,14 +779,26 @@ class Database:
 
     def create_user(self, user):
         if not isinstance(user, User):
-            raise TypeError("expected User object")
+            raise TypeError("Expected User object")
+
+        api_token = secrets.token_urlsafe(20)
+
         with self.__get_cursor() as cursor:
-            cursor.execute('insert into medical_users (email, password, first_name,last_name,user_type)  values (:email, :password, :first_name, :last_name, :user_type)',
-                           email=user.email,
-                           password=user.password,
-                           first_name=user.first_name,
-                           last_name=user.last_name,
-                           user_type=user.access_level)
+            cursor.execute('INSERT INTO medical_users (email, password, first_name, last_name, user_type)  VALUES (:email, :password, :first_name, :last_name, :user_type)',
+                        email=user.email,
+                        password=user.password,
+                        first_name=user.first_name,
+                        last_name=user.last_name,
+                        user_type=user.access_level)
+
+            cursor.execute('SELECT id FROM medical_users WHERE email = :email', {'email': user.email})
+            user_id = cursor.fetchone()[0]
+
+            cursor.execute('INSERT INTO medical_api_tokens (user_id, token) VALUES (:user_id, :api_token)',
+                        {'user_id': user_id, 'api_token': api_token})
+
+        self.__connection.commit()
+
 
     def update_user_password(self, user_id, new_password_hash):
         if (user_id is None or new_password_hash is None):
@@ -855,19 +878,15 @@ class Database:
             with self.__get_cursor() as cursor:
                 cursor.execute(
                     "DELETE FROM medical_appointments WHERE id = :id", id=id)
-                cursor.execute(
-                    "DELETE FROM medical_appointments WHERE id = :id", id=id)
 
     def update_appointment(self, appointment):
         with self.__get_cursor() as cursor:
             if not isinstance(appointment, Appointments):
-                raise TypeError("expected type of Appointmentsr")
+                raise TypeError("expected type of Appointments")
             with self.__get_cursor() as cursor:
-                cursor.execute(" UPDATE medical_appointments SET patient_id =: patient_id, doctor_id =: doctor_id, appointment_time =: appointment_time, status =: status, location =: location, description =: description WHERE id =:id",
-                               patient_id=appointment.patient.id, doctor_id=appointment.doctor.id, appointment_time=appointment.appointment_time, status=appointment.status, location=appointment.location, description=appointment.description, id=appointment.id)
-                cursor.execute(" UPDATE medical_appointments SET patient_id =: patient_id, doctor_id =: doctor_id, appointment_time =: appointment_time, status =: status, location =: location, description =: description WHERE id =:id",
-                               patient_id=appointment.patient.id, doctor_id=appointment.doctor.id, appointment_time=appointment.appointment_time, status=appointment.status, location=appointment.location, description=appointment.description, id=appointment.id)
-
+                cursor.execute(" UPDATE medical_appointments SET doctor_id =: doctor_id, appointment_time =: appointment_time, status =: status, location =: location, description =: description WHERE id =:id",
+                               doctor_id=appointment.doctor.id, appointment_time=appointment.appointment_time, status=appointment.status, location=appointment.location.room_number, description=appointment.description, id=appointment.id)
+                
     def get_appointments(self):
         appointments = []
         with self.__get_cursor() as cursor:
@@ -883,6 +902,53 @@ class Database:
                     patient, doctor, row[3], row[4], location, str(row[6]), id=row[0]))
         return appointments
 
+    def get_appointments_page_number(self, page, doctor_first_name, doctor_last_name, patient_first_name, patient_last_name):
+        if page is None: 
+            raise ValueError("Page parameter cannot be None or empty")
+        
+        appointments = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                f"""
+                SELECT 
+                    app.id, app.patient_id, app.doctor_id, app.appointment_time, app.status, app.location, app.description, 
+                    d.ID, d.EMAIL, d.PASSWORD, d.FIRST_NAME, d.LAST_NAME, d.USER_TYPE, d.AVATAR_PATH, 
+                    p.id, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, p.AVATAR_PATH, 
+                    mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT, mp.WEIGHT, mr.room_number, mr.description 
+                FROM 
+                    medical_appointments app 
+                INNER JOIN 
+                    medical_users d ON app.doctor_id = d.id 
+                INNER JOIN 
+                    medical_users p ON app.PATIENT_ID = p.ID 
+                INNER JOIN 
+                    MEDICAL_PATIENTS mp ON mp.id = p.id 
+                INNER JOIN 
+                    MEDICAL_ROOMs mr ON app.location = mr.room_number
+                WHERE
+                    { "d.FIRST_NAME = :doctor_first_name" if doctor_first_name is not None and doctor_first_name != '' else ":d.FIRST_NAME != :doctor_first_name"} OR
+                    { "d.LAST_NAME = :doctor_last_name" if doctor_last_name is not None and doctor_last_name != '' else ":d.LAST_NAME != :doctor_last_name"}
+                    { "p.FIRST_NAME = :patient_first_name" if patient_first_name is not None and patient_first_name != '' else ":p.FIRST_NAME != :patient_first_name"} OR
+                    { "p.LAST_NAME = :patient_last_name" if patient_last_name is not None and patient_last_name != '' else ":p.LAST_NAME != :patient_last_name"}    
+            """,
+                offset=((page - 1) * 20),
+                count=20,
+                doctor_first_name=str(doctor_first_name),
+                doctor_last_name=str(doctor_last_name),
+                patient_first_name=str(patient_first_name),
+                patient_last_name=str(patient_last_name))
+            for row in results:
+                doctor = User(row[8], row[9], row[10], row[11],
+                            row[12], avatar_path=row[13], id=int(row[7]))
+                allergies = self.get_patient_allergies(int(row[14]))
+                patient = MedicalPatient(float(row[24]), row[15], row[16], row[17], row[18], row[19], row[21], row[22], float(
+                    row[23]), avatar_path=row[20], id=int(row[14]), allergies=allergies)
+                location = MedicalRoom(row[25], row[26])
+                appointments.append(Appointments(
+                    patient, doctor, row[3], row[4], location, str(row[6]), id=row[0]))
+        return appointments
+
+
     def get_medical_rooms(self):
         medical_rooms = []
         with self.__get_cursor() as cursor:
@@ -896,7 +962,6 @@ class Database:
     def get_medical_room_by_room_number(self,room_number):
         if (not isinstance(room_number, str)):
             raise ValueError("Parameters cannot be none")
-        
         medical_room = None
         with self.__get_cursor() as cursor:
             cursor.execute(
@@ -905,6 +970,60 @@ class Database:
             if row:
                 medical_room = MedicalRoom(row[0], row[1])
         return medical_room
+    
+    def get_medical_room_page_number(self, page, room_number):
+        if page is None:
+            raise ValueError("Page parameter cannot be none")
+
+        rooms = []
+        with self.__get_cursor() as cursor:
+            results = cursor.execute(
+                f"""
+                SELECT 
+                room_number, description
+                FROM medical_rooms 
+                WHERE
+                { "room_number = :room_number" if room_number is not None and room_number != '' else "room_number != :room_number"} 
+                OFFSET :offset ROWS
+                FETCH NEXT :count ROWS ONLY
+                """,
+                offset=((page - 1)*20),
+                count=20,
+                room_number=str(room_number))
+            for row in results:
+                rooms.append(MedicalPatient(float(row[0]), row[1]))
+        return rooms
+
+    
+    def store_api_token(self, user_id, token):
+        with self.__get_cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO medical_api_tokens (user_id, token) VALUES (:user_id, :token)",
+                user_id=user_id,
+                token=token
+            )
+
+    def get_user_api_tokens(self, user_id):
+        tokens = []
+        with self.__get_cursor() as cursor:
+            cursor.execute(
+                "SELECT token FROM medical_api_tokens WHERE user_id = :user_id",
+                user_id=user_id
+            )
+            results = cursor.fetchall()
+            for row in results:
+                tokens.append(row[0])
+        return tokens
+    
+    def delete_api_token(self, user_id, token):
+        with self.__get_cursor() as cursor:
+            cursor.execute("DELETE FROM medical_api_tokens WHERE user_id = :user_id AND token = :token", user_id=user_id, token=token)
+            self.__connection.commit()
+    
+    def delete_all_api_tokens(self, user_id):
+        with self.__get_cursor() as cursor:
+            cursor.execute("DELETE FROM medical_api_tokens WHERE user_id = :user_id", {'user_id': user_id})
+            self.__connection.commit()
 
     def __get_cursor(self):
         for i in range(3):

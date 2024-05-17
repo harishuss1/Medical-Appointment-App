@@ -4,7 +4,6 @@ from oracledb import DatabaseError
 from MedicalApp.appointments import Appointments
 from .forms import AppointmentForm, AppointmentResponseForm
 from .db.dbmanager import get_db
-from MedicalApp.db import dbmanager
 
 bp = Blueprint('appointments', __name__, url_prefix='/appointments/')
 
@@ -12,7 +11,7 @@ bp = Blueprint('appointments', __name__, url_prefix='/appointments/')
 def patient_access(func):
     def wrapper(*args, **kwargs):
         if current_user.access_level != 'PATIENT' and current_user.access_level != 'STAFF' and current_user.access_level != 'ADMIN' and current_user.access_level != 'ADMIN_USER':
-            return abort(401, "You do not have access to this page!")
+            return abort(403, "You do not have access to this page!")
         return func(*args, **kwargs)
     wrapper.__name__ = func.__name__
     return wrapper
@@ -20,17 +19,10 @@ def patient_access(func):
 def doctor_access(func):
     def wrapper(*args, **kwargs):
         if current_user.access_level != 'STAFF' and current_user.access_level != 'ADMIN' and current_user.access_level != 'ADMIN_USER':
-            return abort(401, "You do not have access to this page!")
+            return abort(403, "You do not have access to this page!")
         return func(*args, **kwargs)
     wrapper.__name__ = func.__name__
     return wrapper
-
-@bp.route('/')
-@login_required
-@patient_access
-def view_appointments():
-    appointments = get_db().get_patient_appointments(current_user.id)
-    return render_template('patient_appointments.html', appointments=appointments)
 
 @bp.route('/book/', methods=['GET', 'POST'])
 @login_required
