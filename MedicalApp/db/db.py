@@ -624,6 +624,18 @@ class Database:
                 allergies.append(
                     Allergy(int(row[0]), str(row[1]), str(row[2])))
         return allergies
+    
+    def add_allergy(self, name, description):
+        if (name is None or description is None):
+            raise ValueError("Parameters cannot be none")
+
+        with self.__get_cursor() as cursor:
+            cursor.execute(
+                """
+                INSERT INTO medical_allergies (name, description)
+                VALUES (:name, :description)
+                """,
+                name=name, description=description)
 
     def get_patient_details(self, patient_id):
         if (patient_id is None):
@@ -883,10 +895,24 @@ class Database:
         with self.__get_cursor() as cursor:
             if not isinstance(appointment, Appointments):
                 raise TypeError("expected type of Appointments")
-            with self.__get_cursor() as cursor:
-                cursor.execute(" UPDATE medical_appointments SET doctor_id =: doctor_id, appointment_time =: appointment_time, status =: status, location =: location, description =: description WHERE id =:id",
-                               doctor_id=appointment.doctor.id, appointment_time=appointment.appointment_time, status=appointment.status, location=appointment.location.room_number, description=appointment.description, id=appointment.id)
-                
+            cursor.execute("""
+                UPDATE medical_appointments 
+                SET doctor_id = :doctor_id, 
+                    appointment_time = :appointment_time, 
+                    status = :status, 
+                    location = :location, 
+                    description = :description 
+                WHERE id = :id
+                """, {
+                    'doctor_id': appointment.doctor.id, 
+                    'appointment_time': appointment.appointment_time, 
+                    'status': appointment.status, 
+                    'location': appointment.location.room_number, 
+                    'description': appointment.description, 
+                    'id': appointment.id
+                })
+            self.__connection.commit()
+
     def get_appointments(self):
         appointments = []
         with self.__get_cursor() as cursor:
