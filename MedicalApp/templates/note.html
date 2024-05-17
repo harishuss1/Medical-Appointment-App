@@ -1,5 +1,4 @@
 {% extends "base.html" %}
-{% if current_user.access_level == 'STAFF' %}
 {% block nav %}
     <li><a href="{{ url_for('doctor.dashboard') }}">Dashboard</a></li>
     <li><a href="{{ url_for('appointments.confirmed_appointments', user_type='doctor') }}">See all confirmed appointments</a></li>
@@ -9,8 +8,8 @@
     <li><a href="{{ url_for('note.notes', user_id=current_user.id) }}">See all notes</a></li>
     {% endif %}
     <li><a href="{{ url_for('appointments.book_appointment') }}">Book an appointment</a></li>
+    <li><a href="{{ url_for('medical_rooms.add_medical_room') }}">Add medical room</a></li>
 {% endblock nav %}
-{% endif %}
 {% block content %}
 <h1>{% block title %}Note{% endblock title %}</h1>
 <ul id="note">
@@ -18,6 +17,11 @@
         <li>Patient: {{ note.patient.first_name }} {{ note.patient.last_name }}</li>
         <li>Note date: {{ note.note_date }}</li>
         <li>Note: {{ note.note }}.</li>
+        <form method="post" id="add-note" enctype="multipart/form-data">
+            {{ form.csrf_token }}
+            {{ form.attachement.label }} {{ form.attachement() }}
+            <button type="submit">Update Note</button>
+        </form>
         <button id="download-attachements"><a href="{{ url_for('note.get_attachments', note_id=note.id) }}">Download PDF file</a></button>
 </ul>
 

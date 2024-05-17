@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block nav %}
+    {% set user = "patient" %}
+    {% if current_user.access_level == 'STAFF' %}
+        {% set user = "doctor" %}
+        <li>
+            <a href="{{ url_for("doctor.dashboard") }}">Dashboard</a>
+        </li>
+        <li>
+            <a href="{{ url_for("doctor.patients") }}">See all patients</a>
+        </li>
+        <li>
+            <a href="{{ url_for('note.notes', user_id=current_user.id) }}">See all notes</a>
+        </li>
+    {% else %}
+        <li>
+            <a href="{{ url_for("patient.dashboard") }}">Dashboard</a>
+        </li>
+    {% endif %}
+    <li>
+        <a href="{{ url_for("appointments.book_appointment") }}">Book an appointment</a>
+    </li>
+    <li>
+        <a href="{{ url_for("patient.update_patient") }}">Update Details</a>
+    </li>
+    <li>
+        <a href="{{ url_for("patient.view_patient") }}">View Details</a>
+    </li>
+    <li>
+        <a href="{{ url_for('appointments.confirmed_appointments', user_type=user) }}">See all confirmed appointments</a>
+    </li>
+    <li>
+        <a href="{{ url_for('appointments.requested_appointments', user_type=user) }}">See appointment requests</a>
+    </li>
+{% endblock nav %}
+{% block content %}
+    <h2>
+        {% block title %}
+            Update Appointment
+        {% endblock title %}
+    </h2>
+    <form method="post">   
+        {{ form.csrf_token }}
+        {{ form.patient.label }} {{ form.patient() }}
+        {{ form.doctor.label }} {{ form.doctor() }}
+        {{ form.appointment_time.label }} {{ form.appointment_time() }}
+        {% if current_user.access_level != 'PATIENT' and current_user.access_level != 'ADMIN_USER' %}
+            {{ form.location.label }} {{ form.location() }}
+        {% endif %}
+        {{ form.description.label }} {{ form.description() }}
+        <input type="submit" />
+    </form>
+{% endblock content %}

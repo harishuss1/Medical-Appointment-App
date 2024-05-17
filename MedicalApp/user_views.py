@@ -12,7 +12,7 @@ bp = Blueprint('users', __name__, url_prefix="/users/")
 def highest_access(func):
     def wrapper(*args, **kwargs):
         if current_user.access_level != 'ADMIN':
-            return abort(401, "You do not have access to this page!")
+            return abort(403, "You do not have access to this page!")
         return func(*args, **kwargs)
     wrapper.__name__ = func.__name__
     return wrapper
@@ -26,8 +26,11 @@ def users_roles():
         
         if users is None or len(users) == 0:
             flash("There are no users in the database")
-            return redirect('home.index')
+            return redirect(url_for('home.index'))
     except DatabaseError as e:
         flash('An error occured with the database')
-        return redirect('home.index')
+        return redirect(url_for('home.index'))
+    except ValueError as e: 
+        flash("Incorrect values were passed")
+        return redirect(url_for('home.index'))
     return render_template('users.html', users=users)

@@ -1,7 +1,7 @@
-import os
-import click
-from flask import current_app, g
-from .db import Database
+import os 
+import click 
+from flask import current_app, g 
+from .db import Database 
 from .fake_db import FakeDB
 
 
