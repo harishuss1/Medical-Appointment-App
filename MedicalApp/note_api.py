@@ -93,6 +93,8 @@ def get_note_by_id(note_id):
 @bp.route('', methods=['POST'])
 @login_required
 def create_note():
+    if current_user.access_level != 'STAFF' and current_user.access_level != 'ADMIN':
+        abort(make_response(jsonify(id="403", description='You do not have access to this feature'), 403))
     data = request.get_json()
 
     if not data:
