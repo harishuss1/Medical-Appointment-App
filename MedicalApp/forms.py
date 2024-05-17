@@ -5,6 +5,7 @@ from wtforms import DateField, FloatField, MultipleFileField, SelectField, Selec
 from wtforms.validators import DataRequired, Email, Length, EqualTo
 from flask_wtf.file import FileField, FileRequired
 from .db.dbmanager import get_db
+from .allergy import Allergy
 
 
 def check_date(self, field):
@@ -53,7 +54,7 @@ class AppointmentForm(FlaskForm):
     doctor = SelectField("Doctor:", validators=[DataRequired()], choices=[])
     appointment_time = DateField(
         "Appointment Time:", validators=[DataRequired()], render_kw={
-            'min': datetime.today()
+            'min': datetime.utcnow().strftime("%Y-%m-%d")
         })
     location = SelectField("Location:")
     description = StringField("Description:", validators=[DataRequired()])
@@ -151,7 +152,7 @@ class ChangeUserRoleForm(FlaskForm):
 
 class PatientDetailsForm(FlaskForm):
     dob = DateField('Date of Birth', validators=[DataRequired()], render_kw={
-        'max': datetime.today()
+        'max': datetime.utcnow().strftime("%Y-%m-%d")
     })
     blood_type = SelectField('Blood Type', choices=[('A+', 'A+'), ('A-', 'A-'), ('B+', 'B+'), (
         'B-', 'B-'), ('AB+', 'AB+'), ('AB-', 'AB-'), ('O+', 'O+'), ('O-', 'O-')], validators=[DataRequired()])
@@ -170,6 +171,9 @@ class PatientDetailsForm(FlaskForm):
         self.blood_type.data = patient.blood_type
         self.height.data = patient.height
         self.weight.data = patient.weight
+        self.allergies.choices = [(str(allergy.id), allergy.name)
+                              for allergy in patient.allergies]
+        self.allergies.data = [str(allergy.id) for allergy in patient.allergies]
 
 
 class ChangePasswordForm(FlaskForm):

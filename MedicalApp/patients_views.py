@@ -46,8 +46,6 @@ def update_patient():
     form = PatientDetailsForm()
     try:
         allergies = get_db().get_all_allergies()
-        form.allergies.choices = [(Allergy['id'], Allergy['name'])
-                              for Allergy in allergies]
         if request.method == 'POST' and form.validate_on_submit():
             dob = form.dob.data
             blood_type = form.blood_type.data

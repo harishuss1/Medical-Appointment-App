@@ -122,7 +122,7 @@ class Database:
         with self.__get_cursor() as cursor:
             results = cursor.execute(
                 """
-                SELECT 
+                SELECT DISTINCT
                 mp.WEIGHT, p.id, p.AVATAR_PATH, p.EMAIL, p.PASSWORD, p.FIRST_NAME, p.LAST_NAME, p.USER_TYPE, 
                 mp.DOB, mp.BLOOD_TYPE, mp.HEIGHT
                 FROM medical_users p INNER JOIN MEDICAL_PATIENTS mp 
@@ -447,7 +447,7 @@ class Database:
         patients = []
         with self.__get_cursor() as cursor:
             results = cursor.execute(
-                "SELECT weight, email, password, first_name, last_name, user_type, dob, blood_type, height, avatar_path, users.id FROM medical_users users INNER JOIN medical_patients p ON(users.id = p.id) INNER JOIN medical_appointments appts ON(users.id = appts.patient_id) WHERE doctor_id = :id",
+                "SELECT DISTINCT weight, email, password, first_name, last_name, user_type, dob, blood_type, height, avatar_path, users.id FROM medical_users users INNER JOIN medical_patients p ON(users.id = p.id) INNER JOIN medical_appointments appts ON(users.id = appts.patient_id) WHERE doctor_id = :id",
                 id=doctor_id)
             for row in results:
                 patients.append(MedicalPatient(
