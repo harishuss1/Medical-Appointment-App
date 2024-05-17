@@ -31,6 +31,7 @@
             <strong>Date:</strong> {{ appointment.appointment_time }}
             <strong>Doctor:</strong> {{ appointment.doctor }}
             <strong>Description:</strong> {{ appointment.description }}
+            <a href="{{ url_for('appointments.update_patient_appointment', id=appointment.id) }}">Update Appointment</a>
         </li>
         {% endif %}
         {% endfor %}
