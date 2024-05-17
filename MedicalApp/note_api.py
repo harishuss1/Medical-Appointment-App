@@ -7,7 +7,7 @@ from oracledb import DatabaseError
 from MedicalApp.note import Note
 import urllib.parse
 
-bp = Blueprint('note_api', __name__, url_prefix='/api/notes/')
+bp = Blueprint('note_api', __name__, url_prefix='/api/notes')
 
 def login_required(func):
     def wrapper(*args, **kwargs):
@@ -45,6 +45,7 @@ def get_notes():
         
         try:
             notes = get_db().get_notes_page_number(page, patient_id, note_taker_id)
+            print(notes)
         except DatabaseError:
             abort(make_response(jsonify(id="409", description='Something went wrong with our database'), 409))
         except TypeError:
@@ -54,6 +55,7 @@ def get_notes():
     else:
         try:
             notes = get_db().get_notes_page_number(page, None, None)
+            
         except DatabaseError:
             abort(make_response(jsonify(id="409", description='Something went wrong with our database'), 409))
 
@@ -126,8 +128,9 @@ def create_note():
             attachement_path=attachment_paths
         )
 
-        get_db().create_note(note)
+        note_id = get_db().create_note(note)
+        resp = make_response(get_db().get_note_by_id(note_id).to_json(request.url_root),201)
+        return resp
 
-        return jsonify({"message": "Note created successfully"}), 201
     except DatabaseError:
         abort(make_response(jsonify(id="409", description='Something went wrong with our database'), 409))

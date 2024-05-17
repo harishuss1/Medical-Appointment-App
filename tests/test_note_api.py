@@ -24,14 +24,29 @@ class TestNoteAPI(unittest.TestCase):
         data['note_taker_id'] = 9
         data['note_date'] = "2024-07-22"
         data['note'] = "Test Note"
-        data['attachment_paths'] = "/attachments/attachment1.pdf"
+        data['attachment_paths'] = ["/attachments/attachment1.pdf"]
         json_string = json.dumps(data)
         token = "mIzbZLyEzNKW7SP5NAx9eUHUq_w"
         headers = {'Authorization': f'Bearer {token}'}
-        result = self.client.put('/api/notes/', data=json_string, headers=headers, content_type='application/json')
+        result = self.client.post('/api/notes/', data=json_string, headers=headers, content_type='application/json')
         self.assertEqual(201, result.status_code)
-        self.assertNotEqual("", result.headers['Note'])
-        self.assertNotEqual(9, result.headers['Note'].split("/")[-1])
+        self.assertNotEqual("", result.json)
+        self.assertEqual("Test Note", result.json["note"])
+    
+    
+    #(Note(patient=self.patients[0], note_taker=self.users[3], note_date=datetime.date(2024,5,30), note='Follow-up examination conducted. Patient reports improvement in condition. Continuing current medication.', attachement_path=["/attachments/attachments1.pdf"],id=1))
+    
+    def test_getnotes_page_success(self):
+        token = "mIzbZLyEzNKW7SP5NAx9eUHUq_w"
+        headers = {'Authorization': f'Bearer {token}'}
+        result = self.client.get('/api/notes', headers=headers)
+        self.assertEqual(200, result.status_code)
+        results = result.json['results']
+        self.assertIsNotNone(results)
+        self.assertEqual(2, len(results))
+        self.assertEqual("Follow-up examination conducted. Patient reports improvement in condition. Continuing current medication.", results[0]['note'])
+        self.assertEqual(["/attachments/attachments1.pdf"], results[0]['attachment_path'])
+        self.assertEqual(1, results[0]['id'])
     
 
 if __name__ == '__main__':

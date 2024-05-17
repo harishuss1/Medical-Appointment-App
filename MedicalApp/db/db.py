@@ -935,6 +935,7 @@ class Database:
                 cursor.execute('insert into medical_note_attachments (note_id, attachment_path)  values (:note_id, :attachement_path)',
                                note_id=note_id,
                                attachement_path=str(path))
+            return note_id
                 
     def update_note(self, note, paths):
         if not isinstance(note, Note):
