@@ -11,6 +11,10 @@ from .db.dbmanager import get_db
 def check_date(self, field):
         if len(field.data) > datetime.today():
             raise ValidationError("You cannot book an appointment before today's date")
+        
+class AddMedicalRoom(FlaskForm):
+    description = TextAreaField('Description', validators=[DataRequired()])
+    room = StringField('Room', validators=[DataRequired()])
 
 class AppointmentResponseForm(FlaskForm):
     select_confirmation = RadioField('Acceptance:', choices=[(
