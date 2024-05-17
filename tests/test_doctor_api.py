@@ -1,6 +1,6 @@
 import unittest
+import json
 from MedicalApp import create_app
-
 
 class TestDoctorAPI(unittest.TestCase):
     def setUp(self):
@@ -14,23 +14,41 @@ class TestDoctorAPI(unittest.TestCase):
         self.ctx.pop()
 
     def test_get_doctors(self):
-        result = self.client.get('/api/doctors/')
+        token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
+        headers = {'Authorization': f'Bearer {token}'}
+        result = self.client.get('/api/doctors', headers=headers, follow_redirects=True)
         self.assertEqual(200, result.status_code)
-        self.assertIsNotNone(result.json)
-        self.assertTrue('count' in result.json)
+        results = result.json['results']
+        self.assertIsNotNone(results)
+        self.assertEqual(1, len(results))
+        self.assertEqual("Bobby", results[0]['first_name'])
+        self.assertEqual("Nash", results[0]['last_name'])
+        self.assertEqual("bobby@example.com", results[0]['email'])
 
     def test_get_doctor(self):
-        result = self.client.get('/api/doctors/9')
+        token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
+        headers = {'Authorization': f'Bearer {token}'}
+        result = self.client.get('/api/doctors/9', headers=headers)
         self.assertEqual(200, result.status_code)
-        self.assertIsNotNone(result.json)
-        self.assertTrue('id' in result.json)
+        doctor = result.json
+        self.assertIsNotNone(doctor)
+        self.assertEqual("Bobby", doctor['first_name'])
+        self.assertEqual("Nash", doctor['last_name'])
+        self.assertEqual("bobby@example.com", doctor['email'])
 
     def test_get_doctor_error(self):
-        result = self.client.get('/api/doctors/9999')
+        token = "km9b5-UeGr3SDy6PszxFZRRvqiE"
+        headers = {'Authorization': f'Bearer {token}'}
+        result = self.client.get('/api/doctors/9999', headers=headers)
         self.assertEqual(404, result.status_code)
 
-        result = self.client.get('/api/doctors/test')
+        result = self.client.get('/api/doctors/test', headers=headers)
         self.assertEqual(404, result.status_code)
+
+    def test_get_doctor_notoken_401(self):
+        result = self.client.get('/api/doctors/1')
+        self.assertEqual(404, result.status_code)
+
 
 
 if __name__ == '__main__':

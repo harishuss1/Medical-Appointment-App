@@ -8,6 +8,14 @@ from datetime import datetime
 
 bp = Blueprint('appointments_api', __name__, url_prefix='/api/appointments/')
 
+def patient_access(func):
+    def wrapper(*args, **kwargs):
+        if current_user.access_level != 'PATIENT' and current_user.access_level != 'STAFF' and current_user.access_level != 'ADMIN':
+            return abort(403, "You do not have access to this page!")
+        return func(*args, **kwargs)
+    wrapper.__name__ = func.__name__
+    return wrapper
+
 def login_required(func):
     def wrapper(*args, **kwargs):
         if not current_user.is_authenticated:
@@ -17,6 +25,8 @@ def login_required(func):
     return wrapper
 
 @bp.route('', methods=['GET', 'POST'])
+@login_required
+@patient_access
 def get_appointments_api():
     if request.method == 'POST':
         appointment_json = request.json
@@ -63,6 +73,8 @@ def get_appointments_api():
                 else:
                     status = 0
                 appointment = Appointments(patient, doctor, datetime_object, status, location, description)
+            else:
+                abort(make_response(jsonify(id="403", description='You do not have permission to update an appointment'), 403))
                 
 
             id = get_db().add_appointment(appointment)
@@ -114,6 +126,7 @@ def get_appointments_api():
 
 @bp.route('/<int:id>', methods=['GET', 'PUT', 'DELETE'])
 @login_required
+@patient_access
 def get_appointment_by_id_api(id):
     appointment = get_db().get_appointment_by_id(id)
     if request.method == 'GET':
@@ -141,14 +154,14 @@ def get_appointment_by_id_api(id):
                     if 'doctor_id' in appointment_json:
                         try:
                             doctor_id = int(appointment_json['doctor_id'])
-                            doctor = get_db().get_user_by_id(doctor_id)
-                            if doctor is None:
-                                abort(make_response(jsonify(id="404", description='Doctor does not exist'), 404))
-                            if doctor.access_level != 'STAFF' and doctor.access_level != 'ADMIN':
-                                abort(make_response(jsonify(id="400", description='User provided is not a doctor'), 400))
-                            appointment.doctor = doctor
                         except:
                             abort(make_response(jsonify(id="400", description='Incorrect type for doctor id'), 400))
+                        doctor = get_db().get_user_by_id(doctor_id)
+                        if doctor is None:
+                            abort(make_response(jsonify(id="404", description='Doctor does not exist'), 404))
+                        if doctor.access_level != 'STAFF' and doctor.access_level != 'ADMIN':
+                            abort(make_response(jsonify(id="400", description='User provided is not a doctor'), 400))
+                        appointment.doctor = doctor
                     if 'appointment_time' in appointment_json:
                         time = appointment_json['appointment_time']
                         try:
@@ -168,9 +181,13 @@ def get_appointment_by_id_api(id):
                     if 'status' in appointment_json:
                         try:
                             status = int(appointment_json['status'])
+                            
                             appointment.status = status
                         except:
                             abort(make_response(jsonify(id="400", description='Invalid status has been provided'), 400))
+                        if status not in (0, 1, -1):
+                            abort(make_response(jsonify(id="404", description='The status you have provided is invalid'), 404))
+                            
                     if 'location' in appointment_json:
                         location = get_db().get_medical_room_by_room_number(appointment_json['location'])
                         if location is None:
@@ -181,7 +198,7 @@ def get_appointment_by_id_api(id):
                 resp.headers['Appointment'] = url_for('appointments_api.get_appointment_by_id_api', id=id)
                 return resp
             except IntegrityError as e:
-                abort(make_response(jsonify(id="400", description='The allergie(s) you have provided do not exist'), 400))
+                abort(make_response(jsonify(id="404", description='The room you have provided does not exist'), 404))
             except DatabaseError as e:
                 abort(make_response(jsonify(id="409", description='Something went wrong with our database'), 409))
             except TypeError as e:

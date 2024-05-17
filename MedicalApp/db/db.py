@@ -207,6 +207,7 @@ class Database:
                 SELECT 
                 u.id, u.AVATAR_PATH, u.EMAIL, u.PASSWORD, u.FIRST_NAME, u.LAST_NAME, u.USER_TYPE
                 FROM medical_users u
+                WHERE u.user_type = 'STAFF' or u.user_type = 'ADMIN'
                 """)
             for row in results:
                 doctors.append(User(row[2], row[3], row[4], row[5], row[6], 
@@ -233,13 +234,13 @@ class Database:
                 FROM medical_users u
                 WHERE
                 u.USER_TYPE = 'STAFF' AND
-                (:first_name IS NULL OR first_name = :first_name) AND
-                (:last_name IS NULL OR last_name = :last_name)
+                ({ "first_name = :first_name" if first_name is not None and first_name != '' else ":first_name != first_name"} OR
+                { "last_name = :last_name" if last_name is not None and last_name != '' else ":last_name != last_name"}
                 OFFSET :offset ROWS
                 FETCH NEXT :count ROWS ONLY
                 """,
-                offset=((page - 1)*20),
-                count=20,
+                offset=((page - 1)*10),
+                count=10,
                 first_name=str(first_name) if first_name else None,
                 last_name=str(last_name) if last_name else None)
             for row in results:
@@ -778,6 +779,15 @@ class Database:
             for path in note.attachement_path:
                 cursor.execute('insert into medical_note_attachments (note_id, attachment_path)  values (:note_id, :attachement_path)',
                                note_id=note_id,
+                               attachement_path=str(path))
+                
+    def update_note(self, note, paths):
+        if not isinstance(note, Note):
+            raise TypeError("expected Note object")
+        with self.__get_cursor() as cursor:
+            for path in paths:
+                cursor.execute('insert into medical_note_attachments (note_id, attachment_path)  values (:note_id, :attachement_path)',
+                               note_id=note.id,
                                attachement_path=str(path))
 
     def create_user(self, user):

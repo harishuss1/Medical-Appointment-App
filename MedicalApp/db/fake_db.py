@@ -12,7 +12,7 @@ class FakeDB:
         self.allergies = [Allergy(1, "Peanuts", "Allergic reaction to peanuts causing hives and swelling."), Allergy(
             2, "Penicillin", "Allergic reaction to penicillin causing difficulty breathing and rash."), Allergy(3, "Blueberries", "Allergic reaction to blueberries causing hives and swelling.")]
         self.tokens = ["km9b5-UeGr3SDy6PszxFZRRvqiE",
-                       "mIzbZLyEzNKW7SP5NAx9eUHUq_w", "tF1fG-t-R5hu3USXZcDIlKvIwXI", "ErU49l4Du_LEvsV1AgU9SIllZ1g", "2z12xfm3gqvZr1kZIAi4YXahpeA"]
+                       "mIzbZLyEzNKW7SP5NAx9eUHUq_w", "tF1fG-t-R5hu3USXZcDIlKvIwXI", "ErU49l4Du_LEvsV1AgU9SIllZ1g", "2z12xfm3gqvZr1kZIAi4YXahpeA", "3e12xfm3gqvZr1kZIAi4YXahpaX"]
         self.patients = []
         #                                  weight, email,              password,                                                                                                                                                            first_name, last_name, access_level, dob,              blood_type, height, allergies=None, avatar_path=None, id=None
         self.patients.append(MedicalPatient(68.0, "maddie@example.com", "scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68",
@@ -26,7 +26,8 @@ class FakeDB:
         self.users.append(User("chimney@example.com", "scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68", "Howard", "Han", "PATIENT", tokens=[self.tokens[1]], id=7))
         self.users.append(User("eddie@example.com", "scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68", "Eddie", "Diaz", "PATIENT", tokens=[self.tokens[2]], id=8))
         self.users.append(User("bobby@example.com", "scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68", "Bobby", "Nash", "STAFF", tokens=[self.tokens[3]], id=9))
-        self.users.append(User("blocked@example.com", "scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68", "Blocked", "User", "BLOCKED", tokens=[self.tokens[3]], id=10))
+        self.users.append(User("blocked@example.com", "scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68", "Blocked", "User", "BLOCKED", tokens=[self.tokens[4]], id=10))
+        self.users.append(User("blocked@example.com", "scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68", "User", "User", "ADMIN_USER", tokens=[self.tokens[5]], id=11))
         self.appointments = [
              Appointments(
                 patient=self.patients[0],
@@ -297,10 +298,24 @@ class FakeDB:
             page = int(page)
         except:
             raise TypeError("Parameters of incorrect type")
+        
+        doctors = self.get_doctors()
+        offset = ((page - 1)*2)
+        count = 2
+        
+        results = []
+        
+        end = count+offset if count+offset <= len(doctors) else len(doctors)
 
-        doctors = [doctor for doctor in self.users if (first_name is None or doctor.first_name == first_name) and (
-            last_name is None or doctor.last_name == last_name)]
-        return doctors[(page-1)*20: page*20]
+        for i in range(offset, end):
+            doctor = doctors[i]
+            if first_name is None and last_name is None:
+                results.append(doctor)
+            if first_name is not None and doctor.first_name == first_name:
+                results.append(doctor)
+            if last_name is not None and doctor.last_name == last_name:
+                results.append(doctor)
+        return results
 
     def run_file(self, file_path):
         pass
