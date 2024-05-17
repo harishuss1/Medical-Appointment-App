@@ -9,6 +9,7 @@ from .db.dbmanager import get_db
 
 bp = Blueprint('patient', __name__, url_prefix="/patients/")
 
+
 def patient_access(func):
     def wrapper(*args, **kwargs):
         if current_user.access_level != 'PATIENT' and current_user.access_level != 'STAFF' and current_user.access_level != 'ADMIN':
@@ -16,6 +17,7 @@ def patient_access(func):
         return func(*args, **kwargs)
     wrapper.__name__ = func.__name__
     return wrapper
+
 
 def doctor_access(func):
     def wrapper(*args, **kwargs):
@@ -38,6 +40,8 @@ def dashboard():
         flash("Something went wrong with the database")
         return redirect(url_for('home.index'))
     return render_template('patient_dashboard.html', appointments=appointments)
+
+
 @bp.route('/details/update/', methods=['GET', 'POST'])
 @login_required
 @patient_access
@@ -46,7 +50,7 @@ def update_patient():
     try:
         allergies = get_db().get_all_allergies()
         form.allergies.choices = [(Allergy['id'], Allergy['name'])
-                              for Allergy in allergies]
+                                  for Allergy in allergies]
         if request.method == 'POST':
             if form.validate_on_submit():
                 dob = form.dob.data
@@ -59,7 +63,8 @@ def update_patient():
                                                 blood_type, height, weight, selected_allergies)
 
                 patient_allergies = get_db().get_patient_allergies(current_user.id)
-                form.allergies.data = [Allergy.id for Allergy in patient_allergies]
+                form.allergies.data = [
+                    Allergy.id for Allergy in patient_allergies]
 
                 flash('Your information has been updated.')
                 return redirect(url_for('patient.view_patient'))
@@ -70,11 +75,12 @@ def update_patient():
     except DatabaseError as e:
         flash("something went wrong with the database")
         return redirect('home.index')
-    except ValueError as e: 
+    except ValueError as e:
         flash("Incorrect values were passed")
         return redirect(url_for('home.index'))
     form.prefill()
     return render_template('update_patient.html', form=form)
+
 
 @bp.route('/details/', methods=['GET'])
 @login_required
@@ -87,13 +93,13 @@ def view_patient():
             return redirect(url_for('home.index'))
 
         patient = MedicalPatient(weight=patient_details.weight, email=patient_details.email, password=patient_details.password, first_name=patient_details.first_name, last_name=patient_details.last_name,
-                                access_level=patient_details.access_level, dob=patient_details.dob, blood_type=patient_details.blood_type, height=patient_details.height, avatar_path=patient_details.avatar_path, id=patient_details.id)
+                                 access_level=patient_details.access_level, dob=patient_details.dob, blood_type=patient_details.blood_type, height=patient_details.height, avatar_path=patient_details.avatar_path, id=patient_details.id)
 
         patient.allergies = get_db().get_patient_allergies(patient.id)
     except DatabaseError as e:
         flash("Something went wrong with the database")
         return redirect(url_for('home.index'))
-    except ValueError as e: 
+    except ValueError as e:
         flash("Incorrect values were passed")
         return redirect(url_for('home.index'))
 
