@@ -10,6 +10,8 @@ class FakeDB:
     def __init__(self):
         self.allergies = [Allergy(1, "Peanuts", "Allergic reaction to peanuts causing hives and swelling."), Allergy(
             2, "Penicillin", "Allergic reaction to penicillin causing difficulty breathing and rash.")]
+        self.tokens = ["km9b5-UeGr3SDy6PszxFZRRvqiE",
+                       "mIzbZLyEzNKW7SP5NAx9eUHUq_w", "tF1fG-t-R5hu3USXZcDIlKvIwXI", "ErU49l4Du_LEvsV1AgU9SIllZ1g", "2z12xfm3gqvZr1kZIAi4YXahpeA"]
         self.patients = []
         #                                  weight, email,              password,                                                                                                                                                            first_name, last_name, access_level, dob,              blood_type, height, allergies=None, avatar_path=None, id=None
         self.patients.append(MedicalPatient(68.0, "maddie@example.com", "scrypt:32768:8:1$FGTAHUp5LISWRIg8$7353fe1b7e4599016f3dfd29dc2f478bb00fbb1ca016572a3c84e82b8866c4785958b4933ed90dc2fd01f1a217478843aa634f3cab2e97f7b1eb2c4ac8540e68",
