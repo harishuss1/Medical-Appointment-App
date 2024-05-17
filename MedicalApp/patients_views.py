@@ -41,7 +41,6 @@ def dashboard():
         return redirect(url_for('home.index'))
     return render_template('patient_dashboard.html', appointments=appointments)
 
-
 @bp.route('/details/update/', methods=['GET', 'POST'])
 @login_required
 @patient_access
@@ -80,7 +79,6 @@ def update_patient():
         return redirect(url_for('home.index'))
     form.prefill()
     return render_template('update_patient.html', form=form)
-
 
 @bp.route('/details/', methods=['GET'])
 @login_required

@@ -8,7 +8,7 @@ from .forms import AddUserForm, DeleteUserForm, ChangeUserRoleForm, BlockUserFor
 from werkzeug.security import generate_password_hash
 
 
-admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
+admin_bp = Blueprint('admin', __name__, url_prefix='/admin/')
 
 def admin_access(func):
     def wrapper(*args, **kwargs):
@@ -78,15 +78,17 @@ def add_user():
 def delete_user(email):
     form = DeleteUserForm()
     form.email.data = email
+    form.email.render_kw = {'disabled': ''}
     if request.method == 'POST' and form.validate_on_submit():
-        email = form.email.data
+        user_delete = form.email.data
+        user = get_db().get_user_by_email(user_delete)
         db = get_db()
         try:
-            db.delete_user(email)
+            db.delete_user(user_delete)
             flash("User deleted successfully", 'success')
             return redirect(url_for('admin.admin_dashboard'))
         except Exception as e:
-            flash(f"Error deleting user: {e}", 'error')
+            flash(f"This user is not valid", 'error')
     return render_template('delete_user.html', form=form)
 
 
@@ -98,15 +100,16 @@ def block_user(email):
         return redirect(url_for('home.index'))
     form = BlockUserForm()
     form.email.data = email
+    form.location.render_kw = {'disabled': ''}
     if request.method == 'POST' and form.validate_on_submit():
-        email = form.email.data
+        user_delete = form.email.data
         db = get_db()
         try:
-            db.block_user(email)
+            db.block_user(user_delete)
             flash("User blocked successfully", 'success')
             return redirect(url_for('admin.admin_dashboard'))
         except Exception as e:
-            flash(f"Error blocking user: {e}", 'error')
+            flash(f"This user is not valid", 'error')
 
     return render_template('block_user.html', form=form)
 
@@ -120,13 +123,14 @@ def change_user_role(email):
         return redirect(url_for('home.index'))
     form = ChangeUserRoleForm()
     form.email.data = email
+    form.location.render_kw = {'disabled': ''}
     if request.method == 'POST' and form.validate_on_submit():
-        email = form.email.data
+        user_delete = form.email.data
         new_user_type = form.user_type.data
 
         db = get_db()
         try:
-            db.change_user_type(email, new_user_type)
+            db.change_user_type(user_delete, new_user_type)
             flash("User role changed successfully", 'success')
             return redirect(url_for('admin.admin_dashboard'))
         except Exception as e:
