@@ -9,6 +9,7 @@
     <li><a href="{{ url_for('note.notes', user_id=current_user.id) }}">See all notes</a></li>
     {% endif %}
     <li><a href="{{ url_for('appointments.book_appointment') }}">Book an appointment</a></li>
+    <li><a href="{{ url_for('doctor.add_allergy') }}">Add Allergy</a></li>
 {% endblock nav %}
 {% block content %}
 
