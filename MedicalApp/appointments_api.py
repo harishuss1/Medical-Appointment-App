@@ -131,7 +131,7 @@ def get_appointment_by_id_api(id):
     if request.method == 'GET':
         appointment = get_db().get_appointment_by_id(id)
         if appointment:
-            return jsonify(appointment.to_dict())
+            return jsonify(appointment.to_json())
         else:
             abort(404)
     
